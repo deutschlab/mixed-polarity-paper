@@ -1,23 +1,21 @@
 ﻿# mixed-polarity-paper
 
 > **Code repository accompanying the manuscript:**
-> *Synaptic compartment polarity and connectivity in the adult* Drosophila *whole-brain connectome*
-> Amit Gross, David Deutsch
+> *Principles governing synaptic interaction types in a whole-brain connectome*
+> Amit Gross, Majd Farah, Dr David Deutsch
 
 ---
 
 ## Overview
 
-This repository contains the computational pipeline and analysis code for the above manuscript.
-The analysis uses the FlyWire FAFB v783 connectome and the Princeton synapse detection table to
-characterise synapse-level polarity and connectivity patterns across the adult *Drosophila* brain.
+This repository contains the computational pipeline and analysis code for the accompanying manuscript. The analysis uses the FlyWire FAFB v783 connectome, SWC morphology skeletons, and the Princeton synapse detection table to quantify synapse-level interaction types across the adult *Drosophila* whole-brain connectome.
 
 The pipeline implements:
 
-- Per-neuron **synaptic input index (SI)** computation from SWC morphology skeletons
-- Compartment-level classification of synaptic polarity (axo-axonic AA, axo-dendritic AD, dendro-axonic DA, dendro-dendritic DD)
-- Synapse-type characterisation, neuron-type composition analysis, and random forest / logistic regression classifiers
-- Reciprocal connectivity modelling and PCA of morphological features
+- Per-neuron **segregation index (SI)** computation from SWC morphology skeletons and associated pre/post synaptic terminals
+- Synapse-level classification of **synaptic interaction type**: axo-axonic (AA), axo-dendritic (AD), dendro-axonic (DA), and dendro-dendritic (DD)
+- Quantification of synaptic interaction types across neuron classes, neurotransmitter identity, morphology, neuropils, and reciprocal connectivity
+- Statistical modeling, random forest classification/regression, and PCA-based morphology analysis
 
 **Raw data and derived tables are not included in this repository.**
 Source connectome tables are available from the
