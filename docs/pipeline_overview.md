@@ -12,6 +12,7 @@ derived tables used by the figure scripts.
 ## Pipeline flow
 
 ```mermaid
+%%{init: {'theme': 'default', 'themeVariables': {'nodeBorder': '#333', 'mainBkg': '#e8e8f0', 'nodeTextColor': '#000000'}}}%%
 flowchart TD
     RAW["Raw inputs\nPrinceton synapse CSV + SWC skeletons\n+ annotation CSVs"]
     S01["01_extract_compartments_SI\nper-neuron PKLs"]
@@ -44,7 +45,7 @@ flowchart TD
     S07 --> FIGS
 ```
 
-See `docs/diagrams/` for rendered versions of this diagram.
+See [pipeline_overview.md](pipeline_overview.md) for the full run order.
 
 ---
 
