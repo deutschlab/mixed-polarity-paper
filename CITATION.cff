@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite it as below."
+type: software
+title: "mixed-polarity-paper"
+version: 1.0.0
+date-released: "2026"
+repository-code: "https://github.com/AmitGross/mixed-polarity-paper"
+license: "MIT"
+abstract: >
+  Computational pipeline for the analysis of synaptic compartment polarity
+  and connectivity in the Drosophila adult whole-brain connectome (FAFB v783,
+  FlyWire / Princeton synapse table). Implements per-neuron synaptic input
+  index (SI) computation, compartment-level synapse classification (AA/AD/DA/DD),
+  synapse-type characterisation, random forest classifiers, reciprocal
+  connectivity modelling, and PCA of morphological features.
+  Accompanies the manuscript: Gross & Deutsch, in submission.
+authors:
+  - family-names: "Gross"
+    given-names: "Amit"
+  - family-names: "Deutsch"
+    given-names: "David"
+keywords:
+  - connectome
+  - Drosophila
+  - FAFB
+  - FlyWire
+  - synapse polarity
+  - synaptic input index
+  - neuroscience
+  - computational neuroscience

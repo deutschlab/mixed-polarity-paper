@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.conda/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Large data files — regenerate from raw data or obtain from sources listed in data/README.md
+*.ftr
+*.feather
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.hdf5
+*.parquet
+*.zip
+*.gz
+*.tar
+*.tar.gz
+
+# CSV outputs (generated tables) — keep tiny placeholder/example CSVs
+# Exception: small placeholder files are tracked below
+data/raw/*.csv
+data/derived/*.csv
+data/intermediate/*.csv
+data/larva/*.csv
+outputs/
+
+# Data directories — no raw or generated data committed
+data/raw/swc/
+data/derived/
+data/intermediate/
+data/larva/output/
+data/larva/results/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Node (not used — kept for safety)
+node_modules/
+package-lock.json
+
+# Manifest / audit files from development
+*_manifest*.csv
+*_manifest_*.csv
+copied_files_manifest*.csv
+filename_rename_manifest*.csv
+removed_duplicate_*.csv
+excel_missing_files*.csv

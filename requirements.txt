@@ -1,0 +1,28 @@
+# requirements.txt
+# Skeleton — pin exact versions after a successful pipeline run:
+#   pip freeze > requirements_pinned.txt
+#
+# Core scientific stack
+numpy
+pandas
+scipy
+
+# Neuron morphology
+navis>=1.4
+
+# Machine learning
+scikit-learn
+xgboost
+
+# Graph analysis
+networkx
+
+# Visualisation
+matplotlib
+seaborn
+
+# Feather/parquet I/O
+pyarrow
+
+# Model serialisation
+joblib
