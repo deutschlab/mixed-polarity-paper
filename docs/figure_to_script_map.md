@@ -35,13 +35,13 @@ Includes an adult vs larva SI comparison and PCA of morphological features.
 
 | Panel | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|
-| Fig 2A | `figures/fig2/fig2a_si_cdf_adult_larva.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `LARVA_SYNAPSES_FTR`, `LARVA_SI_FTR` | `outputs/fig2/fig2a/` |
+| Fig 2A | `figures/fig2/fig2a_si_cdf_adult_larva.py` | `NEURON_TABLE_FTR`, `LARVA_SYNAPSES_FTR`, `LARVA_SI_FTR` | `outputs/fig2/fig2a/` |
 | Fig 2B | `figures/fig2/si_x_sclass.py` | `NEURON_TABLE_FTR` | `outputs/fig2/si_x_sclass/` |
 | Fig 2C | `figures/fig2/si_x_nt.py` | `NEURON_TABLE_FTR` | `outputs/fig2/si_x_nt/` |
-| Fig 2D | `figures/fig2/feat_x_si_x_sclass_corr.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR` | `outputs/fig2/feat_corr/` |
+| Fig 2D | `figures/fig2/feat_x_si_x_sclass_corr.py` | `NEURON_TABLE_FTR` | `outputs/fig2/feat_corr/` |
 | Fig 2E | `figures/fig2/feat_rf_and_lr_models.py` | `NEURON_TABLE_FTR` | `outputs/fig2/feat_models/` |
 | Fig 2F | `figures/fig2/pca_on_feat.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig2/pca_on_feat/` |
-| Fig 2G | `figures/fig2/si_x_pca.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR` | `outputs/fig2/si_x_pca/` |
+| Fig 2G | `figures/fig2/si_x_pca.py` | `NEURON_TABLE_FTR` | `outputs/fig2/si_x_pca/` |
 | Fig 2 Supp 1A | `figures/fig2/si_x_twigs.py` | `NEURON_TABLE_FTR`, `NEUROPIL_SYNAPSE_CSV` | `outputs/fig2/si_x_twigs/` |
 | Fig 2 Supp 1B/C | `figures/fig2/si_comparisons.py` | `NEURON_TABLE_FTR`, `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig2/si_comparisons/` |
 | Fig 2 Supp 2A | `figures/fig2/si_x_primary_types.py` | `NEURON_TABLE_FTR` | `outputs/fig2/si_x_primary_types/` |
@@ -62,8 +62,8 @@ whether neurons within the same type use the same synapse-type pattern.
 |-------|--------|-------------|-------------|
 | Fig 3A | `figures/fig3/si_x_neuron_types.py` | `NEURON_TABLE_FTR`, `NEURON_ANNOTATIONS_CSV` | `outputs/fig3/si_x_neuron_types/` |
 | Fig 3C | `figures/fig3/fig3c_mixed_example_sfc.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/mixed_example/` |
-| Fig 3D | `figures/fig3/fig3d_si_compartment_correct.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR` | `outputs/fig3/fig3d/` |
-| Fig 3D (AD content, mixed) | `figures/fig3/fig3supp_ad_content_si_mixed.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR` | `outputs/fig3/fig3supp_ad_mixed/` |
+| Fig 3D | `figures/fig3/fig3d_si_compartment_correct.py` | `NEURON_TABLE_FTR` | `outputs/fig3/fig3d/` |
+| Fig 3D (AD content, mixed) | `figures/fig3/fig3supp_ad_content_si_mixed.py` | `NEURON_TABLE_FTR` | `outputs/fig3/fig3supp_ad_mixed/` |
 | Fig 3E | `figures/fig3/fig3e_syntype_composition.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/fig3e/` |
 | Fig 3F (AD content) | `figures/fig3/fig3supp_ad_content_si.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/fig3supp_ad/` |
 | Fig 3F (syntype x identity) | `figures/fig3/syntype_x_identity.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `CLASSIFICATION_CSV` | `outputs/fig3/syntype_x_identity/` |

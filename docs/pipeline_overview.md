@@ -135,7 +135,7 @@ the main neuron metadata table used by almost all figure scripts.
 | | |
 |--|--|
 | **Inputs** | `NEURON_ANNOTATIONS_CSV`, `CELL_STATS_CSV`, `NEURONS_CSV`, `SYNAPSE_TABLE_FTR`, per-neuron PKLs, `RANKS_DIR` |
-| **Outputs** | `SI_UPDATED_FTR`, `SWC_DATA_FTR`, `NEURON_TABLE_FTR` (`neuron_data_full_article_princeton.ftr`) |
+| **Outputs** | `SWC_DATA_FTR`, `NEURON_TABLE_FTR` (`neuron_data_full_article_princeton.ftr`) |
 | **Key columns** | `root_id`, `super_class`, `primary_type`, `nt_type`, `SI`, `cable_length`, synapse counts, morphological features, sensory rank columns |
 | **Downstream** | Scripts 06, 07; virtually all figure scripts |
 
@@ -183,7 +183,6 @@ This table shows which derived tables each figure folder uses. All figure script
 | `SYNAPSE_TABLE_FTR` | x | x | x | x | |
 | `SYNAPSE_TABLE_RAW_FTR` | x | | | | |
 | `NEURON_TABLE_FTR` | x | x | x | x | x |
-| `SI_UPDATED_FTR` | | x | x | | |
 | `NEURON_TABLE_NONP_FTR` | | x | x | | x |
 | `SYNAPSE_TABLE_NONP_FTR` | | x | x | | |
 | `CONNECTIONS_TABLE_FTR` | | | x | x | x |
