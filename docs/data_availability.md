@@ -70,7 +70,6 @@ and [generated_tables.md](generated_tables.md) for key column descriptions.
 | `neuron_data_full_article_princeton.ftr` | `data/derived/` | `05_build_neuron_metadata_table.py` |
 | `connections_by_syn_type_reciprocal_types_filtered_article_princeton.ftr` | `data/derived/` | `06_build_connection_reciprocity_table.py` |
 | `neurons_pca_princeton.ftr` | `data/derived/` | `07_pca_morphology.py` |
-| `SI_updated.ftr` | `data/derived/` | `05_build_neuron_metadata_table.py` |
 | `swc_data.ftr` | `data/derived/` | `05_build_neuron_metadata_table.py` |
 | `reci_prop_princeton.ftr` | `data/derived/` | `figures/fig5/reciprocal_fraction.py` |
 | `full_reci_connections_article_filtered_princeton.ftr` | `data/derived/` | `06_build_connection_reciprocity_table.py` |
