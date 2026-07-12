@@ -4,6 +4,20 @@
   > *Synaptic compartment polarity and connectivity in the adult* Drosophila *whole-brain connectome*
   > Amit Gross,Majd Farah, Dr David Deutsch
 
+  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deutschlab/mixed-polarity-paper/blob/main/demo/demo.ipynb)
+
+  ---
+
+  ## Quick-start demo
+
+  A self-contained demo notebook runs the core SI computation pipeline on 200 sample neurons.
+  All required data is bundled in the `demo/` folder.
+
+  | | |
+  |--|--|
+  | **Run on Colab** (no install) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deutschlab/mixed-polarity-paper/blob/main/demo/demo.ipynb) |
+  | **Run locally** | `cd demo && jupyter notebook demo.ipynb` |
+
   ---
 
   ## Overview
