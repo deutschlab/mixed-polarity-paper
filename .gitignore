@@ -23,6 +23,8 @@ ENV/
 # Jupyter
 .ipynb_checkpoints/
 *.ipynb
+# Exception: demo notebook is tracked
+!demo/demo.ipynb
 
 # Large data files — regenerate from raw data or obtain from sources listed in data/README.md
 *.ftr
