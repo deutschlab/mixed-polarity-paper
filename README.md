@@ -115,6 +115,20 @@
 
   ---
 
+  ## Using the pipeline on your own data
+
+  The pipeline is designed for FlyWire FAFB v783 data but can be adapted to any connectome with SWC skeletons and a synapse table.
+  The key steps and the inputs they require are:
+
+  1. **SWC skeleton files** — one `.swc` per neuron, placed in a directory pointed to by `SWC_DIR` in `config.py`
+  2. **Synapse table** — a CSV with columns `pre_root_id`, `post_root_id`, `pre_x/y/z`, `post_x/y/z`, `neuropil`; set `PRINCETON_SYNAPSE_CSV` in `config.py`
+  3. Run `processing/01_extract_compartments_SI.py` to compute per-neuron compartment labels and SI values
+  4. Downstream scripts (`02`–`07`) build derived tables; figure scripts can then be run on those tables
+
+  For a worked example on a small dataset, see the [demo notebook](demo/demo.ipynb).
+
+  ---
+
   ## Reproducing the analysis
 
   Run the processing scripts in order from the repository root:

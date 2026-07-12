@@ -2,9 +2,9 @@ cff-version: 1.2.0
 message: "If you use this code, please cite it as below."
 type: software
 title: "mixed-polarity-paper"
-version: 1.0.0
+version: 1.2.0
 date-released: "2026"
-repository-code: "https://github.com/AmitGross/mixed-polarity-paper"
+repository-code: "https://github.com/deutschlab/mixed-polarity-paper"
 license: "MIT"
 abstract: >
   Computational pipeline for the analysis of synaptic compartment polarity
@@ -17,6 +17,8 @@ abstract: >
 authors:
   - family-names: "Gross"
     given-names: "Amit"
+  - family-names: "Farah"
+    given-names: "Majd"
   - family-names: "Deutsch"
     given-names: "David"
 keywords:
