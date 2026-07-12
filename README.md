@@ -86,6 +86,7 @@
 
   - **OS:** Linux, macOS, or Windows
   - **Python:** 3.9 or higher (tested on 3.12.4)
+  - **RAM: 32 GB minimum** recommended for running the full pipeline locally. The Princeton synapse table and per-neuron morphology data are large; peak memory usage during processing exceeds 16 GB.
   - **No special hardware required** — all analyses run on standard CPU
   - **Typical install time:** ~5–10 minutes (conda) or ~10–20 minutes (pip, due to dependency resolution)
   - Key packages with tested versions: `navis==1.7.0`, `pandas==2.2.2`, `numpy==1.26.4`, `scikit-learn==1.5.2`, `scipy==1.13.1`, `matplotlib==3.9.2`, `seaborn==0.13.2`
@@ -132,6 +133,8 @@
   ## Reproducing the analysis
 
   Run the processing scripts in order from the repository root:
+
+  > **Note on pipeline design:** The pipeline is split into 7 sequential stages primarily due to RAM constraints — the full synapse table and skeleton data cannot be held in memory simultaneously. Scripts `01` and `02a` are also run as separate processes (standard vs. large neurons) for the same reason: very large neurons (>80,000 nodes) require their own memory budget and are processed in a dedicated batch (`02a`) to avoid out-of-memory errors during the standard pass (`01`).
 
   ```bash
   python processing/01_extract_compartments_SI.py        # hours -- per-neuron compartment labels + SI
