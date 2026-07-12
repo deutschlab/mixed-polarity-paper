@@ -15,6 +15,8 @@
   |--|--|
   | **Run on Colab** (no install) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deutschlab/mixed-polarity-paper/blob/main/demo/demo.ipynb) |
   | **Run locally** | `cd demo && jupyter notebook demo.ipynb` |
+  | **Expected run time** | ~10–20 minutes on a standard desktop CPU |
+  | **Expected output** | `demo/output/SI_results_demo.csv` — per-neuron SI values (0–1) for ~150–180 of the 200 neurons; `demo/output/connectors_demo.csv` — per-synapse compartment labels (A/D/L) |
 
   ---
 
@@ -82,9 +84,12 @@
 
   ### Requirements
 
-  - Python >= 3.9
-  - See `requirements.txt` or `environment.yml` for the full dependency list
-  - Key packages: `navis`, `fafbseg`, `cloudvolume`, `pandas`, `numpy`, `scikit-learn`, `matplotlib`, `seaborn`
+  - **OS:** Linux, macOS, or Windows
+  - **Python:** 3.9 or higher (tested on 3.12.4)
+  - **No special hardware required** — all analyses run on standard CPU
+  - **Typical install time:** ~5–10 minutes (conda) or ~10–20 minutes (pip, due to dependency resolution)
+  - Key packages with tested versions: `navis==1.7.0`, `pandas==2.2.2`, `numpy==1.26.4`, `scikit-learn==1.5.2`, `scipy==1.13.1`, `matplotlib==3.9.2`, `seaborn==0.13.2`
+  - See `requirements.txt` or `environment.yml` for the full pinned dependency list
 
   ### 1. Create environment
 

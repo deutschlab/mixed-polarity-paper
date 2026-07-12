@@ -1,28 +1,27 @@
 # requirements.txt
-# Skeleton — pin exact versions after a successful pipeline run:
-#   pip freeze > requirements_pinned.txt
+# Tested with Python 3.12.4 on Windows 10/11, Linux (Ubuntu 22.04), macOS 13+
 #
 # Core scientific stack
-numpy
-pandas
-scipy
+numpy==1.26.4
+pandas==2.2.2
+scipy==1.13.1
 
 # Neuron morphology
-navis>=1.4
+navis==1.7.0
 
 # Machine learning
-scikit-learn
-xgboost
+scikit-learn==1.5.2
+xgboost==3.0.2
 
 # Graph analysis
-networkx
+networkx==3.3
 
 # Visualisation
-matplotlib
-seaborn
+matplotlib==3.9.2
+seaborn==0.13.2
 
 # Feather/parquet I/O
-pyarrow
+pyarrow==17.0.0
 
 # Model serialisation
-joblib
+joblib==1.4.2
