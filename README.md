@@ -1,7 +1,7 @@
 ﻿  # mixed-polarity-paper
 
   > **Code repository accompanying the manuscript:**
-  > *Synaptic compartment polarity and connectivity in the adult* Drosophila *whole-brain connectome*
+  > *Organizational principles governing synapse types in a whole-brain connectome*
   > Amit Gross,Majd Farah, Dr David Deutsch
 
   ---

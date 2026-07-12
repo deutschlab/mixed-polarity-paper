@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this code, please cite it as below."
 type: software
-title: "mixed-polarity-paper"
+title: "Organizational principles governing synapse types in a whole-brain connectome"
 version: 1.2.0
 date-released: "2026"
 repository-code: "https://github.com/deutschlab/mixed-polarity-paper"
