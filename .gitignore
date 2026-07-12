@@ -27,6 +27,8 @@ ENV/
 # Large data files — regenerate from raw data or obtain from sources listed in data/README.md
 *.ftr
 *.feather
+# Exception: ranks feather files are bundled with the repository
+!data/raw/ranks/*.feather
 *.pkl
 *.pickle
 *.joblib
@@ -39,11 +41,14 @@ ENV/
 *.tar.gz
 
 # CSV outputs (generated tables) — keep tiny placeholder/example CSVs
-# Exception: small placeholder files are tracked below
+# Exception: small files bundled with the repository are tracked below
 data/raw/*.csv
 data/derived/*.csv
 data/intermediate/*.csv
 data/larva/*.csv
+# Bundled input files (<=50 MB, included in repo)
+!data/raw/Supplemental_file1_neuron_annotations.csv
+!data/raw/ranks/*.feather
 outputs/
 
 # Data directories — no raw or generated data committed

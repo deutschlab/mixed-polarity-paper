@@ -27,15 +27,23 @@ Download the `.csv.gz` files, decompress them, and place them at the paths shown
 
 
 
+## Bundled in this repository
+
+The following small files from Dorkenwald et al. 2024 are included directly in this repository
+under `data/raw/` and do not need to be downloaded separately.
+
+| File | Local path | Config variable | Description |
+|------|-----------|----------------|-------------|
+| `Supplemental_file1_neuron_annotations.csv` | `data/raw/Supplemental_file1_neuron_annotations.csv` | `NEURON_ANNOTATIONS_CSV` | Combined neuron annotation table. Columns: `root_id`, `super_class`, `top_nt`, `cell_type`. Supplementary annotation file from Dorkenwald et al. 2024 (see citation below). Required by `processing/05_build_neuron_metadata_table.py`, `figures/fig2/si_x_primary_types_mirror.py`, and `figures/fig3/si_x_neuron_types.py`. |
+| Sensory layer rank feather files | `data/raw/ranks/` | `RANKS_DIR` | Per-neuron sensory layer rank feather files. Columns include `root_id`, `allinputs_layer_mean`, and per-modality layer means (visual, olfactory, mechanosensory, etc.). From Dorkenwald et al. 2024 (see citation below). Required by `processing/05_build_neuron_metadata_table.py`. |
+
 ## Author-provided manuscript inputs
 
-The following files are not available from public databases and must be obtained from the
+The following file is not available from public databases and must be obtained from the
 corresponding authors.
 
 | File | Local path | Config variable | Description |
 |------|-----------|----------------|-------------|
-| `Supplemental_file1_neuron_annotations.csv` | `data/raw/Supplemental_file1_neuron_annotations.csv` | `NEURON_ANNOTATIONS_CSV` | Combined neuron annotation table. Columns: `root_id`, `super_class`, `top_nt`, `cell_type`. This is the supplementary annotation file from Dorkenwald et al. 2024 (see citation below). Required by `processing/05_build_neuron_metadata_table.py`, `figures/fig2/si_x_primary_types_mirror.py`, and `figures/fig3/si_x_neuron_types.py`. |
-| Sensory layer rank feather files | `data/raw/ranks/` | `RANKS_DIR` | Per-neuron sensory layer rank feather files. Columns include `root_id`, `allinputs_layer_mean`, and per-modality layer means (visual, olfactory, mechanosensory, etc.). From Dorkenwald et al. 2024 (see citation below). Required by `processing/05_build_neuron_metadata_table.py`. |
 | Neuropil synapse table | `data/raw/Cloud_SQL_fw_mat783_synapses_v3_neuropil.csv` | `NEUROPIL_SYNAPSE_CSV` | Synapse table with neuropil annotations, derived from FlyWire data published in Dorkenwald et al. 2024 (see citation below). Required only by `figures/fig2/si_x_twigs.py` (Fig 2 supplementary panel). |
 
 
