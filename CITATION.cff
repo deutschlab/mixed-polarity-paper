@@ -13,7 +13,7 @@ abstract: >
   index (SI) computation, compartment-level synapse classification (AA/AD/DA/DD),
   synapse-type characterisation, random forest classifiers, reciprocal
   connectivity modelling, and PCA of morphological features.
-  Accompanies the manuscript: Gross & Deutsch, in submission.
+  Accompanies the manuscript: Gross, Farah & Deutsch, in submission.
 authors:
   - family-names: "Gross"
     given-names: "Amit"

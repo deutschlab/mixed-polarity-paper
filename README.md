@@ -1,8 +1,8 @@
-﻿  # mixed-polarity-paper
+﻿  # Organizational principles governing synapse types in a whole-brain connectome
 
   > **Code repository accompanying the manuscript:**
   > *Organizational principles governing synapse types in a whole-brain connectome*
-  > Amit Gross,Majd Farah, Dr David Deutsch
+  > Amit Gross, Majd Farah, Dr David Deutsch
 
   ---
 
