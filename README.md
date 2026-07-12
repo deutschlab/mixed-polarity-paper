@@ -85,7 +85,7 @@
   ### Requirements
 
   - **OS:** Linux, macOS, or Windows
-  - **Python:** 3.9 or higher (tested on 3.12.4)
+  - **Python:** 3.12.4 (tested; other versions not guaranteed with the pinned dependencies)
   - **RAM: 32 GB minimum** recommended for running the full pipeline locally. The Princeton synapse table and per-neuron morphology data are large; peak memory usage during processing exceeds 16 GB.
   - **No special hardware required** — all analyses run on standard CPU
   - **Typical install time:** ~5–10 minutes (conda) or ~10–20 minutes (pip, due to dependency resolution)
