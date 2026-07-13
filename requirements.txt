@@ -9,6 +9,11 @@ scipy==1.13.1
 # Neuron morphology
 navis==1.7.0
 
+# Connectome data access (FlyWire / CAVE)
+fafbseg
+nglui
+caveclient
+
 # Machine learning
 scikit-learn==1.5.2
 xgboost==3.0.2
@@ -19,6 +24,10 @@ networkx==3.3
 # Visualisation
 matplotlib==3.9.2
 seaborn==0.13.2
+
+# Statistics
+pingouin
+statsmodels
 
 # Feather/parquet I/O
 pyarrow==17.0.0

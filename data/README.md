@@ -1,7 +1,8 @@
 ﻿# Data directory
 
 This directory holds raw inputs and generated derived tables for the pipeline.
-**No data files are committed to this repository.**
+**Two small files are committed to this repository** (`data/raw/Supplemental_file1_neuron_annotations.csv`
+and `data/raw/ranks/`). All other data files must be downloaded or generated — see below.
 
 ---
 

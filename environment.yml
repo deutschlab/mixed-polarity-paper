@@ -13,8 +13,13 @@ dependencies:
   - networkx=3.3
   - matplotlib=3.9.2
   - seaborn=0.13.2
+  - statsmodels
+  - pingouin
   - pyarrow=17.0.0
   - joblib=1.4.2
   - pip
   - pip:
     - navis==1.7.0
+    - fafbseg
+    - nglui
+    - caveclient

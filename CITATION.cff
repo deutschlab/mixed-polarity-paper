@@ -3,17 +3,17 @@ message: "If you use this code, please cite it as below."
 type: software
 title: "Organizational principles governing synapse types in a whole-brain connectome"
 version: 1.2.0
-date-released: "2026"
+doi: 10.64898/2026.06.23.733969
 repository-code: "https://github.com/deutschlab/mixed-polarity-paper"
 license: "MIT"
 abstract: >
-  Computational pipeline for the analysis of synaptic compartment polarity
-  and connectivity in the Drosophila adult whole-brain connectome (FAFB v783,
-  FlyWire / Princeton synapse table). Implements per-neuron synaptic input
-  index (SI) computation, compartment-level synapse classification (AA/AD/DA/DD),
-  synapse-type characterisation, random forest classifiers, reciprocal
-  connectivity modelling, and PCA of morphological features.
-  Accompanies the manuscript: Gross, Farah & Deutsch, in submission.
+  Computational pipeline accompanying the manuscript "Organizational principles
+  governing synapse types in a whole-brain connectome". Analyses the Drosophila
+  adult whole-brain connectome (FAFB v783, FlyWire / Princeton synapse table).
+  Implements per-neuron synaptic input index (SI) computation, compartment-level
+  synapse classification (AA/AD/DA/DD), synapse-type characterisation, random
+  forest classifiers, reciprocal connectivity modelling, and PCA of morphological
+  features.
 authors:
   - family-names: "Gross"
     given-names: "Amit"
