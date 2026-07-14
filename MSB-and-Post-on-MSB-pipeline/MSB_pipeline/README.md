@@ -47,13 +47,22 @@ pip install -r requirements.txt
 ```
 
 
-## Input files
+## Demo Input files
 
 Before running the workflow, make sure the following files are present in this folder:
 
 1. `swc/` containing 10 neurons' `.swc` files
 2. `sample_synapses.ftr` containing the synapse table for those 10 neurons
 
+## Full Input files
+
+The full input files are available at: https://codex.flywire.ai/api/download?dataset=fafb.
+
+1) `swc` files are under `Neuron Skeletons`
+2) `synapses` are under `Synapse Table` but needs pre-processing:
+    1. Add the 720575940 prefix for all rows in pre_root_id_720575940 and post_root_id_720575940 columns, and rename them to 'pre' & 'post'.
+    2. Rename the index column to `synapse_id`.
+    
 
 ## Running the pipeline
 
