@@ -23,7 +23,7 @@ The main outputs are:
 
 ## Requirements
 
-This workflow was developed and tested with Python 3.10+ and the following libraries:
+This workflow was developed and tested with Python 3.12+ and the following libraries:
 
 - `navis`
 - `pandas`
@@ -41,7 +41,7 @@ pip install -r requirements.txt
 If you are using conda, you can also create an environment and install the same requirements there:
 
 ```bash
-conda create -n msb-pipeline python=3.10
+conda create -n msb-pipeline python=3.12
 conda activate msb-pipeline
 pip install -r requirements.txt
 ```
@@ -49,7 +49,7 @@ pip install -r requirements.txt
 
 ## Demo Input files
 
-Before running the workflow, make sure the following files are present in this folder:
+Before running the workflow, make sure the following are present in `MSB-and-Post-on-MSB-pipeline` folder:
 
 1. `swc/` containing 10 neurons' `.swc` files
 2. `sample_synapses.ftr` containing the synapse table for those 10 neurons
@@ -90,7 +90,7 @@ The pipeline writes an output file named:
 cluster_info_output.ftr
 ```
 
-This file is saved in the MSB project folder and contains the clustered synapse information.
+This file is saved in the `MSB-and-Post-on-MSB-pipeline` folder and contains the clustered synapse information.
 
 ## Notes
 
