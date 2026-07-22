@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jul 15 14:44:35 2025
-
-@author: majd_
-
-@description: filopodia algorithm methods
-"""
-
 import networkx as nx
 import pandas as pd
 
