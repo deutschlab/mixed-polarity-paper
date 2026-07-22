@@ -65,7 +65,7 @@ def attach_synapses(
 
 def upload_swc(swc_id: int | str, allsynapses: pd.DataFrame, swc_dir: str | Path | None = None):
     """Load a neuron SWC file from the local project directory."""
-    base_dir = Path(swc_dir or (Path(__file__).resolve().parent.parent / "swc")).resolve()
+    base_dir = Path(swc_dir or (Path(__file__).resolve().parent.parent / "data" / "swc")).resolve()
     swc_name = f"{swc_id}.swc"
 
     swc_path = None
