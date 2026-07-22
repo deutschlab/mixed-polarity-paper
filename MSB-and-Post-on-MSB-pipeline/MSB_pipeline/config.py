@@ -10,17 +10,20 @@ class Config:
         package_dir = Path(__file__).resolve().parent
         default_root = package_dir.parent
         self.project_root = Path(project_root or default_root).resolve()
+
+        data_dir = package_dir.parent / "data"
+
         self.swc_dir = self._resolve_existing_dir(
-            self.project_root / "swc",
-            package_dir / "swc",
-            package_dir.parent / "swc",
+            data_dir / "swc",
+            self.project_root / "data" / "swc",
+            package_dir / "swc",  # fallback fallback
         )
         self.synapse_table_path = self._resolve_existing_file(
-            self.project_root / "sample_synapses.ftr",
-            package_dir.parent / "sample_synapses.ftr",
-            package_dir / "sample_synapses.ftr",
+            data_dir / "sample_synapses.ftr",
+            self.project_root / "data" / "sample_synapses.ftr",
+            package_dir / "sample_synapses.ftr",  # fallback
         )
-        self.output_path = package_dir.parent / "cluster_info_output.ftr"
+        self.output_path = data_dir / "cluster_info_output.ftr"
 
         self.min_score = 30
         self.min_samples = 3

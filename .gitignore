@@ -27,7 +27,6 @@ ENV/
 !demo/demo.ipynb
 
 # Large data files — regenerate from raw data or obtain from sources listed in data/README.md
-*.ftr
 *.feather
 # Exception: ranks feather files are bundled with the repository
 !data/raw/ranks/*.feather

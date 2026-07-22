@@ -9,7 +9,7 @@ The pipeline loads a synapse table and a set of SWC morphology files, attaches s
 The main outputs are:
 
 - a clustered synapse table containing neuron, synapse, and cluster information
-- a Feather file written to the project folder as `cluster_info_output.ftr`
+- The Feather file is written to `mixed-polarity-paper\MSB-and-Post-on-MSB-pipeline\data` as `cluster_info_output.ftr`
 
 ## Repository structure
 
@@ -18,8 +18,8 @@ The main outputs are:
 - `utils.py` – helper functions for reading SWC files and synapse tables
 - `config.py` – configurable paths and clustering parameters
 - `requirements.txt` – Python dependencies needed to run the workflow
-- `swc/` – directory containing SWC morphology files
-- `sample_synapses.ftr` – input synapse table in Feather format
+- `swc/` – directory containing SWC morphology files found in `mixed-polarity-paper\MSB-and-Post-on-MSB-pipeline\data`
+- `sample_synapses.ftr` – input synapse table in Feather format found in `mixed-polarity-paper\MSB-and-Post-on-MSB-pipeline\data`
 
 ## Requirements
 
@@ -49,7 +49,7 @@ pip install -r requirements.txt
 
 ## Demo Input files
 
-Before running the workflow, make sure the following are present in `MSB-and-Post-on-MSB-pipeline` folder:
+Before running the workflow, make sure the following are present in `MSB-and-Post-on-MSB-pipeline/data` folder:
 
 1. `swc/` containing 10 neurons' `.swc` files
 2. `sample_synapses.ftr` containing the synapse table for those 10 neurons
@@ -90,7 +90,7 @@ The pipeline writes an output file named:
 cluster_info_output.ftr
 ```
 
-This file is saved in the `MSB-and-Post-on-MSB-pipeline` folder and contains the clustered synapse information.
+This file is saved in the `MSB-and-Post-on-MSB-pipeline/data` folder and contains the clustered synapse information.
 
 ## Notes
 
