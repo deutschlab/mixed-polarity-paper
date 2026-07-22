@@ -14,7 +14,7 @@
   | | |
   |--|--|
   | **Run on Colab** (no install) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deutschlab/mixed-polarity-paper/blob/main/demo/demo.ipynb) |
-  | **Run locally** | `cd demo && jupyter notebook demo.ipynb` |
+  | **Run locally** | Install the environment first (see [Setup](#setup) below), then: `cd demo && jupyter notebook demo.ipynb` |
   | **Expected run time** | ~10–20 minutes on a standard desktop CPU |
   | **Expected output** | `demo/output/SI_results_demo.csv` — per-neuron SI values (0–1) for ~150–180 of the 200 neurons; `demo/output/connectors_demo.csv` — per-synapse compartment labels (A/D/L) |
 
