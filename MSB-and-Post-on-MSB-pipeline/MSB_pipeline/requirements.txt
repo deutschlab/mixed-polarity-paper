@@ -1,0 +1,6 @@
+navis
+pandas
+numpy
+scipy
+scikit-learn
+pyarrow
