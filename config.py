@@ -117,3 +117,7 @@ LARVA_SYNAPSES_PRE_MERGE_FTR  = LARVA_DATA_DIR / "output" / "synapses_pre_merge_
 # --- fig5 additional data paths ---
 CONNECTIONS_TABLE_NONP_FTR    = DERIVED_DATA_DIR / "connections_by_syn_type_reciprocal_types_filtered_article.ftr"
 NEURONS_NT_BWF_FTR            = DERIVED_DATA_DIR / "neurons_nt_bwf_frac.ftr"
+
+# --- alternative split methods (processing/08_alternative_split_methods.py) ---
+ALT_SPLIT_BATCH_DIR           = INTERMEDIATE_DIR / "alternative_to_SI" / "all_neurons_batches"
+SI_COMPARISONS_FTR            = DERIVED_DATA_DIR / "SI_comparisons.ftr"
