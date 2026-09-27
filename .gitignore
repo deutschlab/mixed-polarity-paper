@@ -81,3 +81,6 @@ copied_files_manifest*.csv
 filename_rename_manifest*.csv
 removed_duplicate_*.csv
 excel_missing_files*.csv
+
+# demo notebook outputs
+demo/output/

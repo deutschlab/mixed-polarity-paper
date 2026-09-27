@@ -62,7 +62,7 @@ whether neurons within the same type use the same synapse-type pattern.
 |-------|--------|-------------|-------------|
 | Fig 3A | `figures/fig3/si_x_neuron_types.py` | `NEURON_TABLE_FTR`, `NEURON_ANNOTATIONS_CSV` | `outputs/fig3/si_x_neuron_types/` |
 | Fig 3C | `figures/fig3/fig3c_mixed_example_sfc.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/mixed_example/` |
-| Fig 3D | `figures/fig3/fig3d_si_compartment_correct.py` | `NEURON_TABLE_FTR` | `outputs/fig3/fig3d/` |
+| Fig 3D | `figures/fig3/fig3d_si_compartment_correct.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/SI_x_correct_compartment/` |
 | Fig 3D (AD content, mixed) | `figures/fig3/fig3supp_ad_content_si_mixed.py` | `NEURON_TABLE_FTR` | `outputs/fig3/fig3supp_ad_mixed/` |
 | Fig 3E | `figures/fig3/fig3e_syntype_composition.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/fig3e/` |
 | Fig 3F (AD content) | `figures/fig3/fig3supp_ad_content_si.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/fig3supp_ad/` |
@@ -83,7 +83,8 @@ multiple classification models.
 
 | Panel | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|
-| Fig 4A / 4C / Supp | `figures/fig4/syntype_x_pc1.py` | `NEURON_TABLE_FTR`, `CONNECTIONS_TABLE_FTR`, `PCA_TABLE_FTR`, `PC1_TABLE_CSV`, `PC1_TABLE_PREDICTIONS_CSV` | `outputs/fig4/syntype_x_pc1/` |
+| (table for Fig 4A / 4C) | `figures/fig4/build_pc1_table.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_FTR`, `CONNECTIONS_TABLE_FTR` | `data/derived/PC1_table.csv` (run before `syntype_x_pc1.py`) |
+| Fig 4A / 4C / Supp | `figures/fig4/syntype_x_pc1.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `PCA_TABLE_FTR`, `PC1_TABLE_CSV`, `PC1_TABLE_PREDICTIONS_CSV` | `outputs/fig4/syntype_x_pc1/` |
 | Fig 4B | `figures/fig4/models_comparison.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `CONNECTIONS_TABLE_FTR` | `outputs/fig4/models_comparison/` |
 | Fig 4 Supp 1B-D | `figures/fig4/syntype_x_pc1_simple_model.py` | `NEURON_TABLE_FTR`, `CONNECTIONS_TABLE_FTR`, `PCA_TABLE_NONP_FTR` | `outputs/fig4/simple_model/` |
 
@@ -101,8 +102,8 @@ reciprocity prediction.
 | Fig 5A (BWF variant) | `figures/fig5/reciprocal_fraction_x_bwf.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `NEURONS_NT_BWF_FTR` | `outputs/fig5/reciprocal_fraction_bwf/` |
 | Fig 5D / Supp 1B | `figures/fig5/fig5d_chi_reci_identity.py` | `CONNECTIONS_TABLE_FTR`, `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR`, `NEURON_TABLE_NONP_FTR`, `CONNECTIONS_TABLE_NONP_FTR` | `outputs/fig5/fig5d/` |
 | Fig 5E | `figures/fig5/syn_type_strength_identity.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_strength/` |
-| Fig 5H | `figures/fig5/syn_type_x_reci_x_dominance_x_sides.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/reci_x_dominance_sides/` |
-| Fig 5H (base) | `figures/fig5/syn_type_x_reci_x_dominance.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/reci_x_dominance/` |
+| Fig 5H | `figures/fig5/syn_type_x_reci_x_dominance_x_sides.py` | `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR`, `CLASSIFICATION_CSV` | `outputs/fig5/syn_type_x_reci_x_dominance_x_sides/` |
+| Fig 5H (base) | `figures/fig5/syn_type_x_reci_x_dominance.py` | `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_x_reci_x_dominance/` |
 | Fig 5I | `figures/fig5/syn_type_x_reci_x_npil.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/reci_x_npil/` |
 | Fig 5 Supp 1C/D | `figures/fig5/reciprocal_fraction_model.py` | `RECI_PROP_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/reci_model/` |
 

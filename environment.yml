@@ -14,7 +14,7 @@ dependencies:
   - matplotlib=3.9.2
   - seaborn=0.13.2
   - statsmodels
-  - pingouin
+  - pingouin<0.6
   - pyarrow=17.0.0
   - joblib=1.4.2
   - pip
@@ -23,3 +23,5 @@ dependencies:
     - fafbseg
     - nglui
     - caveclient
+    - scikit-posthocs==0.17.0
+    - mplcursors==0.7.1

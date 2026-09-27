@@ -3,7 +3,7 @@
 This document describes the processing pipeline that converts raw connectome inputs into the
 derived tables used by the figure scripts.
 
-**Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07  
+**Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07 (08 is optional: the split-method comparison)  
 **All paths are defined in:** `config.py`  
 **All scripts import:** `methods/methods_all.py` via `METHODS_DIR`
 
@@ -23,6 +23,7 @@ flowchart TD
     S05["05_build_neuron_metadata_table\nNEURON_TABLE_FTR"]
     S06["06_build_connection_reciprocity_table\nCONNECTIONS_TABLE_FTR"]
     S07["07_pca_morphology\nPCA_TABLE_FTR"]
+    S08["08_alternative_split_methods (optional)\nSI_COMPARISONS_FTR"]
     FIGS["Figure scripts\nfig1-fig5"]
 
     RAW --> S01
@@ -43,6 +44,9 @@ flowchart TD
     S05 --> FIGS
     S06 --> FIGS
     S07 --> FIGS
+    SYNRAW["synapses_783_article_princeton_raw.ftr\n(no script writes it)"] -.-> S08
+    RAW -.-> S08
+    S05 -.-> S08
 ```
 
 See [pipeline_overview.md](pipeline_overview.md) for the full run order.
@@ -170,6 +174,26 @@ per-neuron PCA scores used in Figure 4.
 | **Inputs** | `NEURON_TABLE_FTR` |
 | **Outputs** | `PCA_TABLE_FTR` (`neurons_pca_princeton.ftr`) |
 | **Key columns** | `neuron`, `PC1`, `PC2` |
-| **Downstream** | `figures/fig4/syntype_x_pc1.py` |
+| **Downstream** | `figures/fig4/build_pc1_table.py`, `figures/fig4/syntype_x_pc1.py` |
+
+---
+
+## Script 08 — Alternative Split Methods (optional)
+
+**File:** `processing/08_alternative_split_methods.py`
+
+Compares the published SFC axon/dendrite split with two single-node cuts: the node whose cut
+gives the highest SI (MaxSI), and the node with the lowest Fisher p-value (MinFisherP). A
+candidate node is any non-root node with exactly one child; the synapses on that node are left
+out of its score. Runs over the intrinsic neurons in batches of 500 and skips batches whose
+output files already exist. An existing `SI_comparisons.ftr` is never overwritten.
+
+| | |
+|--|--|
+| **Inputs** | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` |
+| **Outputs** | Per batch in `ALT_SPLIT_BATCH_DIR`: `summary_batch_NNNN.ftr`, `nodes_batch_NNNN.ftr`, `failures_batch_NNNN.ftr`; combined `SI_COMPARISONS_FTR` (`SI_comparisons.ftr`), written only if that file does not already exist |
+| **Key columns** | `neuron_id`, `SFC_SI`, `SFC_Phi`, `MaxSI_SI`, `MinFisherP_Phi` |
+| **Downstream** | None in this repository |
+| **Note** | No script in this repository writes `SYNAPSE_TABLE_RAW_FTR`, and `SWC_DIR` must hold the skeletons of every neuron, so the script cannot be run from the downloads alone |
 
 ---

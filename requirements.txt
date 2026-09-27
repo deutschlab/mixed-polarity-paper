@@ -26,8 +26,12 @@ matplotlib==3.9.2
 seaborn==0.13.2
 
 # Statistics
-pingouin
+pingouin<0.6
 statsmodels
+scikit-posthocs==0.17.0
+
+# Interactive plot hover (figures/fig2/feat_rf_and_lr_models.py)
+mplcursors==0.7.1
 
 # Feather/parquet I/O
 pyarrow==17.0.0
