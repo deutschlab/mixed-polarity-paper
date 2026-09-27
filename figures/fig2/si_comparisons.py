@@ -378,3 +378,56 @@ plt.savefig(
     format='svg'
 )
 plt.show()
+
+#%% Neuron counts in the comparison, overall and per super-class
+# ------------------------------------------------------------
+# Print number of compared neurons: overall and per super_class
+# ------------------------------------------------------------
+
+# df is the merged comparison table, all super-classes:
+# df = pd.merge(nodesP, nodesG, on=['neuron', 'super_class'], how='inner')
+
+preferred_order = [
+    "central",
+    "optic",
+    "visual_projection",
+    "visual_centrifugal",
+    "ascending",
+    "descending",
+    "sensory",
+    "endocrine",
+    "motor"
+]
+
+# Count unique compared neurons per super_class
+counts = (
+    df.groupby("super_class")["neuron"]
+      .nunique()
+      .rename("n_compared_neurons")
+      .reset_index()
+)
+
+# Apply preferred order, keeping any unexpected classes at the end
+counts["order"] = counts["super_class"].apply(
+    lambda x: preferred_order.index(x) if x in preferred_order else 999
+)
+
+counts = counts.sort_values(["order", "super_class"]).drop(columns="order")
+
+# Overall count
+n_total = df["neuron"].nunique()
+
+print("=== SI COMPARISON NEURON COUNTS ===")
+print(f"Total compared neurons: {n_total:,}")
+print("\nPer super_class:")
+
+for _, row in counts.iterrows():
+    print(f"{row['super_class']:<22} n = {int(row['n_compared_neurons']):,}")
+
+# Sanity check: rows vs unique neurons
+n_rows = len(df)
+if n_rows != n_total:
+    print("\nWARNING:")
+    print(f"Rows in merged df: {n_rows:,}")
+    print(f"Unique neurons:     {n_total:,}")
+    print("This means some neurons appear more than once.")

@@ -179,3 +179,109 @@ else:
     print("\nGames-Howell Post-Hoc (Welch condition)\n")
     gh = pg.pairwise_gameshowell(dv='SI', between='primary_type', data=anova_df)
     print(gh[['A', 'B', 'pval', 'hedges']].head())
+
+#%% Primary types with >=2 neurons: Welch ANOVA and partial eta squared
+# Types with a single neuron are left out: they have no within-type spread.
+# ------------------------------------------------------------
+# Primary-type analysis: keep only primary_types with >=2 neurons
+# ------------------------------------------------------------
+
+# Starting dataframe
+analysis_df = nodesG[['neuron', 'SI', 'primary_type', 'super_class']].dropna()
+
+# Count neurons per primary_type
+ptype_counts_all = (
+    analysis_df.groupby('primary_type')['neuron']
+    .nunique()
+    .sort_values(ascending=False)
+)
+
+valid_ptypes = ptype_counts_all[ptype_counts_all >= 2].index
+
+# Filter to primary types with >=2 neurons
+anova_df = analysis_df[analysis_df['primary_type'].isin(valid_ptypes)].copy()
+
+# Counts
+n_total_before = analysis_df['neuron'].nunique()
+n_total_after = anova_df['neuron'].nunique()
+
+k_total_before = analysis_df['primary_type'].nunique()
+k_total_after = anova_df['primary_type'].nunique()
+
+n_excluded_neurons = n_total_before - n_total_after
+k_excluded_ptypes = k_total_before - k_total_after
+
+print("=== PRIMARY TYPE ANALYSIS COUNTS ===")
+print(f"Intrinsic neurons before primary_type >=2 filter: {n_total_before:,}")
+print(f"Primary types before filter: {k_total_before:,}")
+print()
+print(f"Intrinsic neurons included in analysis: {n_total_after:,}")
+print(f"Primary types included, n >= 2: {k_total_after:,}")
+print()
+print(f"Excluded neurons from singleton primary types: {n_excluded_neurons:,}")
+print(f"Excluded singleton primary types: {k_excluded_ptypes:,}")
+
+# Per super_class counts after filtering
+print("\nIncluded neurons per super_class:")
+sclass_counts = (
+    anova_df.groupby('super_class')['neuron']
+    .nunique()
+    .loc[['central', 'optic', 'visual_projection', 'visual_centrifugal']]
+)
+
+for sclass, n in sclass_counts.items():
+    print(f"{sclass:<22} n = {n:,}")
+
+# Expected degrees of freedom for classical ANOVA
+N = anova_df['neuron'].nunique()
+k = anova_df['primary_type'].nunique()
+
+print("\nExpected classical ANOVA df:")
+print(f"df1 = k - 1 = {k - 1:,}")
+print(f"df2 = N - k = {N - k:,}")
+#%%
+#%%
+# ------------------------------------------------------------
+# ANOVA / Welch ANOVA using only valid primary_types
+# ------------------------------------------------------------
+
+from scipy.stats import levene, f_oneway
+import pingouin as pg
+
+groups = [g['SI'].values for _, g in anova_df.groupby('primary_type')]
+
+levene_stat, levene_p = levene(*groups)
+print(f"Levene’s test: W = {levene_stat:.3f}, p = {levene_p:.3e}")
+
+if levene_p < 0.05:
+    print("\nVariances differ → Using Welch ANOVA\n")
+    welch = pg.welch_anova(
+        data=anova_df,
+        dv='SI',
+        between='primary_type'
+    )
+    print(welch)
+
+    F_val = welch['F'].iloc[0]
+    p_val = welch['p-unc'].iloc[0]
+    df1 = welch['ddof1'].iloc[0]
+    df2 = welch['ddof2'].iloc[0]
+    np2 = welch['np2'].iloc[0]
+
+    p_txt = "p < 0.001" if p_val < 0.001 else f"p = {p_val:.3g}"
+    print(
+        f"\nReport: Welch ANOVA, "
+        f"F({df1:.0f}, {df2:.2f}) = {F_val:.3f}, "
+        f"{p_txt}, η²p = {np2:.3f}"
+    )
+
+else:
+    print("\nVariances are equal → Using classical one-way ANOVA\n")
+    f_stat, p_value = f_oneway(*groups)
+
+    N = anova_df['neuron'].nunique()
+    k = anova_df['primary_type'].nunique()
+    df1 = k - 1
+    df2 = N - k
+
+    print(f"ANOVA: F({df1}, {df2}) = {f_stat:.3f}, p = {p_value:.3e}")

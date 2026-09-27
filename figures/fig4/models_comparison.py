@@ -83,3 +83,36 @@ plt.savefig(_out_dir / "accuracy_values.svg")
 sns.despine(top=True, right=True)
 plt.show()
 #%%
+
+#%% n values for reporting
+
+# Fig 4B majority-label model: directed neuron-neuron connections
+n_synapses_connection_model = int(connections['sum_syn'].sum())
+n_connections = len(connections)
+
+# Fig 4B majority-label model: primary-type pairs
+n_synapses_primary_type_model = int(connections_agg['sum_syn'].sum())
+n_primary_type_pairs = len(connections_agg)
+
+# Fig 3J and 4A classifiers (values typed in, not computed here)
+n_all_features_test = 673_655
+n_pc1_test = 449_104
+
+print('--- N values ---')
+print(f'Neuron-pair / connection majority label:')
+print(f'  n synapses = {n_synapses_connection_model:,}')
+print(f'  n directed connections = {n_connections:,}')
+print(f'  accuracy = {result_per_conneciton * 100:.1f}%')
+
+print(f'\nPrimary-type pair majority label:')
+print(f'  n synapses = {n_synapses_primary_type_model:,}')
+print(f'  n primary-type pairs = {n_primary_type_pairs:,}')
+print(f'  accuracy = {result_per_conneciton_primary_type * 100:.1f}%')
+
+print(f'\nFull feature classifier:')
+print(f'  n held-out synapses = {n_all_features_test:,}')
+print(f'  accuracy = 79.4%')
+
+print(f'\nPC1_pre / PC1_post classifier:')
+print(f'  n held-out synapses = {n_pc1_test:,}')
+print(f'  accuracy = 69.2%')

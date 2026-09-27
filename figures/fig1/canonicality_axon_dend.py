@@ -142,3 +142,26 @@ print("Levene test (dend_correct):", stat_dend, p_dend)
 #%%
 
 #%%
+
+#%% Welch ANOVA of canonical percent across super-classes
+import pingouin as pg
+
+# Axon canonical percent across super_classes
+welch_ax = pg.welch_anova(
+    data=df,
+    dv='axon_correct',
+    between='super_class'
+)
+
+# Dendrite canonical percent across super_classes
+welch_dend = pg.welch_anova(
+    data=df,
+    dv='dend_correct',
+    between='super_class'
+)
+
+print("Welch ANOVA - axon_correct")
+print(welch_ax)
+
+print("\nWelch ANOVA - dend_correct")
+print(welch_dend)

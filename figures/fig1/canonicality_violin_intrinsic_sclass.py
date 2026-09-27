@@ -213,7 +213,7 @@ print("Welch ANOVA (dend_correct):\n", welch_dend)
 #%%
 import pingouin as pg
 
-# Axon correct pairwise (Welch-style)
+# Axon correct pairwise t-tests (pooled variance), Bonferroni-adjusted
 posthoc_ax = pg.pairwise_ttests(
     dv='axon_correct',
     between='super_class',
@@ -221,11 +221,11 @@ posthoc_ax = pg.pairwise_ttests(
     padjust='bonf',        # multiple comparisons correction (Bonferroni)
     parametric=True,
     effsize='hedges',      # Hedges' g effect size
-    correction=False       # use Welch correction (no pooled var)
+    correction=False       # False = pooled-variance Student t-test, not Welch
 )
 print(posthoc_ax[['A','B','T','dof','p-corr','hedges']])
 
-# Dend correct pairwise (Welch-style)
+# Dend correct pairwise t-tests (pooled variance), Bonferroni-adjusted
 posthoc_dend = pg.pairwise_ttests(
     dv='dend_correct',
     between='super_class',
@@ -236,6 +236,30 @@ posthoc_dend = pg.pairwise_ttests(
     correction=False
 )
 print(posthoc_dend[['A','B','T','dof','p-corr','hedges']])
+#%% Games-Howell post-hoc tests (the post-hoc test named in the Methods)
+import pingouin as pg
+
+# Games-Howell post-hoc for axon_correct
+posthoc_ax = pg.pairwise_gameshowell(
+    data=df,
+    dv='axon_correct',
+    between='super_class',
+    effsize='hedges'
+)
+
+# Games-Howell post-hoc for dend_correct
+posthoc_dend = pg.pairwise_gameshowell(
+    data=df,
+    dv='dend_correct',
+    between='super_class',
+    effsize='hedges'
+)
+
+print("Games-Howell axon:")
+print(posthoc_ax[['A', 'B', 'diff', 'T', 'df', 'pval', 'hedges']])
+
+print("\nGames-Howell dendrite:")
+print(posthoc_dend[['A', 'B', 'diff', 'T', 'df', 'pval', 'hedges']])
 #%%
 desc_ax = df.groupby('super_class')['axon_correct'].agg(['mean','std','count'])
 desc_dend = df.groupby('super_class')['dend_correct'].agg(['mean','std','count'])
