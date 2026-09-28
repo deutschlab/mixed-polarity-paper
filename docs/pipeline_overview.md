@@ -36,6 +36,8 @@ flowchart TD
     S01 --> S04
     S02A --> S04
     S04 --> S05
+    S01 --> S05
+    S02A --> S05
     RAW --> S05
     S05 --> S06
     S04 --> S06

@@ -28,8 +28,10 @@ ENV/
 
 # Large data files — regenerate from raw data or obtain from sources listed in data/README.md
 *.feather
-# Exception: ranks feather files are bundled with the repository
+*.ftr
+# Exceptions: the ranks feather files and the MSB sample tables are bundled with the repository
 !data/raw/ranks/*.feather
+!MSB-and-Post-on-MSB-pipeline/data/*.ftr
 *.pkl
 *.pickle
 *.joblib
