@@ -33,7 +33,6 @@ from config import (
 import networkx as nx
 from sklearn.cluster import AgglomerativeClustering
 import random
-client = CAVEclient('flywire_fafb_production')
 import seaborn as sns
 import matplotlib.colors as mcolors
 import matplotlib.cm as cm

@@ -381,6 +381,3 @@ df.to_feather(NEURON_TABLE_FTR)
 
 
 #%%
-
-# Keep only rows where 'neuron' from dff are not in nodesG2
-diff = dff[~dff['neuron'].isin(nodesG2['neuron'])]

@@ -4,6 +4,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import METHODS_DIR, NEURON_TABLE_FTR, OUTPUT_DIR, SI_UPDATED_FTR, LARVA_SYNAPSES_FTR, LARVA_SI_FTR
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
+from scipy.stats import shapiro, mannwhitneyu, ttest_ind
 import os
 import seaborn as sns
 import pickle

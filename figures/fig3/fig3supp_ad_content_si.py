@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import NEURON_TABLE_FTR, SYNAPSE_TABLE_FTR, OUTPUT_DIR, METHODS_DIR
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
+import seaborn as sns
 #%%
 nodesG=pd.read_feather(NEURON_TABLE_FTR)
 #%%
@@ -51,6 +52,8 @@ for i in range(0,100,5):
     r=mask.groupby(by='comp').size()
     r2=r/r.sum()
     r2=r2.reset_index()
+    if not (r2['comp']=='AD').any():
+        break  # no AD synapse passes this threshold
     r3=round(r2[r2['comp']=='AD'][0].values[0],3)
     print(i,r3)
     r_list.append([i,r3])

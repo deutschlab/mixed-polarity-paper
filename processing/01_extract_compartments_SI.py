@@ -27,7 +27,6 @@ from config import METHODS_DIR, PRINCETON_SYNAPSE_CSV, SWC_DIR, PROCESSED_SWC_DI
 import networkx as nx
 from sklearn.cluster import AgglomerativeClustering
 import random
-client = CAVEclient('flywire_fafb_production')
 import seaborn as sns
 import matplotlib.colors as mcolors
 import matplotlib.cm as cm
@@ -103,6 +102,7 @@ import navis  # Assuming you have navis library available for NeuronList
 # Define the base directories
 input_base_dir = SWC_DIR
 output_base_dir = PROCESSED_SWC_DIR
+output_base_dir.mkdir(parents=True, exist_ok=True)
 
 
 # Get the list of subdirectories in the input directory

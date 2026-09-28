@@ -7,7 +7,6 @@ mpl.rcParams['font.family'] = 'Arial'
 
 import matplotlib.pyplot as plt
 import numpy as np
-from fafbseg import flywire
 import navis
 import pandas as pd
 
@@ -23,7 +22,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import NEURON_TABLE_FTR, SYNAPSE_TABLE_FTR, OUTPUT_DIR, METHODS_DIR
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
-client = CAVEclient('flywire_fafb_production')
 import seaborn as sns
 import matplotlib.pyplot as plt
 

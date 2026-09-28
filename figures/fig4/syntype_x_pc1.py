@@ -17,6 +17,7 @@ from config import (NEURON_TABLE_FTR, SYNAPSE_TABLE_FTR, PCA_TABLE_FTR,
                     OUTPUT_DIR, METHODS_DIR)
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
+import seaborn as sns
 
 #%%
 nodesG=pd.read_feather(NEURON_TABLE_FTR)

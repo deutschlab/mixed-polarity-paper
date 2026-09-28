@@ -9,7 +9,6 @@ import matplotlib.cm as cm
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
-from fafbseg import flywire
 import navis
 import pandas as pd
 
@@ -30,7 +29,6 @@ import scikit_posthocs as sp
 from sklearn.cluster import AgglomerativeClustering
 from scipy.stats import f_oneway, levene, mannwhitneyu, shapiro
 import random
-client = CAVEclient('flywire_fafb_production')
 import seaborn as sns
 import gc
 

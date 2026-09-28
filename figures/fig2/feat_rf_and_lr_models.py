@@ -23,6 +23,10 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 import seaborn as sns
+from sklearn.preprocessing import StandardScaler
+from scipy.spatial.distance import pdist
+from scipy.cluster.hierarchy import linkage, dendrogram
+import mplcursors
 
 #%%
 nodesG=pd.read_feather(NEURON_TABLE_FTR)

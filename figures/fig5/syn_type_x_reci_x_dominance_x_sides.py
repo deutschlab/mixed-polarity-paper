@@ -322,13 +322,13 @@ for type_1 in ['AD', 'DA', 'AA', 'DD']:
         if type_1 != type_2:
             # Find rows satisfying non-diagonal condition
             idx1 = final_df[
-                (final_df[f'Node_A_pre_{type_1}'] > final_df['dim_A->B']/2) &
-                (final_df[f'Node_B_pre_{type_2}'] > final_df['dim_B->A']/2)
+                (final_df[f'node_A_pre_{type_1}'] > final_df['dim_A->B']/2) &
+                (final_df[f'node_B_pre_{type_2}'] > final_df['dim_B->A']/2)
             ].index
 
             idx2 = final_df[
-                (final_df[f'Node_B_pre_{type_1}'] > final_df['dim_B->A']/2) &
-                (final_df[f'Node_A_pre_{type_2}'] > final_df['dim_A->B']/2)
+                (final_df[f'node_B_pre_{type_1}'] > final_df['dim_B->A']/2) &
+                (final_df[f'node_A_pre_{type_2}'] > final_df['dim_A->B']/2)
             ].index
 
             # Add both
@@ -338,8 +338,8 @@ for type_1 in ['AD', 'DA', 'AA', 'DD']:
 # --- Then, collect indices from diagonal ---
 for type_ in ['AD', 'DA', 'AA', 'DD']:
     idx_diag = final_df[
-        (final_df[f'Node_A_pre_{type_}'] > final_df['dim_A->B']/2) &
-        (final_df[f'Node_B_pre_{type_}'] > final_df['dim_B->A']/2)
+        (final_df[f'node_A_pre_{type_}'] > final_df['dim_A->B']/2) &
+        (final_df[f'node_B_pre_{type_}'] > final_df['dim_B->A']/2)
     ].index
 
     selected_indices.update(idx_diag)

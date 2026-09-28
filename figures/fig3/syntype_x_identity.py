@@ -8,7 +8,6 @@ mpl.rcParams['font.family'] = 'Arial'
 
 import matplotlib.pyplot as plt
 import numpy as np
-from fafbseg import flywire
 import navis
 import pandas as pd
 
@@ -24,7 +23,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import NEURON_TABLE_FTR, SYNAPSE_TABLE_FTR, CLASSIFICATION_CSV, OUTPUT_DIR, METHODS_DIR
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
-client = CAVEclient('flywire_fafb_production')
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -66,9 +64,6 @@ aa=syn_df.head()
 #%%
 
 #%%
-aa=syn_df[['pre','post','cleft_score','pre_x','pre_y','pre_z','post_x','post_y','post_z']].head()
-#%%
-aa.columns=['pre_neuron','post_neuron','cleft_score','pre_x','pre_y','pre_z','post_x','post_y','post_z']
 
 #%%
 #%%

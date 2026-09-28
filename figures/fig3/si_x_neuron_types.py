@@ -8,7 +8,6 @@ mpl.rcParams['font.family'] = 'Arial'
 
 import matplotlib.pyplot as plt
 import numpy as np
-from fafbseg import flywire
 import navis
 import pandas as pd
 
@@ -24,7 +23,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import NEURON_TABLE_FTR, NEURON_ANNOTATIONS_CSV, OUTPUT_DIR, METHODS_DIR
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
-client = CAVEclient('flywire_fafb_production')
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -93,9 +91,6 @@ T4_g = list(T4_neurons.groupby(by='primary_type').size().reset_index(name='count
 # Plot histograms with different colors
 sns.histplot(kc_neurons['SI'], fill=True, stat='density', color='green', label='DM Neurons')
 #%%
-sns.histplot(dm_neurons, fill=True, stat='density', color='green', label='DM Neurons')
-sns.histplot(lc_neurons, fill=True, stat='density', color='red', label='lc Neurons')
-sns.histplot(ring_neurons, fill=True, stat='density', color='yellow', label='ring Neurons')
 
 # Add legend
 plt.legend(title='Neuron Type')
