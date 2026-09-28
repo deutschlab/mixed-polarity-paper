@@ -60,6 +60,14 @@ data/derived/
 data/intermediate/
 data/larva/output/
 data/larva/results/
+# larval raw inputs: keep only the placeholder files
+data/larva/raw/*
+!data/larva/raw/.gitkeep
+!data/larva/raw/swc/
+data/larva/raw/swc/*
+!data/larva/raw/swc/all_neurons/
+data/larva/raw/swc/all_neurons/*
+!data/larva/raw/swc/all_neurons/.gitkeep
 
 # OS / editor
 .DS_Store
