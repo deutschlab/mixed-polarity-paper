@@ -181,8 +181,8 @@
   the ones seaborn uses for error bands), and every printed table is followed by a checksum of its full contents, so a change in
   a row or decimal that is not shown still changes the printed output. `run_status.txt` in the folder says whether the script
   finished. It saves figures at 72 dpi by default (`--dpi` changes it), which matches the published SVGs. `--replace OLD NEW`
-  replaces one exact piece of source text before the run, for example to skip a step that is too slow; say so when you report
-  the result. `tools/compare_outputs.py` then compares two output folders.
+  replaces one exact piece of source text before the run, for example to skip a step that is too slow; a run changed this way
+  is not a full reproduction of the script. `tools/compare_outputs.py` then compares two output folders.
 
   ```bash
   python tools/run_figure.py figures/fig1/canonicality_axon_dend.py --out outputs/check/before

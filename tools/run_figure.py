@@ -165,8 +165,8 @@ def run_figure(script: Path, out_dir: Path, dpi: float | None = 72,
     out_dir must be empty or not exist yet, so that no file from an earlier run is
     mistaken for this run's output.
     replacements: (old, new) pairs of exact source text; each old text must occur
-    exactly once. Use it to skip a step that is too slow to run, and say so when
-    you report the result.
+    exactly once. Use it to skip a step that is too slow to run; a run changed this
+    way is not a full reproduction of the script.
     """
     script = script.resolve()
     if out_dir.exists() and any(out_dir.iterdir()):
