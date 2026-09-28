@@ -4,15 +4,20 @@ The script runs as it is. What changes is how matplotlib, pandas and the random
 number generators behave:
 - no plot window opens; plt.show() closes the figures, as Spyder's inline plots do;
 - every figure is saved into one output folder, under its own file name;
-- SVG and PDF files carry no date, and SVG files use fixed internal ids, so the same
-  figure gives the same file;
+- SVG files carry no date and PDF files a fixed one (1 Jan 1970), and SVG files use
+  fixed internal ids, so the same figure gives the same file;
 - random numbers are seeded (numpy, Python's random, and the generators seaborn uses
   for its error bands), so repeated runs draw the same values;
-- printed tables are shown in full.
+- printed tables show all their columns, and each is followed by a checksum of its
+  full contents (values, index, column names and types), so a change in a row or
+  decimal that is not shown still changes the printed output; a table holding other
+  objects, such as neurons, gets no checksum, because their text differs between runs;
+  numpy arrays print every element in full precision.
 What the script prints goes to stdout.log in the output folder, and its warnings to
-stderr.log; if the script stops with an error, the traceback appears only in the
-terminal. Figures are saved by file name alone, so two figures with the same name
-in different folders overwrite each other (a warning is written to stderr.log).
+stderr.log. run_status.txt says whether the script finished; if it stopped with an
+error, the file holds the traceback, which also appears in the terminal. Figures
+are saved by file name alone, so two figures with the same name in different
+folders overwrite each other (a warning is written to stderr.log).
 Tables that a script writes (for example into data/derived) still go to their
 usual place and are not compared.
 
@@ -29,8 +34,10 @@ area and sometimes different axis ticks, with the same data.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import os
 import sys
+import traceback
 from pathlib import Path
 from typing import TextIO
 
@@ -91,11 +98,53 @@ def _configure_matplotlib(out_dir: Path, dpi: float | None) -> None:
 
 
 def _configure_pandas() -> None:
+    import numpy as np
     import pandas as pd
 
     pd.set_option("display.max_columns", None)
     pd.set_option("display.width", 10000)
     pd.set_option("display.max_colwidth", None)
+    np.set_printoptions(threshold=sys.maxsize, floatmode="unique")
+
+    # Long tables print only their first and last rows, and values to 6 decimals.
+    # The checksum covers every value, so a change hidden by either still shows.
+    for cls in (pd.DataFrame, pd.Series):
+        if not getattr(cls.__repr__, "_with_checksum", False):
+            cls.__repr__ = _with_checksum(cls.__repr__)
+
+
+# Values whose text form is the same in every run. Any other object (a navis
+# neuron, a fitted model) prints its memory address, so its checksum would differ
+# between two identical runs.
+_STABLE_TYPES = (str, bytes, int, float, bool, complex, type(None))
+
+
+def _checksum(obj) -> str:
+    import numpy as np
+    import pandas as pd
+
+    columns = obj.to_frame() if isinstance(obj, pd.Series) else obj
+    for _, column in columns.items():
+        if column.dtype == object and not all(
+                isinstance(value, _STABLE_TYPES + (np.generic, pd.Timestamp, pd.Timedelta))
+                or value is pd.NA for value in column):
+            return "not available"
+    row_hashes = pd.util.hash_pandas_object(obj, index=True).to_numpy()
+    header = repr([(str(name), str(dtype)) for name, dtype in columns.dtypes.items()])
+    return hashlib.sha1(header.encode("utf-8") + row_hashes.tobytes()).hexdigest()[:16]
+
+
+def _with_checksum(original_repr):
+    def __repr__(self) -> str:
+        text = original_repr(self)
+        try:
+            digest = _checksum(self)
+        except Exception:  # values that cannot be hashed
+            digest = "not available"
+        return f"{text}\n[{len(self)} rows, checksum {digest}]"
+
+    __repr__._with_checksum = True
+    return __repr__
 
 
 def _seed_random() -> None:
@@ -134,6 +183,8 @@ def run_figure(script: Path, out_dir: Path, dpi: float | None = 72,
     _configure_pandas()
     _seed_random()
 
+    status = out_dir / "run_status.txt"
+    status.write_text("started, not finished\n", encoding="utf-8")
     with open(out_dir / "stdout.log", "w", encoding="utf-8") as out_log, \
             open(out_dir / "stderr.log", "w", encoding="utf-8") as err_log:
         stdout, stderr = sys.stdout, sys.stderr
@@ -141,8 +192,18 @@ def run_figure(script: Path, out_dir: Path, dpi: float | None = 72,
         try:
             namespace = {"__file__": str(script), "__name__": "__main__"}
             exec(compile(source, str(script), "exec"), namespace)
+        except SystemExit as exc:
+            if exc.code not in (None, 0):
+                status.write_text("stopped with an error\n" + traceback.format_exc(),
+                                  encoding="utf-8")
+                raise
+        except BaseException:
+            status.write_text("stopped with an error\n" + traceback.format_exc(),
+                              encoding="utf-8")
+            raise
         finally:
             sys.stdout, sys.stderr = stdout, stderr
+    status.write_text("finished\n", encoding="utf-8")
 
 
 def main() -> None:

@@ -10,9 +10,9 @@ scipy==1.13.1
 navis==1.7.0
 
 # Connectome data access (FlyWire / CAVE)
-fafbseg
-nglui
-caveclient
+fafbseg==3.1.1
+nglui==3.6.1
+caveclient==8.2.1
 
 # Machine learning
 scikit-learn==1.5.2
@@ -26,8 +26,8 @@ matplotlib==3.9.2
 seaborn==0.13.2
 
 # Statistics
-pingouin<0.6
-statsmodels
+pingouin==0.5.5
+statsmodels==0.15.0
 scikit-posthocs==0.17.0
 
 # Interactive plot hover (figures/fig2/feat_rf_and_lr_models.py)

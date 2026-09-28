@@ -17,9 +17,16 @@ Usage:
 With --figures-only against a folder of SVGs, the run must save only SVGs; a PNG or
 PDF it also saves is reported as missing from the other folder.
 
-Exits with status 1 if anything differs, if a file exists in only one folder, or if
-there was nothing to compare. Ignoring ids hides one kind of change: an element
-that switches to a different clip region or marker that already exists in the file.
+A folder made by run_figure.py holds run_status.txt; if it does not say the run
+finished, the comparison fails, because two runs that stop at the same error can
+otherwise look identical. A folder without the file (such as the published SVGs)
+is noted, not failed.
+
+Exits with status 1 if anything differs, if a file exists in only one folder, if a
+run did not finish, or if neither folder holds a figure (printed output alone is
+not accepted as a match unless --allow-no-figures is given). Ignoring ids hides one
+kind of change: an element that switches to a different clip region or marker that
+already exists in the file.
 """
 
 from __future__ import annotations
@@ -33,7 +40,8 @@ from pathlib import Path
 _METADATA = re.compile(r"dc:date|<dc:|<cc:|<rdf:|</rdf|</cc|metadata")
 _IDS = re.compile(r'(id|href|clip-path)="[^"]*"')
 _URLS = re.compile(r"url\(#[^)]*\)")
-_NOT_COMPARED = {"stderr.log"}
+_STATUS = "run_status.txt"
+_NOT_COMPARED = {"stderr.log", _STATUS}
 _FIGURES = {".svg", ".png", ".pdf"}
 
 
@@ -79,14 +87,32 @@ def _files(folder: Path, figures_only: bool) -> dict[str, Path]:
     return files
 
 
-def compare(dir_a: Path, dir_b: Path, allow_extra_lines: bool = False,
-            figures_only: bool = False) -> bool:
-    files_a, files_b = _files(dir_a, figures_only), _files(dir_b, figures_only)
-    if not files_a and not files_b:
-        print("nothing to compare: both folders are empty")
+def _run_finished(folder: Path) -> bool:
+    status = folder / _STATUS
+    if not status.exists():
+        print(f"{folder}: no {_STATUS}, so whether that run finished is not known")
+        return True
+    first = status.read_text(encoding="utf-8").split("\n", 1)[0]
+    if first != "finished":
+        print(f"{folder}: the run did not finish ({_STATUS}: {first})")
         return False
+    return True
 
-    ok = True
+
+def compare(dir_a: Path, dir_b: Path, allow_extra_lines: bool = False,
+            figures_only: bool = False, allow_no_figures: bool = False) -> bool:
+    files_a, files_b = _files(dir_a, figures_only), _files(dir_b, figures_only)
+    ok = _run_finished(dir_a)
+    ok = _run_finished(dir_b) and ok
+    if not files_a and not files_b:
+        print("nothing to compare: neither folder holds a file that is compared")
+        return False
+    names = files_a.keys() | files_b.keys()
+    has_figures = any(Path(name).suffix.lower() in _FIGURES for name in names)
+    if not has_figures and not allow_no_figures:
+        print("no figure in either folder: printed output alone is not accepted as a match "
+              "(use --allow-no-figures to compare it anyway)")
+        ok = False
     for name in sorted(files_a.keys() | files_b.keys()):
         if name not in files_a or name not in files_b:
             print(f"{name}: only in {dir_a if name in files_a else dir_b}")
@@ -119,12 +145,15 @@ def main() -> None:
     parser.add_argument("--figures-only", action="store_true",
                         help="compare only figure files (.svg, .png, .pdf), for example "
                              "against a folder that holds just the published SVGs")
+    parser.add_argument("--allow-no-figures", action="store_true",
+                        help="compare folders that hold no figure, for a script that only "
+                             "prints or writes tables")
     args = parser.parse_args()
     for folder in (args.first, args.second):
         if not folder.is_dir():
             parser.error(f"{folder} is not a folder")
     sys.exit(0 if compare(args.first, args.second, args.allow_extra_lines,
-                          args.figures_only) else 1)
+                          args.figures_only, args.allow_no_figures) else 1)
 
 
 if __name__ == "__main__":

@@ -178,8 +178,11 @@
 
   `tools/run_figure.py` runs one figure script so that two runs can be compared: no plot window opens,
   every figure goes to one output folder (it must be new or empty), SVG files carry no date, random numbers are seeded (including
-  the ones seaborn uses for error bands), and printed tables are shown in full. It saves figures at 72 dpi by
-  default, which matches the published SVGs. `tools/compare_outputs.py` then compares two output folders.
+  the ones seaborn uses for error bands), and every printed table is followed by a checksum of its full contents, so a change in
+  a row or decimal that is not shown still changes the printed output. `run_status.txt` in the folder says whether the script
+  finished. It saves figures at 72 dpi by default (`--dpi` changes it), which matches the published SVGs. `--replace OLD NEW`
+  replaces one exact piece of source text before the run, for example to skip a step that is too slow; say so when you report
+  the result. `tools/compare_outputs.py` then compares two output folders.
 
   ```bash
   python tools/run_figure.py figures/fig1/canonicality_axon_dend.py --out outputs/check/before
@@ -194,7 +197,8 @@
   `--figures-only` to compare only figure files (.svg, .png, .pdf), for example against a folder of published
   SVGs; the run must then save only SVGs. Warnings (`stderr.log`) are not compared. Figures are saved by
   file name alone, so two figures with the same name overwrite each other. It exits with status 1 if anything
-  differs or if there was nothing to compare.
+  differs, if either run did not finish, or if neither folder holds a figure (use `--allow-no-figures` for a
+  script that only prints or writes tables, such as `figures/fig4/build_pc1_table.py`).
 
   Some figure scripts also write tables, for example into `data/derived/`. Those go to their usual place, are
   overwritten by a check run, and are not compared.
