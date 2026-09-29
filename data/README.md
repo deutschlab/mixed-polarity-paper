@@ -15,6 +15,11 @@ The main source for the FAFB connectome data is the FlyWire Codex download page:
 
 > https://codex.flywire.ai/api/download?dataset=fafb
 
+Codex offers several datasets on that page; this project uses FAFB v783 only. Files from another
+dataset can have the same column names and load without an error, so check the dataset before you
+download. At the time of writing the site asks you to sign in with a Google account and accept the
+FlyWire terms of service before downloading.
+
 Download the relevant `.csv.gz` files from that page, decompress them, and place them in the paths
 described below and in `config.py`.
 
@@ -46,6 +51,12 @@ The following Codex files are not used by this pipeline and do not need to be do
 The Codex download section for the synapse table is labelled "Synapse Table", and the downloaded file
 may not be called `fafb_v783_princeton_synapse_table.csv`. After decompressing it, rename it to that name,
 or change `PRINCETON_SYNAPSE_CSV` in `config.py`.
+
+The synapse table has no synapse ID column. Steps 01, 02a and 03 each read the CSV and number the
+rows, and step 03 matches the synapses from 01 and 02a by that number, so the file must not change
+between step 01 and step 03: do not sort it, remove duplicates or download it again in between. That
+row number becomes the `synapse_id` column of the derived tables, so it only matches the CSV they were
+built from.
 
 Extract the SWC files from `sk_lod1_783_healed.zip` into `data/raw/swc/783/`. Steps 01, 02a and 08 look for skeletons only in subfolders of `SWC_DIR` (one subfolder per batch, for example about 1,500 neurons each), with each file named `<root_id>.swc`; files placed directly in `SWC_DIR` are not found, and step 01 then finishes without output or error.
 

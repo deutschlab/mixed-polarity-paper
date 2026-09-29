@@ -92,6 +92,8 @@ The larval SI for Figure 2A comes from `processing/larva/larva_process.py`, whic
 
 The figure scripts are in `figures/fig1/` to `figures/fig5/`, usually one script per panel. They are written as `#%%` cell scripts for an editor like Spyder, but you can also run them as normal Python scripts from any folder. If you do, each plot opens in a window and the script waits until you close it; `tools/run_figure.py` gets around this.
 
+Fig 1C and Fig 3C make a Neuroglancer link through `caveclient` before they draw the panel, so they stop with an error unless you have a FlyWire account and a CAVE token saved on your machine (see the caveclient documentation). The `caveclient` and `nglui` packages are imported by `methods/methods_all.py`, so every script that uses it needs them installed (both are in the pinned requirements); only these two panels need the token.
+
 Two scripts need another one to run first: `figures/fig4/build_pc1_table.py` before `figures/fig4/syntype_x_pc1.py`, and `figures/fig5/reciprocal_fraction.py` before `figures/fig5/reciprocal_fraction_model.py`.
 
 Figures are saved in `outputs/figN/`, almost all as SVG and a few as PNG or PDF. A few figure scripts also write tables into `data/derived/`. [docs/figure_to_script_map.md](docs/figure_to_script_map.md) shows which script makes which panel.

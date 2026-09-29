@@ -112,3 +112,9 @@ reciprocity prediction.
 
 > `reciprocal_fraction_model.py` also generates `RF_MODEL_PKL`
 > (`data/intermediate/reciprocity/models/final_random_forest_model_princeton.pkl`).
+
+## Figures 6 and 7
+
+There are no panel scripts for Figures 6 and 7 in this repository yet. The two MSB pipelines in
+`MSB-and-Post-on-MSB-pipeline/` find multi-synapse boutons and the postsynapses near them, but they do not
+make any panel.

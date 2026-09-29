@@ -18,6 +18,9 @@ For every neuron with an SWC morphology file, the pipeline:
    contains no pre-synapse, then assigns each surviving post-synapse a `base_node`
    (and a compact `base` index) along the path back to its cluster centroid.
 
+The geodesic distance limit in the first stage is 5,500 nm. It is written into `pipeline.py`
+(`mask = min_dists < 5500`), not into `config.py`.
+
 The per-neuron results are concatenated and written to a single Feather file.
 
 The main output is:
