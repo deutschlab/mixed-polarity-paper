@@ -59,6 +59,7 @@
     06_build_connection_reciprocity_table.py  Build connection + reciprocity table
     07_pca_morphology.py                PCA of morphological features
     08_alternative_split_methods.py     Optional: MaxSI and MinFisherP cuts compared with the SFC split
+    phi_threshold.py                    Optional: the Phi cutoff equivalent to SI = 0.1 (reads the outputs of 05 and 08)
 
   methods/
     methods_all.py    Shared utility library imported by all figure scripts
@@ -165,6 +166,7 @@
   python processing/06_build_connection_reciprocity_table.py
   python processing/07_pca_morphology.py                 # -> data/derived/neurons_pca_princeton.ftr
   python processing/08_alternative_split_methods.py      # optional -> data/derived/SI_comparisons.ftr (needs synapses_783_article_princeton_raw.ftr, which no script here writes, and all skeletons)
+  python processing/phi_threshold.py                     # optional, after 08; prints the Phi cutoff equivalent to SI = 0.1
   ```
 
   Then run individual figure scripts from their `figures/figN/` directory.
