@@ -1,257 +1,210 @@
-﻿  # Organizational principles governing synapse types in a whole-brain connectome
+# Organizational principles governing synapse types in a whole-brain connectome
 
-  > **Code repository accompanying the manuscript:**
-  > *Organizational principles governing synapse types in a whole-brain connectome*
-  > Amit Gross, Majd Farah, Dr David Deutsch
+Code for the manuscript *Organizational principles governing synapse types in a whole-brain connectome* by Amit Gross, Majd Farah and Dr David Deutsch.
 
-  ---
+## About
 
-  ## Quick-start demo
+The analysis uses the FlyWire FAFB v783 connectome of the adult fruit fly brain, with one SWC skeleton per neuron and the Princeton synapse table.
 
-  A self-contained demo notebook runs the core SI computation pipeline on 200 sample neurons.
-  All required data is bundled in the `demo/` folder.
+Each neuron's skeleton is split into an axon and a dendrite, sometimes with a short linker between them. We then measure how well the neuron keeps its inputs and outputs apart on those two sides. That is the segregation index (SI), which runs from 0 (mixed) to 1 (fully separated). Each synapse gets a two-letter type, the sending neuron's compartment followed by the receiving neuron's: AD, AA, DD or DA. The rest of the code builds tables from these labels and makes the figures in the paper, which look at synapse types across neuron classes, neurotransmitters, neuron shape, brain regions and reciprocal connections.
 
-  | | |
-  |--|--|
-  | **Run on Colab** (no install) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deutschlab/mixed-polarity-paper/blob/main/demo/demo.ipynb) |
-  | **Run locally** | Install the environment first (see [Setup](#setup) below), then: `cd demo && jupyter notebook demo.ipynb` |
-  | **Expected run time** | ~10–20 minutes on a standard desktop CPU |
-  | **Expected output** | `demo/output/SI_results_demo.csv` — per-neuron SI values (0–1) for ~150–180 of the 200 neurons; `demo/output/connectors_demo.csv` — per-synapse compartment labels (A/D/L) |
+The folder [MSB-and-Post-on-MSB-pipeline/](MSB-and-Post-on-MSB-pipeline/) holds two separate pipelines. `MSB_pipeline` groups presynapses into multi-synapse boutons (MSBs) using DBSCAN on distances along the skeleton, and `Post_on_MSB_pipeline`, which runs after it, finds the postsynapses on spines coming off those boutons.
 
-  > **Note:** This demo covers only the core SI computation pipeline. It does **not** include the two additional pipelines — multi-synapse bouton (MSB) clustering and post-synapse-on-MSB detection. Those live in the separate [MSB-and-Post-on-MSB-pipeline/](MSB-and-Post-on-MSB-pipeline/) directory, each with its own README and bundled sample data for running a standalone demo. See [MSB-and-Post-on-MSB-pipeline/MSB_pipeline/README.md](MSB-and-Post-on-MSB-pipeline/MSB_pipeline/README.md) and [MSB-and-Post-on-MSB-pipeline/Post_on_MSB_pipeline/README.md](MSB-and-Post-on-MSB-pipeline/Post_on_MSB_pipeline/README.md).
+## What you can reproduce
 
-  ---
+The demo runs without downloading anything, since its 200 neurons, their synapses and skeletons are in `demo/`. The two MSB pipelines also come with their own sample data and READMEs.
 
-  ## Overview
+The full pipeline cannot be run from public data alone. With the Codex downloads you can run steps 01 to 04, but step 05, which builds the per-neuron table, also needs a file called `swc_data.ftr` that no script here makes. Steps 06 to 08, the Phi-cutoff script, the two synapse-type tools and almost all figure scripts need step 05's table, so from the downloads alone none of them can run.
 
-  This repository contains the computational pipeline and analysis code for the accompanying manuscript. The analysis uses the FlyWire FAFB v783 connectome, SWC morphology skeletons, and the Princeton synapse detection table to quantify synapse-level interaction types across the adult *Drosophila* whole-brain connectome.
+Seven tables that the scripts read are not made anywhere in this repository. They are listed in [docs/data_availability.md](docs/data_availability.md), and the scripts that need them will not run until someone provides them. The larval curve in Figure 2A can't be rebuilt either: it needs raw files from the corresponding author, and the larva script currently gives no usable output (see [docs/pipeline_overview.md](docs/pipeline_overview.md)).
 
-  The pipeline implements:
+The derived tables in `data/derived/` are not included.
 
-  - Per-neuron **segregation index (SI)** computation from SWC morphology skeletons and associated pre/post synaptic terminals
-  - Synapse-level classification of **synaptic type**: axo-axonic (AA), axo-dendritic (AD), dendro-axonic (DA), and dendro-dendritic (DD)
-  - Quantification of synaptic types across neuron classes, neurotransmitter identity, morphology, neuropils, and reciprocal connectivity
-  - Statistical modeling, random forest classification/regression, and PCA-based morphology analysis
+## Quick-start demo
 
-  In addition to the core SI pipeline, the repository includes **two additional pipelines** under [MSB-and-Post-on-MSB-pipeline/](MSB-and-Post-on-MSB-pipeline/), each packaged as a standalone, locally runnable workflow with its own README and sample data:
+The notebook `demo/demo.ipynb` runs the core steps on 200 sample neurons: it splits each neuron, labels each synapse and computes SI.
 
-  - **MSB clustering** (`MSB_pipeline`) — attaches synapses to neuron skeletons and clusters pre-synapses into multi-synapse boutons (MSBs) using a DBSCAN-based workflow on geodesic distances
-  - **Post-on-MSB detection** (`Post_on_MSB_pipeline`) — runs downstream of MSB clustering to identify the post-synapses sitting on spines extending from those MSBs
+To run it on Colab, open it here: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deutschlab/mixed-polarity-paper/blob/main/demo/demo.ipynb). Note that Colab installs the latest navis rather than the pinned `navis==1.7.0`, so the SI values there can come out slightly different.
 
-  **Most raw data is not included in this repository**, but two small input files are bundled directly under `data/raw/`: the neuron annotation table and sensory layer rank files from Dorkenwald et al. 2024. Source connectome tables are available from the [FlyWire Codex download page](https://codex.flywire.ai/api/download?dataset=fafb). Derived `.ftr` / `.pkl` tables are generated by the processing pipeline and are not committed. See [data/README.md](data/README.md) and [docs/data_availability.md](docs/data_availability.md) for the full list of required files and where to obtain them.
+To run it locally, set up the environment first (see [Setup](#setup)), install Jupyter (`pip install notebook`, it isn't in the pinned requirements), then run `cd demo && jupyter notebook demo.ipynb`. It took 56 seconds on a laptop. It writes two files: `demo/output/SI_results_demo.csv`, with the SI of every neuron whose split worked (all 200 in our run), and `demo/output/connectors_demo.csv`, with the compartment (A, D or L) of every synapse.
 
-  ---
+The demo only covers the SI steps, not the MSB pipelines.
 
-  ## Repository structure
+## Setup
 
-  ```
-  config.py           Central path configuration -- edit this before running anything
-  requirements.txt    Python package requirements (pip)
-  environment.yml     Conda environment specification
+You need Python 3.12.4 on Linux, macOS or Windows. Other Python versions may not work with the pinned packages. For the full pipeline we recommend 32 GB of memory, because the synapse table is large and memory use goes above 16 GB. No special hardware is needed.
 
-  processing/         Core pipeline: raw data -> derived tables
-    01_extract_compartments_SI.py       Per-neuron compartment labelling + SI (standard neurons)
-    02a_large_neurons_pipeline.py       Large-neuron batch (same logic, separate pass)
-    02b_merge_connectors.py             Merge pre/post connector tables
-    03_merge_synapses_connectors.py     Merge synapse detections with connectors
-    04_build_master_synapse_table.py    Build master per-synapse table with labels
-    05_build_neuron_metadata_table.py   Build per-neuron metadata table
-    06_build_connection_reciprocity_table.py  Build connection + reciprocity table
-    07_pca_morphology.py                PCA of morphological features
-    08_alternative_split_methods.py     Optional: MaxSI and MinFisherP cuts compared with the SFC split
-    phi_threshold.py                    Optional: the Phi cutoff equivalent to SI = 0.1 (reads the outputs of 05 and 08)
+All packages are pinned in `requirements.txt` and `environment.yml`, including `navis==1.7.0`, `pandas==2.2.2`, `numpy==1.26.4`, `scikit-learn==1.5.2`, `scipy==1.13.1`, `matplotlib==3.9.2` and `seaborn==0.13.2`. Keep navis at 1.7.0, since other versions can give different SI values. Installing takes about 5 to 10 minutes with conda, or 10 to 20 with pip.
 
-  methods/
-    methods_all.py    Shared utility library imported by all figure scripts
+```bash
+# conda (recommended)
+conda env create -f environment.yml
+conda activate fafb783-synapse-polarity
 
-  figures/
-    fig1/             Figure 1: SI distributions, compartment split, canonicality
-    fig2/             Figure 2: SI models, random forest, PCA, adult vs larva comparison
-    fig3/             Figure 3: Synapse-type composition, identity, classifiers
-    fig4/             Figure 4: Synapse type x PC1 morphological gradient model
-    fig5/             Figure 5: Reciprocal connectivity
+# or pip, in a new virtual environment
+python3.12 -m venv .venv
+source .venv/bin/activate          # on Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-  data/               Placeholder structure -- no data files committed; see data/README.md
-    raw/              Raw inputs (download separately; see docs/data_availability.md)
-    derived/          Generated tables (regenerated by pipeline)
-    intermediate/     Intermediate files (regenerated by pipeline)
-    larva/            Larval connectome data (obtained from corresponding author)
+On macOS with pip, `xgboost` also needs `brew install libomp`. Conda takes care of this.
 
-  docs/               Pipeline documentation and data reference
-    data_availability.md      All input files: source and how to obtain
-    pipeline_overview.md      Step-by-step pipeline with I/O per script
-    figure_to_script_map.md   Which script produces which figure panel
-    generated_tables.md       All derived tables: generator script and key columns
+### Data
 
-  outputs/            Generated figure files -- not committed; regenerated by figure scripts
+Most of the data is not in this repository. Two inputs are included in `data/raw/`: the neuron annotation table (`Supplemental_file1_neuron_annotations.csv`) and the 15 sensory-rank files in `data/raw/ranks/`, both from Dorkenwald et al. 2024. The connectome files come from the [FlyWire Codex download page](https://codex.flywire.ai/api/download?dataset=fafb). [data/README.md](data/README.md) and [docs/data_availability.md](docs/data_availability.md) list every file, where to get it and where to put it.
 
-  tools/              Checking results
-    run_figure.py           Run one figure script with fixed, comparable output
-    compare_outputs.py      Compare the output folders of two runs
-    synapse_type_shares.py  Share of each synapse type (AD/AA/DD/DA) in a synapse table
+Skeletons go in subfolders of `data/raw/swc/783/`, one file per neuron named `<root_id>.swc`. Any number of subfolders is fine (we used batches of about 1,500 neurons), but files placed directly in `data/raw/swc/783/` won't be found. If the archive unpacks into one flat folder, make a subfolder and move the files into it. Step 01 gives no error when it finds no skeletons; it just writes nothing.
 
-  MSB-and-Post-on-MSB-pipeline/   Two additional standalone pipelines (see their own READMEs)
-    MSB_pipeline/                 MSB clustering: attach synapses + DBSCAN cluster pre-synaptic connectors
-    Post_on_MSB_pipeline/         Post-on-MSB detection: filopodia post-synapses on MSB spines (runs after MSB_pipeline)
-    data/                         Shared sample inputs (swc/, sample_synapses.ftr) and generated outputs
-  ```
+### Paths
 
-  > The two additional pipelines are self-contained; see [MSB-and-Post-on-MSB-pipeline/MSB_pipeline/README.md](MSB-and-Post-on-MSB-pipeline/MSB_pipeline/README.md) and [MSB-and-Post-on-MSB-pipeline/Post_on_MSB_pipeline/README.md](MSB-and-Post-on-MSB-pipeline/Post_on_MSB_pipeline/README.md) for setup and run instructions. **All other sections of this README (Setup, Using the pipeline on your own data, Reproducing the analysis, Key generated tables, Documentation) apply only to the core SI pipeline and are not relevant to these two additions.**
+All paths are set in `config.py`, and `ROOT` finds the repository folder on its own. You only need to edit `config.py` if you keep a file in a different place or under a different name.
 
-  ---
+## Reproducing the analysis
 
-  ## Setup
+Run the steps in this order, from the repository root:
 
-  ### Requirements
+```bash
+python processing/01_extract_compartments_SI.py        # takes hours; compartment labels and SI per neuron
+python processing/02a_large_neurons_pipeline.py        # the very large neurons, in a separate pass
+python processing/02b_merge_connectors.py
+python processing/03_merge_synapses_connectors.py
+python processing/04_build_master_synapse_table.py     # -> data/derived/synapses_783_article_princeton.ftr
+python processing/05_build_neuron_metadata_table.py    # -> data/derived/neuron_data_full_article_princeton.ftr (needs swc_data.ftr)
+python processing/06_build_connection_reciprocity_table.py
+python processing/07_pca_morphology.py                 # -> data/derived/neurons_pca_princeton.ftr
+python processing/08_alternative_split_methods.py      # optional -> data/derived/SI_comparisons.ftr
+python processing/phi_threshold.py                     # optional, after 05 and 08
+```
 
-  - **OS:** Linux, macOS, or Windows
-  - **Python:** 3.12.4 (tested; other versions not guaranteed with the pinned dependencies)
-  - **RAM: 32 GB minimum** recommended for running the full pipeline locally. The Princeton synapse table and per-neuron morphology data are large; peak memory usage during processing exceeds 16 GB.
-  - **No special hardware required** — all analyses run on standard CPU
-  - **Typical install time:** ~5–10 minutes (conda) or ~10–20 minutes (pip, due to dependency resolution)
-  - Key packages with tested versions: `navis==1.7.0`, `pandas==2.2.2`, `numpy==1.26.4`, `scikit-learn==1.5.2`, `scipy==1.13.1`, `matplotlib==3.9.2`, `seaborn==0.13.2`
-  - See `requirements.txt` or `environment.yml` for the full pinned dependency list
-  - **macOS with pip:** `xgboost` needs the OpenMP runtime (`brew install libomp`); the conda install includes it
+Step 05 reads `swc_data.ftr`, which no script here writes. The code that used to write it is still inside step 05, but it is commented out and points to a local Windows path, so from the downloads alone the pipeline stops at step 05.
 
-  ### 1. Create environment
+The work is split into steps mostly to keep memory use down, since the synapse table and all the skeletons don't fit in memory together. Step 01 skips neurons with more than 80,000 skeleton points. It also treats any skeleton subfolder that already has an output folder as done, and it makes that folder before it starts, so if a run of step 01 is interrupted, delete the unfinished folders in `data/intermediate/processed_swc_data/` before running it again. Step 02a processes those large neurons, but it works from a list of neuron IDs written into the script, not from step 01's size check.
 
-  ```bash
-  # Using conda (recommended):
-  conda env create -f environment.yml
-  conda activate fafb783-synapse-polarity
+Step 08 is optional. It compares the published axon/dendrite split with two single-node cuts, MaxSI and MinFisherP. It needs step 05's table, the skeletons of the intrinsic neurons, and `synapses_783_article_princeton_raw.ftr`, which no script here makes. That file must have `size` and `neuropil` columns, so the synapse table from step 04 can't be used in its place.
 
-  # Or using pip:
-  pip install -r requirements.txt
-  ```
+`phi_threshold.py` is also optional. It works out which Phi value matches the SI = 0.1 cutoff, using step 08's output plus the neuron table and `SI_updated.ftr` from step 05. It prints the results and saves a plot to `outputs/phi_threshold/phi_threshold.svg`.
 
-  ### 2. Obtain raw data
+The larval SI for Figure 2A comes from `processing/larva/larva_process.py`, which runs separately from these steps. As committed it gives no usable output (see above).
 
-  Raw connectome data and project-specific input files are **not included** in this repository.
-  See [data/README.md](data/README.md) and [docs/data_availability.md](docs/data_availability.md)
-  for the full list of required files and instructions for where to obtain each one.
+[docs/pipeline_overview.md](docs/pipeline_overview.md) describes each step with its inputs and outputs.
 
-  ### 3. Configure paths
+### Figures
 
-  Open `config.py` and verify that `ROOT` resolves to this repository directory.
-  All data paths are derived from `ROOT` -- no absolute paths need to be set in individual scripts.
+The figure scripts are in `figures/fig1/` to `figures/fig5/`, usually one script per panel. They are written as `#%%` cell scripts for an editor like Spyder, but you can also run them as normal Python scripts from any folder. If you do, each plot opens in a window and the script waits until you close it; `tools/run_figure.py` gets around this.
 
-  ---
+Two scripts need another one to run first: `figures/fig4/build_pc1_table.py` before `figures/fig4/syntype_x_pc1.py`, and `figures/fig5/reciprocal_fraction.py` before `figures/fig5/reciprocal_fraction_model.py`.
 
-  ## Using the pipeline on your own data
+Figures are saved in `outputs/figN/`, almost all as SVG and a few as PNG or PDF. A few figure scripts also write tables into `data/derived/`. [docs/figure_to_script_map.md](docs/figure_to_script_map.md) shows which script makes which panel.
 
-  The pipeline is designed for FlyWire FAFB v783 data but can be adapted to any connectome with SWC skeletons and a synapse table.
-  The key steps and the inputs they require are:
+A note on SI: step 04 stores each neuron's SI in the synapse table as `SI_pre` and `SI_post`, and step 05 stores it in the neuron table and in `SI_updated.ftr`. All three come from the same output of steps 01 and 02a, so after a fresh run they are identical. Tables from an earlier run may not match, which is why the synapse-type tools refer to the table SI as "older" and to `SI_updated.ftr` as "corrected". Most figure scripts take SI from the neuron table or the synapse table, and six take it from `SI_updated.ftr`.
 
-  1. **SWC skeleton files** — one `.swc` per neuron, placed in a directory pointed to by `SWC_DIR` in `config.py`
-  2. **Synapse table** — a CSV with columns `pre_root_id`, `post_root_id`, `pre_x/y/z`, `post_x/y/z`, `neuropil`; set `PRINCETON_SYNAPSE_CSV` in `config.py`
-  3. Run `processing/01_extract_compartments_SI.py` to compute per-neuron compartment labels and SI values
-  4. Downstream scripts (`02`–`07`) build derived tables; figure scripts can then be run on those tables
+## Tools
 
-  For a worked example on a small dataset, see the [demo notebook](demo/demo.ipynb).
+Run these from the repository root with the environment active.
 
-  ---
+### Checking that a figure reproduces
 
-  ## Reproducing the analysis
+`tools/run_figure.py` runs a figure script in a way that makes two runs easy to compare. No plot windows open, and all figures go into one output folder, which has to be new or empty. SVG files are written without a date, random numbers are fixed (including the ones seaborn uses for error bands), and every printed table is followed by a checksum of its contents, so a change in a hidden row or decimal still shows up. The file `run_status.txt` says whether the script finished. Figures are saved at 72 dpi by default, the same as the published SVGs; `--dpi` changes this. With `--replace OLD NEW` you can swap an exact piece of text in the script before it runs, for example to skip a very slow step, but a run changed that way is no longer a full reproduction.
 
-  Run the processing scripts in order from the repository root:
+`tools/compare_outputs.py` then compares two output folders, matching files by name. An SVG passes if it is identical, or identical once element ids and metadata are ignored, and any other file has to be identical. The printed output in `stdout.log` has to match too; with `--allow-extra-lines` it is enough that every line of the first run appears, in order, in the second. `--figures-only` compares figure files only (.svg, .png, .pdf), which is useful against a folder of published SVGs. `stderr.log` is never compared. The script exits with status 1 if anything differs, if a run didn't finish, or if neither folder has a figure; use `--allow-no-figures` for a script that only prints or writes tables, such as `figures/fig4/build_pc1_table.py`.
 
-  > **Note on pipeline design:** The pipeline is split into 7 sequential stages primarily due to RAM constraints — the full synapse table and skeleton data cannot be held in memory simultaneously. Scripts `01` and `02a` are also run as separate processes (standard vs. large neurons) for the same reason: very large neurons (>80,000 nodes) require their own memory budget and are processed in a dedicated batch (`02a`) to avoid out-of-memory errors during the standard pass (`01`).
+```bash
+python tools/run_figure.py figures/fig1/canonicality_axon_dend.py --out outputs/check/before
+# make your change, then run again into a new folder
+python tools/run_figure.py figures/fig1/canonicality_axon_dend.py --out outputs/check/after
+python tools/compare_outputs.py outputs/check/before outputs/check/after
+```
 
-  ```bash
-  python processing/01_extract_compartments_SI.py        # hours -- per-neuron compartment labels + SI
-  python processing/02a_large_neurons_pipeline.py        # large-neuron batch
-  python processing/02b_merge_connectors.py
-  python processing/03_merge_synapses_connectors.py
-  python processing/04_build_master_synapse_table.py     # -> data/derived/synapses_783_article_princeton.ftr
-  python processing/05_build_neuron_metadata_table.py    # -> data/derived/neuron_data_full_article_princeton.ftr
-  python processing/06_build_connection_reciprocity_table.py
-  python processing/07_pca_morphology.py                 # -> data/derived/neurons_pca_princeton.ftr
-  python processing/08_alternative_split_methods.py      # optional -> data/derived/SI_comparisons.ftr (needs synapses_783_article_princeton_raw.ftr, which no script here writes, and all skeletons)
-  python processing/phi_threshold.py                     # optional, after 08; prints the Phi cutoff equivalent to SI = 0.1 and saves outputs/phi_threshold/phi_threshold.svg
-  ```
+A check run still writes any tables the figure script writes, in their usual place, replacing what is there. Since all figures land in one folder, two figures saved under the same file name in different subfolders will overwrite each other.
 
-  Then run individual figure scripts from their `figures/figN/` directory.
-  All figure scripts import `config.py` and `methods/methods_all.py` -- no additional path setup needed.
-  Run `figures/fig4/build_pc1_table.py` before `figures/fig4/syntype_x_pc1.py`, and `figures/fig5/reciprocal_fraction.py` before `figures/fig5/reciprocal_fraction_model.py`.
+### Synapse-type tools
 
-  See [docs/figure_to_script_map.md](docs/figure_to_script_map.md) for a panel-by-panel mapping, and
-  [docs/generated_tables.md](docs/generated_tables.md) for the full derived-table catalog.
+Both tools read the synapse and neuron tables from `data/derived/`, so they need step 05's output (and `SI_updated.ftr` if you use `--si corrected`). "Intrinsic" neurons here means super-class `central`, `optic`, `visual_projection` or `visual_centrifugal`, with `axon_correct`, `dend_correct` and `primary_type` filled in, the same set the figure scripts use. The SI filter keeps synapses where `SI_pre` and `SI_post` are both at least 0.1; `--si corrected` takes SI from `SI_updated.ftr` instead.
 
-  ### Checking results
+`tools/synapse_type_shares.py` prints the share of each synapse type (AD, AA, DD, DA), for all synapses and for intrinsic neurons, with and without the SI filter. Synapses with a linker end are left out and counted separately. It needs about 4 GB of memory, or about 5 GB with `--si corrected`.
 
-  `tools/run_figure.py` runs one figure script so that two runs can be compared: no plot window opens,
-  every figure goes to one output folder (it must be new or empty), SVG files carry no date, random numbers are seeded (including
-  the ones seaborn uses for error bands), and every printed table is followed by a checksum of its full contents, so a change in
-  a row or decimal that is not shown still changes the printed output. `run_status.txt` in the folder says whether the script
-  finished. It saves figures at 72 dpi by default (`--dpi` changes it), which matches the published SVGs. `--replace OLD NEW`
-  replaces one exact piece of source text before the run, for example to skip a step that is too slow; a run changed this way
-  is not a full reproduction of the script. `tools/compare_outputs.py` then compares two output folders.
+`tools/split_agreement.py` compares the types that two or more splits give to the same synapses. For each pair of splits, and for four groups of synapses (all of them, those passing the SI filter, intrinsic neurons, and intrinsic neurons passing the filter), it reports how many synapses have a type in both, the agreement, the agreement expected by chance, Cohen's kappa, the agreement for each type and the 4 x 4 table of counts. After that it gives the agreement by SI band and a per-neuron summary. `--bootstrap N` adds 95% intervals by resampling whole cell types (`--cluster neuron` resamples single neurons instead, and `--seed` sets the seed); use at least 1000 replicates. The intervals cover the agreement and kappa only. It needs about 12 GB of memory.
 
-  ```bash
-  python tools/run_figure.py figures/fig1/canonicality_axon_dend.py --out outputs/check/before
-  # change something, then run it again into a new folder
-  python tools/run_figure.py figures/fig1/canonicality_axon_dend.py --out outputs/check/after
-  python tools/compare_outputs.py outputs/check/before outputs/check/after
-  ```
+The SI filter and the SI bands use one SI for every split compared, by default `SI_pre` and `SI_post`, which come from the published split. So they pick out neurons that the published split separates well, and agreement with the published split will look higher there. Keep that in mind when you compare splits on the filtered synapses.
 
-  `compare_outputs.py` matches files by name. An SVG passes if it is identical, or identical once element ids
-  and metadata are ignored; any other file must be identical; the printed output (`stdout.log`) must be
-  identical, or, with `--allow-extra-lines`, contain every line of the first run in the same order. Use
-  `--figures-only` to compare only figure files (.svg, .png, .pdf), for example against a folder of published
-  SVGs; the run must then save only SVGs. Warnings (`stderr.log`) are not compared. Figures are saved by
-  file name alone, so two figures with the same name overwrite each other. It exits with status 1 if anything
-  differs, if either run did not finish, or if neither folder holds a figure (use `--allow-no-figures` for a
-  script that only prints or writes tables, such as `figures/fig4/build_pc1_table.py`).
+```bash
+python tools/synapse_type_shares.py
+python tools/synapse_type_shares.py --si corrected
+```
 
-  Some figure scripts also write tables, for example into `data/derived/`. Those go to their usual place, are
-  overwritten by a check run, and are not compared.
+Both tools accept `--table` to point at another synapse table with the same columns. `synapse_type_shares.py --column` counts a different column of synapse types, and `split_agreement.py` takes the columns to compare as arguments. They were written for a synapse table with one type column per split method, like the one the alternative-split pipeline produces. Step 08 only scores the splits per neuron; the pipeline that labels each synapse under each split hasn't been added to the repository yet, so for now no table here has more than one type column.
 
-  `tools/synapse_type_shares.py` prints the share of each synapse type (AD, AA, DD, DA) in the synapse table,
-  for all synapses in the table and for intrinsic neurons, with and without the SI >= 0.1 filter on both ends. By
-  default the filter uses the SI stored in the synapse table; `--si corrected` uses `SI_updated.ftr`. `--table`
-  points it at another synapse table, for example one made with a different axon/dendrite split; the intrinsic
-  neurons still come from the delivered neuron table. It needs about 4 GB of memory.
+## Main generated tables
 
-  ```bash
-  python tools/synapse_type_shares.py
-  python tools/synapse_type_shares.py --si corrected
-  ```
+The pipeline writes these to `data/derived/`.
 
-  ---
+| File | Contents |
+|------|----------|
+| `synapses_783_article_princeton.ftr` | One row per synapse between two neurons that were both split: the two neurons, positions, brain region (`npil`), synapse type (`comp`) and `SI_pre`/`SI_post`. `comp` can take nine values, because a linker end gives types like AL or LD, so filter to AA/AD/DA/DD. |
+| `neuron_data_full_article_princeton.ftr` | One row per neuron that could be split: type, SI, shape measurements and connection counts |
+| `SI_updated.ftr` | Each neuron's SI (`root_id`, `SI`) |
+| `connections_by_syn_type_reciprocal_types_filtered_article_princeton.ftr` | One row per connection: synapse counts per type, and whether the pair is reciprocal |
+| `neurons_pca_princeton.ftr` | Each neuron's PC1 and PC2 |
 
-  ## Key generated tables
+The full list, with columns, is in [docs/generated_tables.md](docs/generated_tables.md).
 
-  All files are written to `data/derived/` by the pipeline and are not committed to this repository.
+## Documentation
 
-  | File | Description |
-  |------|-------------|
-  | `synapses_783_article_princeton.ftr` | Per-synapse table: compartment labels (AA/AD/DA/DD), SI values, neuropil |
-  | `neuron_data_full_article_princeton.ftr` | Per-neuron table: type, SI, morphology metrics, connectivity counts |
-  | `connections_by_syn_type_reciprocal_types_filtered_article_princeton.ftr` | Per-connection table: synapse-type counts, reciprocity flag |
-  | `neurons_pca_princeton.ftr` | Per-neuron PCA scores (PC1, PC2) |
+- [docs/data_availability.md](docs/data_availability.md): every input file, where it comes from and where it goes
+- [docs/pipeline_overview.md](docs/pipeline_overview.md): each processing step, with inputs and outputs
+- [docs/figure_to_script_map.md](docs/figure_to_script_map.md): which script makes which figure panel, and from which tables
+- [docs/generated_tables.md](docs/generated_tables.md): every derived table, which script writes it and its columns
+- [data/README.md](data/README.md): the data folder and where each file goes
 
-  See [docs/generated_tables.md](docs/generated_tables.md) for the complete table catalog.
+## Repository layout
 
-  ---
+```
+config.py           all file paths
+requirements.txt    pinned packages (pip)
+environment.yml     the same packages for conda
 
-  ## Documentation
+processing/         the pipeline, from raw data to derived tables
+  01_extract_compartments_SI.py            split each neuron, label synapses, compute SI
+  02a_large_neurons_pipeline.py            the same for very large neurons
+  02b_merge_connectors.py                  collect step 01's synapse labels into two tables
+  03_merge_synapses_connectors.py          add the labels back to the synapse list
+  04_build_master_synapse_table.py         the per-synapse table
+  05_build_neuron_metadata_table.py        the per-neuron table
+  06_build_connection_reciprocity_table.py the per-connection and reciprocity tables
+  07_pca_morphology.py                     PCA of the shape measurements
+  08_alternative_split_methods.py          optional: two single-node cuts compared with the published split
+  phi_threshold.py                         optional: the Phi cutoff that matches SI = 0.1
+  larva/larva_process.py                   larval SI for Figure 2A
 
-  | Document | Contents |
-  |----------|---------|
-  | [docs/data_availability.md](docs/data_availability.md) | All input files: source, local path, config variable, and how to obtain |
-  | [docs/pipeline_overview.md](docs/pipeline_overview.md) | Step-by-step pipeline explanation with per-script inputs and outputs |
-  | [docs/figure_to_script_map.md](docs/figure_to_script_map.md) | Panel-by-panel map: script -> figure panel -> input tables |
-  | [docs/generated_tables.md](docs/generated_tables.md) | All derived tables: which script generates them and key columns |
-  | [data/README.md](data/README.md) | Data directory structure and file placement instructions |
+methods/
+  methods_all.py    shared functions, used by most scripts
 
-  ---
+figures/            one folder per figure (fig1 to fig5)
 
-  ## Citation
+tools/
+  run_figure.py            run a figure script with fixed, comparable output
+  compare_outputs.py       compare the output folders of two runs
+  synapse_type_shares.py   share of each synapse type in a synapse table
+  split_agreement.py       agreement of synapse types between splits
 
-  Please cite the accompanying manuscript. Citation details are provided in [CITATION.cff](CITATION.cff).
+demo/               the demo notebook and its 200-neuron data set
 
-  ---
+data/               mostly empty; the data goes here (see data/README.md)
+  raw/              downloaded inputs, plus the included annotation table and ranks/
+  derived/          tables made by the pipeline
+  intermediate/     working files made by the pipeline
+  larva/            larval data, from the corresponding author
 
-  ## License
+docs/               the reference documents listed above
+outputs/            figures made by the scripts (not included)
 
-  See LICENSE for terms of use.
+MSB-and-Post-on-MSB-pipeline/   the two MSB pipelines, each with its own README and sample data
+```
+
+## Citation
+
+Please cite the manuscript. [CITATION.cff](CITATION.cff) has the citation for this code (DOI 10.64898/2026.06.23.733969).
+
+## License
+
+MIT, see [LICENSE](LICENSE). The two MSB pipelines have their own LICENSE files.
