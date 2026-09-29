@@ -209,7 +209,8 @@ output files already exist. An existing `SI_comparisons.ftr` is never overwritte
 
 Finds the Phi value that corresponds to the SI = 0.1 cutoff, so that methods scored with Phi
 can use a matching cutoff. It uses the SFC cut, where `SI_comparisons.ftr` gives each neuron
-in it (the intrinsic neurons of the neuron table that step 08 split successfully) both an SI and a Phi, and
+that step 08 split successfully both an SI and a Phi. It keeps only the intrinsic neurons (the four
+super-classes the panels use) and
 matches the two in three ways: the median Phi of neurons with SI within 0.005 of 0.1, the Phi
 value that calls the same share of neurons mixed, and the Phi cutoff that agrees with SI < 0.1
 on the most neurons. It prints the three estimates, the recommended cutoff (their median, to two

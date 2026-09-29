@@ -8,8 +8,10 @@ given SI it also depends on the neuron's balance of inputs and outputs. So the
 match below holds on average, not neuron by neuron.
 
 SI_comparisons.ftr (written by 08_alternative_split_methods.py) holds both scores
-for the published SFC cut of every neuron in it (the intrinsic neurons of the
-neuron table that step 08 split successfully): SFC_SI and SFC_Phi. SFC_SI is the
+for the published SFC cut of every neuron that step 08 split successfully:
+SFC_SI and SFC_Phi. Only intrinsic neurons (central, optic, visual_projection,
+visual_centrifugal) are used, because the panels that use the cutoff keep only
+those; any other super-class in the table is left out and counted. SFC_SI is the
 corrected SI (SI_updated.ftr); the script stops if it is not. On that cut the Phi
 cutoff is matched to SI = 0.1 in three ways:
 
@@ -43,6 +45,7 @@ from scipy.stats import spearmanr
 SI_CUTOFF = 0.1
 WINDOW = 0.005          # SI window around the cutoff for the local median
 N_BOOTSTRAP = 1000
+INTRINSIC = ['central', 'optic', 'visual_projection', 'visual_centrifugal']
 
 #%% load
 scores = pd.read_feather(SI_COMPARISONS_FTR)
@@ -58,6 +61,9 @@ n_missing = scores['neuron'].isna().sum()
 print(f"neurons: {len(scores)}, duplicated IDs: {n_duplicated}, not in the neuron table: {n_missing}")
 if n_duplicated or n_missing:
     raise ValueError("SI_comparisons.ftr has duplicated IDs or neurons missing from the neuron table")
+n_all = len(scores)
+scores = scores[scores['super_class'].isin(INTRINSIC)].reset_index(drop=True)
+print(f"intrinsic neurons kept: {len(scores)} (left out: {n_all - len(scores)} of other super-classes)")
 print("missing values:", scores[['SFC_SI', 'SFC_Phi', 'MaxSI_SI', 'MinFisherP_Phi']].isna().sum().to_dict())
 scores = scores.dropna(subset=['SFC_SI', 'SFC_Phi']).reset_index(drop=True)
 print(f"neurons with both SFC_SI and SFC_Phi (used below): {len(scores)}")
