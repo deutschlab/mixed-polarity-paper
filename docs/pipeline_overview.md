@@ -50,7 +50,7 @@ flowchart TD
     SWCDATA["swc_data.ftr\n(no script writes it)"] -.-> S05
     RAW -.-> S08
     S05 -.-> S08
-    S08 -.-> PHI["phi_threshold (optional)\nprints the Phi cutoff"]
+    S08 -.-> PHI["phi_threshold (optional)\nprints and plots the Phi cutoff"]
     S05 -.-> PHI
 ```
 
@@ -207,22 +207,21 @@ output files already exist. An existing `SI_comparisons.ftr` is never overwritte
 
 **File:** `processing/phi_threshold.py`
 
-Finds the Phi value that corresponds to the SI = 0.1 cutoff, so that methods scored with Phi
-can use a matching cutoff. It uses the SFC cut, where `SI_comparisons.ftr` gives each neuron
-that step 08 split successfully both an SI and a Phi. It keeps only the intrinsic neurons (the four
-super-classes the panels use) and
-matches the two in three ways: the median Phi of neurons with SI within 0.005 of 0.1, the Phi
-value that calls the same share of neurons mixed, and the Phi cutoff that agrees with SI < 0.1
-on the most neurons. It prints the three estimates, the recommended cutoff (their median, to two
-decimals, with the range of the three), the share of neurons each method calls mixed at SI 0.1
-and that Phi, the match within super-classes and by input/output balance and synapse count, and
-95% intervals from resampling whole primary types. Phi is not a fixed function of SI, so the
-match holds on average, not neuron by neuron.
+Finds the Phi value that matches the SI = 0.1 cutoff, so that split methods scored with Phi
+can use a matching cutoff. It uses the SFC split, where `SI_comparisons.ftr` gives each neuron
+both an SI and a Phi, and keeps only the intrinsic neurons (the four super-classes the figures
+use). It finds the cutoff in three ways: the typical Phi of neurons with SI within 0.005 of 0.1,
+the Phi value that calls the same share of neurons mixed, and the Phi cutoff that agrees with
+SI < 0.1 for the most neurons. The recommended cutoff is the median of the three, rounded to two
+decimals, and is reported with the range of the three. The script also prints the share of
+neurons each method calls mixed, checks the match within super-classes and by input/output
+balance and synapse count, and gives 95% intervals by resampling whole cell types. Phi does not
+follow SI exactly, so the match holds on average, not for every neuron.
 
 | | |
 |--|--|
 | **Inputs** | `SI_COMPARISONS_FTR`, `SI_UPDATED_FTR` (the script stops unless `SFC_SI` equals it), `NEURON_TABLE_FTR` (super_class, primary_type, and axon/dendrite input and output counts for grouping) |
-| **Outputs** | Printed only |
+| **Outputs** | Printed results, and `outputs/phi_threshold/phi_threshold.svg` (the typical Phi at each SI, and the Phi of the neurons at SI = 0.1, with the three estimates) |
 | **Downstream** | None in this repository |
 
 ---

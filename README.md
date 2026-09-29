@@ -166,7 +166,7 @@
   python processing/06_build_connection_reciprocity_table.py
   python processing/07_pca_morphology.py                 # -> data/derived/neurons_pca_princeton.ftr
   python processing/08_alternative_split_methods.py      # optional -> data/derived/SI_comparisons.ftr (needs synapses_783_article_princeton_raw.ftr, which no script here writes, and all skeletons)
-  python processing/phi_threshold.py                     # optional, after 08; prints the Phi cutoff equivalent to SI = 0.1
+  python processing/phi_threshold.py                     # optional, after 08; prints the Phi cutoff equivalent to SI = 0.1 and saves outputs/phi_threshold/phi_threshold.svg
   ```
 
   Then run individual figure scripts from their `figures/figN/` directory.
