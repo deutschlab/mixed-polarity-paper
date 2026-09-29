@@ -25,15 +25,19 @@ With the defaults, the delivered table gives 47.7 / 20.9 / 22.1 / 9.3 %
 with SI >= 0.1 (the n of the paper's Fig 3F).
 
 --table points the tool at another synapse table with the same columns (pre, post,
-comp, and SI_pre and SI_post for the default SI filter). The intrinsic neurons and
-the corrected SI still come from the delivered neuron table and SI_updated.ftr, so
-for a table made with a different axon/dendrite split, use the default SI filter
-(that table's own SI) and keep in mind that the intrinsic set is the delivered one.
+comp, and SI_pre and SI_post for the default SI filter). --column counts another
+column of synapse types instead of comp, for example a column of types made with a
+different axon/dendrite split. The intrinsic neurons and the corrected SI still come
+from the delivered neuron table and SI_updated.ftr. The default SI filter uses the
+table's own SI_pre and SI_post, whatever they hold: in a table made with a different
+split they may still be the published split's SI, so check that before reading the
+SI >= 0.1 lines as that split's.
 
 Usage:
     python tools/synapse_type_shares.py
     python tools/synapse_type_shares.py --si corrected
     python tools/synapse_type_shares.py --table path/to/other_synapse_table.ftr
+    python tools/synapse_type_shares.py --table path/to/other_synapse_table.ftr --column maxSI_compartment
 
 Needs about 4 GB of memory (about 5 GB with --si corrected) for the full table.
 """
@@ -99,14 +103,18 @@ def print_shares(comp: pa.ChunkedArray, mask, label: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--table", type=Path, default=SYNAPSE_TABLE_FTR,
-                        help="synapse table with pre, post, comp, SI_pre and SI_post "
-                             "(default: the delivered synapse table)")
+                        help="synapse table with pre, post, the type column, and SI_pre and "
+                             "SI_post for the default SI filter (default: the delivered synapse table)")
+    parser.add_argument("--column", default="comp",
+                        help="column of synapse types to count (default: comp)")
     parser.add_argument("--si", choices=["table", "corrected"], default="table",
                         help="SI for the >= 0.1 filter: the table's own SI_pre/SI_post "
                              "(older SI, default) or SI_updated.ftr (corrected)")
     args = parser.parse_args()
 
-    columns = ["pre", "post", "comp"] + (["SI_pre", "SI_post"] if args.si == "table" else [])
+    if args.column in ("pre", "post", "SI_pre", "SI_post"):
+        sys.exit(f"{args.column} is not a column of synapse types")
+    columns = ["pre", "post", args.column] + (["SI_pre", "SI_post"] if args.si == "table" else [])
     names = pa.ipc.open_file(args.table).schema.names
     missing = [c for c in columns if c not in names]
     if missing:
@@ -116,14 +124,23 @@ def main() -> None:
         if table[column].type != pa.int64():
             sys.exit(f"{column} is {table[column].type}, not int64: neuron IDs must be "
                      "64-bit integers, or they will not match the neuron table")
-    comp = table["comp"]
+        if table[column].null_count:
+            sys.exit(f"{column} has {table[column].null_count:,} empty values")
+    comp = table[args.column]
+    if pa.types.is_dictionary(comp.type):
+        comp = comp.cast(pa.string())
+    if not (pa.types.is_string(comp.type) or pa.types.is_large_string(comp.type)):
+        sys.exit(f"{args.column} holds {comp.type}, not text such as 'AD': is it a column of synapse types?")
 
     labelled = pc.is_in(comp, value_set=pa.array(TYPES))
+    if not pc.any(labelled).as_py():
+        sys.exit(f"{args.column} has no value {', '.join(TYPES)} at all: is it a column of synapse types?")
     if args.si == "table":
         polarized = pc.and_(pc.greater_equal(table["SI_pre"], SI_CUTOFF),
                             pc.greater_equal(table["SI_post"], SI_CUTOFF))
         polarized = pc.fill_null(polarized, False)
-        si_source = "SI_pre and SI_post in the table (older SI)"
+        si_source = "SI_pre and SI_post in the table" + (
+            " (older SI)" if args.table.resolve() == SYNAPSE_TABLE_FTR.resolve() else "")
     else:
         polarized = pa.array((corrected_si(table["pre"]) >= SI_CUTOFF)
                              & (corrected_si(table["post"]) >= SI_CUTOFF))
@@ -136,6 +153,7 @@ def main() -> None:
     if args.table.resolve() != SYNAPSE_TABLE_FTR.resolve():
         print("Note: the intrinsic neurons come from the delivered neuron table"
               + (", and the corrected SI from SI_updated.ftr" if args.si == "corrected" else ""))
+    print(f"Synapse types: {args.column}")
     print(f"SI filter: {si_source}")
     unlabelled = len(comp) - pc.sum(labelled).as_py()
     print(f"Left out: {unlabelled:,} synapses with a linker end or no type")
