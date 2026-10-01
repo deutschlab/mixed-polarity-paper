@@ -114,6 +114,43 @@ Seven inputs are read by the code but not written by any script in this reposito
 
 None of these seven files is deposited with this repository. Those scripts cannot run until the files are supplied. (`synapses_783_article_princeton_raw.ftr` used to be on this list; `processing/build_raw_synapse_table.py` now builds it from the Codex CSV.) Because step 05 needs `swc_data.ftr`, the neuron table, and every step and figure that reads it, cannot be rebuilt from the downloads alone.
 
+### The Buhmann tables (earlier synapse detection)
+
+The three tables above from the earlier, non-Princeton synapse detection come from the synapse
+predictions of Buhmann et al. (2021). The pipeline in `processing/` is written for the Princeton
+synapse table from Codex (`PRINCETON_SYNAPSE_CSV`); this repository neither includes the Buhmann
+tables nor makes them, and the raw Buhmann synapse table they were built from is not part of it.
+Building them would mean running steps 01 to 06 again on that table, with at least these changes:
+
+- Attach synapses with `heal_attach` instead of `heal_attach_princeton` (both in
+  `methods/methods_all.py`). `heal_attach` goes through `attach_synapses`, which keeps only
+  synapses with a `cleft_score` of at least 30 (its `min_score` default), so the table needs a
+  `cleft_score` column. The Princeton route applies no score cut.
+- Steps 01 and 02a each define their own `heal_attach_princeton` (line 81), which replaces the one
+  in `methods/methods_all.py`; the calls to change are at 01 line 148 and 02a line 273.
+- The Princeton route carries each synapse's `synapse_id` and `size` through steps 01, 02a, 02b and
+  03, partly by column position, and step 03 merges on `synapse_id`. `attach_synapses` keeps
+  neither column.
+- The root-ID repair and the column renaming by position in steps 01 and 02a are written for the
+  Codex CSV.
+
+Whether the Buhmann run differed in anything else is not recorded here.
+
+| Panel | Script | Buhmann table it needs |
+|-------|--------|------------------------|
+| Fig 2 Supp 1B/C | `figures/fig2/si_comparisons.py` | `neuron_data_full_article.ftr`. The script also reads `synapses_783_article.ftr` at line 193 without using it, so without that file it stops there, after saving `SI_corr_all.svg` and `SI_corr_per_sclass.svg` and before `SI_corr_combined_general_left_blue_clean.svg` |
+| Fig 3 Supp 1A (Buhmann curve) | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `neuron_data_full_article.ftr` |
+| Fig 3 Supp 2A/B | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `synapses_783_article.ftr` |
+| Fig 3 Supp 2C | `figures/fig3/si_x_npil_x_synapse_detection.py` | `synapses_783_article.ftr` |
+
+`figures/fig5/fig5d_chi_reci_identity.py` also reads the Buhmann neuron and connection tables, from
+line 554, after it has saved all its figures. Nothing from them is saved or printed: the reciprocal
+fractions there are bare expressions, shown only when the script is run cell by cell. Without those
+files the script stops at line 554, with its figures already written.
+
+`neurons_pca.ftr` (`PCA_TABLE_NONP_FTR` in `config.py`) is also listed above; how it was made is not
+recorded in this repository.
+
 ---
 
 ## Filopodia / bouton analysis (Fig 7)

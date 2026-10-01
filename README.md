@@ -16,7 +16,7 @@ The demo runs without downloading anything, since its 200 neurons, their synapse
 
 The full pipeline cannot be run from public data alone. With the Codex downloads you can run steps 01 to 04, but step 05, which builds the per-neuron table, also needs a file called `swc_data.ftr` that no script here makes. Steps 06 to 08, the Phi-cutoff script, the two synapse-type tools and almost all figure scripts need step 05's table, so from the downloads alone none of them can run.
 
-Seven tables that the scripts read are not made anywhere in this repository. They are listed in [docs/data_availability.md](docs/data_availability.md), and the scripts that need them will not run until someone provides them. The larval curve in Figure 2A can't be rebuilt either: it needs raw files from the corresponding author, and the larva script currently gives no usable output (see [docs/pipeline_overview.md](docs/pipeline_overview.md)).
+Seven tables that the scripts read are not made anywhere in this repository. They are listed in [docs/data_availability.md](docs/data_availability.md), and the scripts that need them will not run until someone provides them. Three of them come from the earlier Buhmann synapse detection. The pipeline here is written for the Princeton synapse table; the Buhmann section of docs/data_availability.md says what would have to change and which panels need those tables. The larval curve in Figure 2A can't be rebuilt either: it needs raw files from the corresponding author, and the larva script currently gives no usable output (see [docs/pipeline_overview.md](docs/pipeline_overview.md)).
 
 The derived tables in `data/derived/` are not included.
 

@@ -71,7 +71,7 @@ whether neurons within the same type use the same synapse-type pattern.
 | Fig 3H | `figures/fig3/syntype_x_strength_x_identity.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_x_strength_x_identity/` |
 | Fig 3I | `figures/fig3/syn_type_prob_based_on_other_syn_type_princeton.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR` | `outputs/fig3/syn_type_prob/` |
 | Fig 3J | `figures/fig3/syntype_x_features.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_x_features/` |
-| Fig 3 Supp 1A / 2A/B | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_correct_compartment_buhmann/` |
+| Fig 3 Supp 1A (Buhmann curve) / 2A/B | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_correct_compartment_buhmann/` |
 | Fig 3 Supp 2C | `figures/fig3/si_x_npil_x_synapse_detection.py` | `SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_npil_x_synapse_detection/` |
 
 ---
@@ -86,7 +86,13 @@ multiple classification models.
 | (table for Fig 4A / 4C) | `figures/fig4/build_pc1_table.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `PCA_TABLE_FTR` | writes `PC1_TABLE_CSV` (`data/derived/PC1_table.csv`); run before `syntype_x_pc1.py` |
 | Fig 4A / 4C / Supp | `figures/fig4/syntype_x_pc1.py` | `NEURON_TABLE_FTR`, `PC1_TABLE_CSV`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/syntype_x_pc1/`, where it also saves and reloads the model `rf_pc1_model.joblib`; writes `PC1_TABLE_PREDICTIONS_CSV` |
 | Fig 4B | `figures/fig4/models_comparison.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/models_comparison/` |
-| Fig 4 Supp 1B-D | `figures/fig4/syntype_x_pc1_simple_model.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_NONP_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/syntype_x_pc1_simple_model/` |
+| Not settled (see note) | `figures/fig4/syntype_x_pc1_simple_model.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_NONP_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/syntype_x_pc1_simple_model/` |
+
+> `syntype_x_pc1_simple_model.py` saves a feature-importance plot, a confusion matrix and a decision surface
+> for a model on PC1, the same kinds of plot as Fig 4A and 4D. It reads `neurons_pca.ftr` (`PCA_TABLE_NONP_FTR`),
+> not the table step 07 writes. `syntype_x_pc1.py` draws a decision surface too, but its save line (586) is
+> commented out, so which script made the published Fig 4D is not settled. Fig 4 Supp 1 holds only skeleton
+> images of the Fig 4D neurons.
 
 ---
 
@@ -100,12 +106,15 @@ reciprocity prediction.
 |-------|--------|-------------|-------------|
 | Fig 5A-C / Supp | `figures/fig5/reciprocal_fraction.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/reciprocal_fraction/`; writes `RECI_PROP_FTR` |
 | Fig 5A (BWF variant) | `figures/fig5/reciprocal_fraction_x_bwf.py` | `CONNECTIONS_TABLE_FTR`, `NEURONS_NT_BWF_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/reciprocal_fraction_x_bwf/` |
-| Fig 5D / Supp 1B | `figures/fig5/fig5d_chi_reci_identity.py` | `CONNECTIONS_TABLE_FTR`, `CONNECTIONS_TABLE_NONP_FTR`, `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR`, `NEURON_TABLE_NONP_FTR` | `outputs/fig5/chi_reci_identity/` |
+| Fig 5D | `figures/fig5/fig5d_chi_reci_identity.py` | `CONNECTIONS_TABLE_FTR`, `CONNECTIONS_TABLE_NONP_FTR`, `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR`, `NEURON_TABLE_NONP_FTR` | `outputs/fig5/chi_reci_identity/` |
 | Fig 5E | `figures/fig5/syn_type_strength_identity.py` | `CONNECTIONS_TABLE_FTR`, `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_strength_identity/` |
 | Fig 5H | `figures/fig5/syn_type_x_reci_x_dominance_x_sides.py` | `CLASSIFICATION_CSV`, `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_x_reci_x_dominance_x_sides/` |
 | Fig 5H (base) | `figures/fig5/syn_type_x_reci_x_dominance.py` | `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_x_reci_x_dominance/` |
 | Fig 5I | `figures/fig5/syn_type_x_reci_x_npil.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig5/syn_type_x_reci_x_npil/` |
 | Fig 5 Supp 1C/D | `figures/fig5/reciprocal_fraction_model.py` | `NEURON_TABLE_FTR`, `RECI_PROP_FTR` | `outputs/fig5/reciprocal_fraction_model/`; writes `RF_MODEL_PKL` |
+
+> `fig5d_chi_reci_identity.py` reads the Buhmann tables (`*_NONP_FTR`) from line 554, after all its figures are
+> saved; nothing from them is saved or printed. See the Buhmann section of [data_availability.md](data_availability.md).
 
 > `reciprocal_fraction.py` also generates `RECI_PROP_FTR` as a side output, which is required
 > by `reciprocal_fraction_model.py`. Run `reciprocal_fraction.py` before `reciprocal_fraction_model.py`.
