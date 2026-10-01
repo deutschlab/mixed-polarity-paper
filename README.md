@@ -120,6 +120,18 @@ python tools/compare_outputs.py outputs/check/before outputs/check/after
 
 A check run still writes any tables the figure script writes, in their usual place, replacing what is there. Since all figures land in one folder, two figures saved under the same file name in different subfolders will overwrite each other.
 
+To check every figure at once, `tools/run_all_figures.py` runs each script under `figures/` through `run_figure.py`, one after another, each into its own subfolder of `--out`. Scripts that others read from run first (`build_pc1_table.py`, `reciprocal_fraction.py` and the three Fig 7 `si_sim_*.py` scripts). Each script has a time limit, 20 minutes or 3 hours for the few slow ones, and one that runs out of time is stopped with any worker processes it started. `progress.txt` gets one line per script and a summary; `commit.txt` the git commit, and `inputs.txt` the size and date of every file under `data/raw` and `data/derived`, so a difference between two runs can be traced to changed input data. Running it again with the same `--out` continues an interrupted run: scripts that finished or stopped with an error are skipped, the others run again (`--rerun-failed` also reruns the ones that stopped). `--only fig4` runs a subset. It exits with status 1 if any script did not finish, which on this repository includes every script whose input tables are not supplied. A full run takes several hours, and scripts that write tables still replace them in their usual place (for example the 3 GB `data/derived/PC1_table.csv`).
+
+`tools/compare_runs.py` then compares two such runs script by script: the run status (and, for a script that stopped, the last line of its error), every saved figure (as `compare_outputs.py` does) and the printed output. It reports the scripts that are the same and finished separately from those that are the same but did not finish. `--mask` replaces text that changes on every run, such as the date and time in statsmodels summaries, before the printed outputs are compared, so the rest of those lines still counts. It exits with status 1 if any script differs or is in only one run.
+
+```bash
+python tools/run_all_figures.py --out outputs/runs/before
+# make your change, then run again into a new folder
+python tools/run_all_figures.py --out outputs/runs/after
+python tools/compare_runs.py outputs/runs/before outputs/runs/after \
+    --mask "[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4}" --mask "\d{2}:\d{2}:\d{2}"
+```
+
 `tools/check_raw_synapse_table.py` checks the raw synapse tables that `processing/build_raw_synapse_table.py` writes: the columns and their types, `synapse_id` in order and unique, no self-synapses in the version without them, both versions differing by exactly the self-synapses, and every synapse of the processed synapse table present with the same pre and post cell. It also compares the six coordinates with the processed table, which catches a pre/post column swap. It needs the step 04 synapse table and about 10 GB of free memory; `--csv` also checks the row count against the Codex CSV. It takes one to two minutes.
 
 ### Synapse-type tools
@@ -190,6 +202,8 @@ figures/            one folder per figure (fig1 to fig5, and fig7), plus split_m
 tools/
   run_figure.py            run a figure script with fixed, comparable output
   compare_outputs.py       compare the output folders of two runs
+  run_all_figures.py       run every figure script, one after another
+  compare_runs.py          compare two full runs script by script
   check_raw_synapse_table.py  check the two raw synapse tables after building them
   synapse_type_shares.py   share of each synapse type in a synapse table
   split_agreement.py       agreement of synapse types between splits
