@@ -70,7 +70,7 @@ RECIPROCITY_DIR           = INTERMEDIATE_DIR / "reciprocity"
 RECIPROCITY_CALC_DIR      = RECIPROCITY_DIR  / "calculations"
 RECIPROCITY_MODELS_DIR    = RECIPROCITY_DIR  / "models"
 
-# ── Filopodia analysis (fig6/7) ──────────────────────────────────────────────
+# ── Filopodia analysis (fig7) ──────────────────────────────────────────────
 FILOPODIA_DIR             = DERIVED_DATA_DIR / "filopodia"
 
 # ── Additional raw input files ───────────────────────────────────────────────
@@ -121,3 +121,8 @@ NEURONS_NT_BWF_FTR            = DERIVED_DATA_DIR / "neurons_nt_bwf_frac.ftr"
 # --- alternative split methods (processing/08_alternative_split_methods.py) ---
 ALT_SPLIT_BATCH_DIR           = INTERMEDIATE_DIR / "alternative_to_SI" / "all_neurons_batches"
 SI_COMPARISONS_FTR            = DERIVED_DATA_DIR / "SI_comparisons.ftr"
+
+# --- Fig 7 SI simulation (written by figures/fig7/si_sim_*.py, read by figures/fig7/si_comb_analysis.py) ---
+FILOPODIA_NODES_BASELINE_FTR     = FILOPODIA_DIR / "nodes_baseline.ftr"
+FILOPODIA_NODES_NO_FILOPODIA_FTR = FILOPODIA_DIR / "nodes_no_filopodia.ftr"
+FILOPODIA_NODES_SAMPLEOUT_FTR    = FILOPODIA_DIR / "nodes_sampleout.ftr"

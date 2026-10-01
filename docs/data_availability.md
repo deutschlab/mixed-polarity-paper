@@ -103,25 +103,28 @@ and [generated_tables.md](generated_tables.md) for key column descriptions.
 | `all_synapses_unprocess_larva_th0.9_SI_filt_issue_solved.ftr` | `data/larva/output/` | `processing/larva/larva_process.py` |
 | `SI_list_larva_th_0.9_linker_SI_filt_issue_solved` | `data/larva/results/` | `processing/larva/larva_process.py` |
 
-Seven inputs are read by the code but not written by any script in this repository:
+Eight inputs are read by the code but not written by any script in this repository:
 
 - `synapses_783_article_princeton_raw.ftr`, read by `08_alternative_split_methods.py` and `figures/fig1/create_split_axon_dendrite_princeton.py`
-- `neurons_nt_bwf_frac.ftr`, read by `figures/fig5/reciprocal_fraction_x_bwf.py`
+- `neurons_nt_bwf_frac.ftr`, read by `figures/fig5/reciprocal_fraction_x_bwf.py` and `figures/fig7/filopodia_x_mirror_neurons.py`
+- `syn_bouton_filopodia.ftr`, read by the four Fig 7 scripts listed in the Fig 7 section below
 - `swc_data.ftr`, read by `05_build_neuron_metadata_table.py` (the only code that writes it is commented out)
 - three tables from the earlier, non-Princeton synapse detection: `neuron_data_full_article.ftr` (read by `figures/fig2/si_comparisons.py`, `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` and `figures/fig5/fig5d_chi_reci_identity.py`), `synapses_783_article.ftr` (read by `figures/fig2/si_comparisons.py`, `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` and `figures/fig3/si_x_npil_x_synapse_detection.py`) and `connections_by_syn_type_reciprocal_types_filtered_article.ftr` (read by `figures/fig5/fig5d_chi_reci_identity.py`)
 - `neurons_pca.ftr`, read by `figures/fig4/syntype_x_pc1_simple_model.py`, which merges it onto the Princeton neuron table
 
-None of these seven files is deposited with this repository. Those scripts cannot run until the files are supplied. Because step 05 needs `swc_data.ftr`, the neuron table, and every step and figure that reads it, cannot be rebuilt from the downloads alone.
+None of these eight files is deposited with this repository. Those scripts cannot run until the files are supplied. Because step 05 needs `swc_data.ftr`, the neuron table, and every step and figure that reads it, cannot be rebuilt from the downloads alone.
 
 ---
 
-## Filopodia / bouton analysis (scripts to be added)
+## Filopodia / bouton analysis (Fig 7)
 
-The following data files are referenced in `config.py` for the Fig 7 filopodia and bouton
-analysis. The corresponding scripts are not yet included in this release and will be added
-shortly.
+The Fig 7 filopodia scripts in `figures/fig7/` read two tables that no script in this repository
+writes. They are not deposited with this release, so those scripts cannot run until the files are supplied.
+The copies these scripts were written against were named `syn_bouton_filopodia(new).ftr` and
+`neurons_nt_bwf_frac(new).ftr`; save them under the names below.
 
 | File | Config variable | Notes |
 |------|----------------|-------|
-| `data/raw/syn_bouton_filopodia.ftr` | `SYN_BOUTON_FTR` | Input data for Fig 7 filopodia analysis — scripts to be added. |
-| `data/derived/filopodia/` | `FILOPODIA_DIR` | Output directory for filopodia analysis — generated once scripts are added. |
+| `data/raw/syn_bouton_filopodia.ftr` | `SYN_BOUTON_FTR` | Per-synapse table with `synapse_id` and `filopodia_on_post` (0/1), read by `post_on_filo_ratio.py` and the three `si_sim_*.py` scripts in `figures/fig7/`. The scripts merge it on `synapse_id`, which is a row number of the Codex CSV (see `generated_tables.md`), so it must have been built from the same synapse table as `SYNAPSE_TABLE_FTR`; otherwise the merge runs without error and gives wrong flags. It must also: have exactly one row per `synapse_id`; cover every AA/AD/DA/DD synapse in `SYNAPSE_TABLE_FTR`; store `filopodia_on_post` as integer or bool with no missing values; and have no other column whose name is also a column of `SYNAPSE_TABLE_FTR` (such as `pre`, `post` or `comp`). A missing synapse makes `si_sim_baseline.py` and `si_sim_sampleout.py` stop with a TypeError, while `si_sim_no_filopodia.py` silently treats it as on a filopodium; a repeated `synapse_id` silently duplicates synapses; a shared column name stops the scripts with a KeyError. |
+| `data/derived/neurons_nt_bwf_frac.ftr` | `NEURONS_NT_BWF_FTR` | Per-neuron table with `neuron` (int64, one row per neuron) and `filopodia_fraction`, read by `figures/fig7/filopodia_x_mirror_neurons.py` and `figures/fig5/reciprocal_fraction_x_bwf.py`. The mirror script merges the whole table, so it must not contain `primary_type`, `side` or `super_class`; a repeated `neuron` silently changes which cell types count as left/right pairs. |
+| `data/derived/filopodia/` | `FILOPODIA_DIR` | Written by the three `figures/fig7/si_sim_*.py` scripts (`nodes_baseline.ftr`, `nodes_no_filopodia.ftr`, `nodes_sampleout.ftr`) and read by `figures/fig7/si_comb_analysis.py`. |

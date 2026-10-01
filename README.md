@@ -16,7 +16,7 @@ The demo runs without downloading anything, since its 200 neurons, their synapse
 
 The full pipeline cannot be run from public data alone. With the Codex downloads you can run steps 01 to 04, but step 05, which builds the per-neuron table, also needs a file called `swc_data.ftr` that no script here makes. Steps 06 to 08, the Phi-cutoff script, the two synapse-type tools and almost all figure scripts need step 05's table, so from the downloads alone none of them can run.
 
-Seven tables that the scripts read are not made anywhere in this repository. They are listed in [docs/data_availability.md](docs/data_availability.md), and the scripts that need them will not run until someone provides them. The larval curve in Figure 2A can't be rebuilt either: it needs raw files from the corresponding author, and the larva script currently gives no usable output (see [docs/pipeline_overview.md](docs/pipeline_overview.md)).
+Eight tables that the scripts read are not made anywhere in this repository. They are listed in [docs/data_availability.md](docs/data_availability.md), and the scripts that need them will not run until someone provides them. The larval curve in Figure 2A can't be rebuilt either: it needs raw files from the corresponding author, and the larva script currently gives no usable output (see [docs/pipeline_overview.md](docs/pipeline_overview.md)).
 
 The derived tables in `data/derived/` are not included.
 
@@ -90,11 +90,11 @@ The larval SI for Figure 2A comes from `processing/larva/larva_process.py`, whic
 
 ### Figures
 
-The figure scripts are in `figures/fig1/` to `figures/fig5/`, usually one script per panel. They are written as `#%%` cell scripts for an editor like Spyder, but you can also run them as normal Python scripts from any folder. If you do, each plot opens in a window and the script waits until you close it; `tools/run_figure.py` gets around this.
+The figure scripts are in `figures/fig1/` to `figures/fig5/` and `figures/fig7/`, usually one script per panel. They are written as `#%%` cell scripts for an editor like Spyder, but you can also run them as normal Python scripts from any folder. If you do, each plot opens in a window and the script waits until you close it; `tools/run_figure.py` gets around this.
 
 Fig 1C and Fig 3C make a Neuroglancer link through `caveclient` before they draw the panel, so they stop with an error unless you have a FlyWire account and a CAVE token saved on your machine (see the caveclient documentation). The `caveclient` and `nglui` packages are imported by `methods/methods_all.py`, so every script that uses it needs them installed (both are in the pinned requirements); only these two panels need the token.
 
-Two scripts need another one to run first: `figures/fig4/build_pc1_table.py` before `figures/fig4/syntype_x_pc1.py`, and `figures/fig5/reciprocal_fraction.py` before `figures/fig5/reciprocal_fraction_model.py`.
+Three scripts need others to run first: `figures/fig4/build_pc1_table.py` before `figures/fig4/syntype_x_pc1.py`, `figures/fig5/reciprocal_fraction.py` before `figures/fig5/reciprocal_fraction_model.py`, and the three `figures/fig7/si_sim_*.py` scripts before `figures/fig7/si_comb_analysis.py`.
 
 Figures are saved in `outputs/figN/`, almost all as SVG and a few as PNG or PDF. A few figure scripts also write tables into `data/derived/`. [docs/figure_to_script_map.md](docs/figure_to_script_map.md) shows which script makes which panel.
 
@@ -181,7 +181,7 @@ processing/         the pipeline, from raw data to derived tables
 methods/
   methods_all.py    shared functions, used by most scripts
 
-figures/            one folder per figure (fig1 to fig5)
+figures/            one folder per figure (fig1 to fig5, and fig7)
 
 tools/
   run_figure.py            run a figure script with fixed, comparable output

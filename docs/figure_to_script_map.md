@@ -113,8 +113,33 @@ reciprocity prediction.
 > `reciprocal_fraction_model.py` also generates `RF_MODEL_PKL`
 > (`data/intermediate/reciprocity/models/final_random_forest_model_princeton.pkl`).
 
-## Figures 6 and 7
+## Figure 6
 
-There are no panel scripts for Figures 6 and 7 in this repository yet. The two MSB pipelines in
-`MSB-and-Post-on-MSB-pipeline/` find multi-synapse boutons and the postsynapses near them, but they do not
-make any panel.
+There are no panel scripts for Figure 6 in this repository yet.
+
+## Figure 7 — Postsynaptic terminals on multisynaptic boutons
+
+The filopodia panels. The two MSB pipelines in `MSB-and-Post-on-MSB-pipeline/` find multi-synapse
+boutons and the postsynapses near them, but they do not make any panel, and no script in this
+repository writes `SYN_BOUTON_FTR` or `NEURONS_NT_BWF_FTR`, which these scripts read.
+
+| Panel | Script | Input tables | Output path |
+|-------|--------|-------------|-------------|
+| Fig 7H | `figures/fig7/post_on_filo_ratio.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SYN_BOUTON_FTR` | `outputs/fig7/post_on_filo_ratio/` (the panel is `axon_dend_filo_ratio_by_superclass_lines.svg`; the other three SVGs are variants) |
+| Fig 7J (input) | `figures/fig7/si_sim_baseline.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SYN_BOUTON_FTR` | `outputs/fig7/si_sim_baseline/`; writes `FILOPODIA_NODES_BASELINE_FTR` |
+| Fig 7J (input) | `figures/fig7/si_sim_no_filopodia.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SYN_BOUTON_FTR` | `outputs/fig7/si_sim_no_filopodia/`; writes `FILOPODIA_NODES_NO_FILOPODIA_FTR` |
+| Fig 7J (input) | `figures/fig7/si_sim_sampleout.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SYN_BOUTON_FTR` | `outputs/fig7/si_sim_sampleout/`; writes `FILOPODIA_NODES_SAMPLEOUT_FTR` |
+| Fig 7J | `figures/fig7/si_comb_analysis.py` | `FILOPODIA_NODES_BASELINE_FTR`, `FILOPODIA_NODES_NO_FILOPODIA_FTR`, `FILOPODIA_NODES_SAMPLEOUT_FTR`, `NEURON_TABLE_FTR` | `outputs/fig7/si_comb_analysis/sim_results.svg` |
+| Fig 7 Supp 4A/B | `figures/fig7/filopodia_x_mirror_neurons.py` | `NEURON_TABLE_FTR`, `NEURONS_NT_BWF_FTR`, `SI_UPDATED_FTR`, `NEURON_ANNOTATIONS_CSV` | `outputs/fig7/filopodia_x_mirror_neurons/` (A: `std_of_filopodia_fraction_within_groups_vs_between_princeton.svg`; B: `filopodia_frac_corr_sides_princeton_v2.svg`) |
+
+> Run the three `si_sim_*.py` scripts before `si_comb_analysis.py`; it reads the three tables they write
+> to `data/derived/filopodia/`.
+
+> The `si_sim_*.py` scripts recompute SI on the existing axon/dendrite labels; they do not re-split any neuron.
+> `post_on_filo_ratio.py`, `si_comb_analysis.py` and the three `si_sim_*.py` scripts load the whole synapse table
+> (`SYNAPSE_TABLE_FTR`, about 76 million rows), so they need a machine with plenty of memory.
+> Fig 7 neuron sets differ from the other figures: `post_on_filo_ratio.py` and `si_comb_analysis.py` apply the
+> four-super-class filter but not the `dropna` on `axon_correct`/`dend_correct`/`primary_type`, and `post_on_filo_ratio.py`
+> takes the compartment from the second letter of `comp`, so synapses from linker segments (LA, LD) are included.
+> Their pie and correctness plots are not panels. The saved 7J bar compares baseline with no-filopodia only; the
+> sample-out table is read by `si_comb_analysis.py` and used only in a figure it shows and does not save.

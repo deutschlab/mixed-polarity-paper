@@ -24,7 +24,7 @@ flowchart TD
     S06["06_build_connection_reciprocity_table\nCONNECTIONS_TABLE_FTR"]
     S07["07_pca_morphology\nPCA_TABLE_FTR"]
     S08["08_alternative_split_methods (optional)\nSI_COMPARISONS_FTR"]
-    FIGS["Figure scripts\nfig1-fig5"]
+    FIGS["Figure scripts\nfig1-fig5, fig7"]
 
     RAW --> S01
     RAW --> S02A
@@ -48,6 +48,7 @@ flowchart TD
     S07 --> FIGS
     SYNRAW["synapses_783_article_princeton_raw.ftr\n(no script writes it)"] -.-> S08
     SWCDATA["swc_data.ftr\n(no script writes it)"] -.-> S05
+    FILO["syn_bouton_filopodia.ftr, neurons_nt_bwf_frac.ftr\n(no script writes them)"] -.-> FIGS
     RAW -.-> S08
     S05 -.-> S08
     S08 -.-> PHI["phi_threshold (optional)\nprints and plots the Phi cutoff"]
