@@ -37,7 +37,7 @@ CELL_STATS_CSV         = RAW_DATA_DIR / "cell_stats.csv"
 
 # ── Key derived table files ──────────────────────────────────────────────────
 SYNAPSE_TABLE_FTR         = DERIVED_DATA_DIR / "synapses_783_article_princeton.ftr"
-SYNAPSE_TABLE_RAW_FTR     = DERIVED_DATA_DIR / "synapses_783_article_princeton_raw.ftr"
+SYNAPSE_TABLE_RAW_FTR     = DERIVED_DATA_DIR / "synapses_783_article_princeton_raw.ftr"  # the version without self-synapses; see RAW_TABLE_KEEP_SELF_SYNAPSES at the end
 NEURON_TABLE_FTR          = DERIVED_DATA_DIR / "neuron_data_full_article_princeton.ftr"
 CONNECTIONS_TABLE_FTR     = DERIVED_DATA_DIR / (
     "connections_by_syn_type_reciprocal_types_filtered_article_princeton.ftr"
@@ -126,3 +126,15 @@ SI_COMPARISONS_FTR            = DERIVED_DATA_DIR / "SI_comparisons.ftr"
 FILOPODIA_NODES_BASELINE_FTR     = FILOPODIA_DIR / "nodes_baseline.ftr"
 FILOPODIA_NODES_NO_FILOPODIA_FTR = FILOPODIA_DIR / "nodes_no_filopodia.ftr"
 FILOPODIA_NODES_SAMPLEOUT_FTR    = FILOPODIA_DIR / "nodes_sampleout.ftr"
+
+# --- raw synapse table (built by processing/build_raw_synapse_table.py from PRINCETON_SYNAPSE_CSV) ---
+# Two versions: without self-synapses (as steps 01/02a and Amit's v2 split-method script use the synapses;
+# the default) and with them. A cell split without them gives the SI in SI_updated.ftr and SI_comparisons.ftr;
+# split with them, it gives the SI in the delivered neuron table (the same on 30 of 30 cells checked).
+# This switch decides which file SYNAPSE_TABLE_RAW_FTR points to, for every script that reads it: step 08,
+# figures/fig1/create_split_axon_dendrite_princeton.py and figures/split_methods/skeleton_comparisons*.py.
+RAW_TABLE_KEEP_SELF_SYNAPSES     = False
+SYNAPSE_TABLE_RAW_NO_SELF_FTR    = SYNAPSE_TABLE_RAW_FTR   # the name set above
+SYNAPSE_TABLE_RAW_WITH_SELF_FTR  = DERIVED_DATA_DIR / "synapses_783_article_princeton_raw_with_self.ftr"
+SYNAPSE_TABLE_RAW_FTR = (SYNAPSE_TABLE_RAW_WITH_SELF_FTR if RAW_TABLE_KEEP_SELF_SYNAPSES
+                         else SYNAPSE_TABLE_RAW_NO_SELF_FTR)

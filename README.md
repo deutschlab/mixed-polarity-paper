@@ -16,7 +16,7 @@ The demo runs without downloading anything, since its 200 neurons, their synapse
 
 The full pipeline cannot be run from public data alone. With the Codex downloads you can run steps 01 to 04, but step 05, which builds the per-neuron table, also needs a file called `swc_data.ftr` that no script here makes. Steps 06 to 08, the Phi-cutoff script, the two synapse-type tools and almost all figure scripts need step 05's table, so from the downloads alone none of them can run.
 
-Eight tables that the scripts read are not made anywhere in this repository. They are listed in [docs/data_availability.md](docs/data_availability.md), and the scripts that need them will not run until someone provides them. The larval curve in Figure 2A can't be rebuilt either: it needs raw files from the corresponding author, and the larva script currently gives no usable output (see [docs/pipeline_overview.md](docs/pipeline_overview.md)).
+Seven tables that the scripts read are not made anywhere in this repository. They are listed in [docs/data_availability.md](docs/data_availability.md), and the scripts that need them will not run until someone provides them. The larval curve in Figure 2A can't be rebuilt either: it needs raw files from the corresponding author, and the larva script currently gives no usable output (see [docs/pipeline_overview.md](docs/pipeline_overview.md)).
 
 The derived tables in `data/derived/` are not included.
 
@@ -32,7 +32,7 @@ The demo only covers the SI steps, not the MSB pipelines.
 
 ## Setup
 
-You need Python 3.12.4 on Linux, macOS or Windows. Other Python versions may not work with the pinned packages. For the full pipeline we recommend 32 GB of memory, because the synapse table is large and memory use goes above 16 GB. No special hardware is needed.
+You need Python 3.12.4 on Linux, macOS or Windows. Other Python versions may not work with the pinned packages. For the full pipeline we recommend 32 GB of memory, because the synapse table is large and memory use goes above 16 GB. The optional `processing/build_raw_synapse_table.py` needs more: it peaked at about 40 GB (22 GB resident) on a 36 GB Mac, and writes about 7 GB. No special hardware is needed.
 
 All packages are pinned in `requirements.txt` and `environment.yml`, including `navis==1.7.0`, `pandas==2.2.2`, `numpy==1.26.4`, `scikit-learn==1.5.2`, `scipy==1.13.1`, `matplotlib==3.9.2` and `seaborn==0.13.2`. Keep navis at 1.7.0, since other versions can give different SI values. Installing takes about 5 to 10 minutes with conda, or 10 to 20 with pip.
 
@@ -72,6 +72,7 @@ python processing/04_build_master_synapse_table.py     # -> data/derived/synapse
 python processing/05_build_neuron_metadata_table.py    # -> data/derived/neuron_data_full_article_princeton.ftr (needs swc_data.ftr)
 python processing/06_build_connection_reciprocity_table.py
 python processing/07_pca_morphology.py                 # -> data/derived/neurons_pca_princeton.ftr
+python processing/build_raw_synapse_table.py           # optional, before 08 -> the raw synapse table (two versions)
 python processing/08_alternative_split_methods.py      # optional -> data/derived/SI_comparisons.ftr
 python processing/phi_threshold.py                     # optional, after 05 and 08
 ```
@@ -80,7 +81,7 @@ Step 05 reads `swc_data.ftr`, which no script here writes. The code that used to
 
 The work is split into steps mostly to keep memory use down, since the synapse table and all the skeletons don't fit in memory together. Step 01 skips neurons with more than 80,000 skeleton points. It also treats any skeleton subfolder that already has an output folder as done, and it makes that folder before it starts, so if a run of step 01 is interrupted, delete the unfinished folders in `data/intermediate/processed_swc_data/` before running it again. Step 02a processes those large neurons, but it works from a list of neuron IDs written into the script, not from step 01's size check.
 
-Step 08 is optional. It compares the published axon/dendrite split with two single-node cuts, MaxSI and MinFisherP. It needs step 05's table, the skeletons of the intrinsic neurons, and `synapses_783_article_princeton_raw.ftr`, which no script here makes. That file must have `size` and `neuropil` columns, so the synapse table from step 04 can't be used in its place.
+Step 08 is optional. It compares the published axon/dendrite split with two single-node cuts, MaxSI and MinFisherP. It needs step 05's table, the skeletons of the intrinsic neurons, and `synapses_783_article_princeton_raw.ftr`, which `processing/build_raw_synapse_table.py` builds from the Codex CSV (run it first). That file must have `size` and `neuropil` columns, so the synapse table from step 04 can't be used in its place. The build writes two versions, without and with self-synapses; `RAW_TABLE_KEEP_SELF_SYNAPSES` in `config.py` chooses which one the scripts read.
 
 `phi_threshold.py` is also optional. It works out which Phi value matches the SI = 0.1 cutoff, using step 08's output plus the neuron table and `SI_updated.ftr` from step 05. It prints the results and saves a plot to `outputs/phi_threshold/phi_threshold.svg`.
 
@@ -90,7 +91,7 @@ The larval SI for Figure 2A comes from `processing/larva/larva_process.py`, whic
 
 ### Figures
 
-The figure scripts are in `figures/fig1/` to `figures/fig5/` and `figures/fig7/`, usually one script per panel. They are written as `#%%` cell scripts for an editor like Spyder, but you can also run them as normal Python scripts from any folder. If you do, each plot opens in a window and the script waits until you close it; `tools/run_figure.py` gets around this.
+The figure scripts are in `figures/fig1/` to `figures/fig5/` and `figures/fig7/`, usually one script per panel; `figures/split_methods/` and `figures/supporting/` hold scripts for the split-method comparison and for numbers in the text. They are written as `#%%` cell scripts for an editor like Spyder, but you can also run them as normal Python scripts from any folder. If you do, each plot opens in a window and the script waits until you close it; `tools/run_figure.py` gets around this.
 
 Fig 1C and Fig 3C make a Neuroglancer link through `caveclient` before they draw the panel, so they stop with an error unless you have a FlyWire account and a CAVE token saved on your machine (see the caveclient documentation). The `caveclient` and `nglui` packages are imported by `methods/methods_all.py`, so every script that uses it needs them installed (both are in the pinned requirements); only these two panels need the token.
 
@@ -108,7 +109,7 @@ Run these from the repository root with the environment active.
 
 `tools/run_figure.py` runs a figure script in a way that makes two runs easy to compare. No plot windows open, and all figures go into one output folder, which has to be new or empty. SVG files are written without a date, random numbers are fixed (including the ones seaborn uses for error bands), and every printed table is followed by a checksum of its contents, so a change in a hidden row or decimal still shows up. The file `run_status.txt` says whether the script finished. Figures are saved at 72 dpi by default, the same as the published SVGs; `--dpi` changes this. With `--replace OLD NEW` you can swap an exact piece of text in the script before it runs, for example to skip a very slow step, but a run changed that way is no longer a full reproduction.
 
-`tools/compare_outputs.py` then compares two output folders, matching files by name. An SVG passes if it is identical, or identical once element ids and metadata are ignored, and any other file has to be identical. The printed output in `stdout.log` has to match too; with `--allow-extra-lines` it is enough that every line of the first run appears, in order, in the second. `--figures-only` compares figure files only (.svg, .png, .pdf), which is useful against a folder of published SVGs. `stderr.log` is never compared. The script exits with status 1 if anything differs, if a run didn't finish, or if neither folder has a figure; use `--allow-no-figures` for a script that only prints or writes tables, such as `figures/fig4/build_pc1_table.py`.
+`tools/compare_outputs.py` then compares two output folders, matching files by name. An SVG passes if it is identical, or identical once element ids and metadata are ignored, and any other file has to be identical. The printed output in `stdout.log` has to match too; with `--allow-extra-lines` it is enough that every line of the first run appears, in order, in the second. `--figures-only` compares figure files only (.svg, .png, .pdf), which is useful against a folder of published SVGs. `stderr.log` is never compared. The script exits with status 1 if anything differs, if a run didn't finish, or if neither folder has a figure; use `--allow-no-figures` for a script that only prints or writes tables, such as `figures/fig4/build_pc1_table.py`. With `--content`, an SVG whose lines still differ passes if it draws the same text and colours, in the same order, and, inside each plot, the same markers and shapes once the plot's size and position are removed. That is how to check a port against an original saved with a different figure size or font. Positions are compared to 0.1% of the plot, line widths and font sizes are not compared, and an SVG whose text was saved as outlines fails.
 
 ```bash
 python tools/run_figure.py figures/fig1/canonicality_axon_dend.py --out outputs/check/before
@@ -118,6 +119,8 @@ python tools/compare_outputs.py outputs/check/before outputs/check/after
 ```
 
 A check run still writes any tables the figure script writes, in their usual place, replacing what is there. Since all figures land in one folder, two figures saved under the same file name in different subfolders will overwrite each other.
+
+`tools/check_raw_synapse_table.py` checks the raw synapse tables that `processing/build_raw_synapse_table.py` writes: the columns and their types, `synapse_id` in order and unique, no self-synapses in the version without them, both versions differing by exactly the self-synapses, and every synapse of the processed synapse table present with the same pre and post cell. It also compares the six coordinates with the processed table, which catches a pre/post column swap. It needs the step 04 synapse table and about 10 GB of free memory; `--csv` also checks the row count against the Codex CSV. It takes one to two minutes.
 
 ### Synapse-type tools
 
@@ -174,6 +177,7 @@ processing/         the pipeline, from raw data to derived tables
   05_build_neuron_metadata_table.py        the per-neuron table
   06_build_connection_reciprocity_table.py the per-connection and reciprocity tables
   07_pca_morphology.py                     PCA of the shape measurements
+  build_raw_synapse_table.py               optional: the raw synapse table from the Codex CSV (for 08 and the split-method figures)
   08_alternative_split_methods.py          optional: two single-node cuts compared with the published split
   phi_threshold.py                         optional: the Phi cutoff that matches SI = 0.1
   larva/larva_process.py                   larval SI for Figure 2A
@@ -181,11 +185,12 @@ processing/         the pipeline, from raw data to derived tables
 methods/
   methods_all.py    shared functions, used by most scripts
 
-figures/            one folder per figure (fig1 to fig5, and fig7)
+figures/            one folder per figure (fig1 to fig5, and fig7), plus split_methods/ and supporting/
 
 tools/
   run_figure.py            run a figure script with fixed, comparable output
   compare_outputs.py       compare the output folders of two runs
+  check_raw_synapse_table.py  check the two raw synapse tables after building them
   synapse_type_shares.py   share of each synapse type in a synapse table
   split_agreement.py       agreement of synapse types between splits
 

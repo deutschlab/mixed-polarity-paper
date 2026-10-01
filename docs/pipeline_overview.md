@@ -3,7 +3,7 @@
 This document describes the processing pipeline that converts raw connectome inputs into the
 derived tables used by the figure scripts.
 
-**Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07 (08 is optional: the split-method comparison; `phi_threshold.py` is optional and runs after 08). The larval step, `processing/larva/larva_process.py`, is separate and is needed only for Figure 2A.  
+**Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07 (08 is optional: the split-method comparison, run after `build_raw_synapse_table.py`, which builds its raw synapse table from the Codex CSV; `phi_threshold.py` is optional and runs after 08). The larval step, `processing/larva/larva_process.py`, is separate and is needed only for Figure 2A.  
 **All paths are defined in:** `config.py`  
 **The numbered scripts import:** `methods/methods_all.py` via `METHODS_DIR`
 
@@ -46,7 +46,8 @@ flowchart TD
     S05 --> FIGS
     S06 --> FIGS
     S07 --> FIGS
-    SYNRAW["synapses_783_article_princeton_raw.ftr\n(no script writes it)"] -.-> S08
+    RAW -.-> BUILDRAW["build_raw_synapse_table (optional)\nSYNAPSE_TABLE_RAW_FTR"]
+    BUILDRAW -.-> S08
     SWCDATA["swc_data.ftr\n(no script writes it)"] -.-> S05
     FILO["syn_bouton_filopodia.ftr, neurons_nt_bwf_frac.ftr\n(no script writes them)"] -.-> FIGS
     RAW -.-> S08
@@ -217,7 +218,24 @@ single cut places every synapse except those on the cut node on one side, and on
 | **Outputs** | Per batch in `ALT_SPLIT_BATCH_DIR`: `summary_batch_NNNN.ftr`, `nodes_batch_NNNN.ftr`, `failures_batch_NNNN.ftr`; combined `SI_COMPARISONS_FTR` (`SI_comparisons.ftr`), written only if that file does not already exist |
 | **Key columns** | `neuron_id`, `SFC_SI`, `SFC_Phi`, `MaxSI_SI`, `MinFisherP_Phi` |
 | **Downstream** | `processing/phi_threshold.py` |
-| **Note** | No script in this repository writes `SYNAPSE_TABLE_RAW_FTR`, and `SWC_DIR` must hold the skeletons of every intrinsic neuron, so the script cannot be run from the downloads alone. Unlike scripts 01 and 02a, it does not drop synapses from a neuron to itself, so its `SFC_SI` matches the SI of script 05 only if that table has none. When combining, a missing batch file is printed and skipped, so check that the combined table has one row per intrinsic neuron |
+| **Note** | `SYNAPSE_TABLE_RAW_FTR` is built by `processing/build_raw_synapse_table.py`; `SWC_DIR` must hold the skeletons of every intrinsic neuron, so the script cannot be run from the downloads alone. Unlike scripts 01 and 02a, it does not drop synapses from a neuron to itself, so its `SFC_SI` matches the SI that script 05 writes (`SI_updated.ftr`) only if the raw table has none: the default version (`RAW_TABLE_KEEP_SELF_SYNAPSES = False`) has none. When combining, a missing batch file is printed and skipped, so check that the combined table has one row per intrinsic neuron |
+
+---
+
+## Raw synapse table (optional)
+
+**File:** `processing/build_raw_synapse_table.py`
+
+Builds the synapse table before any filtering from the Codex CSV: row number as `synapse_id`, the
+`ctr_*` columns dropped, full root ids rebuilt, and the columns renamed by position (the script first
+checks the CSV's column order). `BUILD` at the top chooses which versions to write.
+
+| | |
+|--|--|
+| **Inputs** | `PRINCETON_SYNAPSE_CSV` |
+| **Outputs** | `SYNAPSE_TABLE_RAW_NO_SELF_FTR` (76,944,712 rows) and `SYNAPSE_TABLE_RAW_WITH_SELF_FTR` (80,215,790 rows) |
+| **Downstream** | `SYNAPSE_TABLE_RAW_FTR` (one of the two, by `RAW_TABLE_KEEP_SELF_SYNAPSES`): step 08, `figures/fig1/create_split_axon_dendrite_princeton.py`, `figures/split_methods/skeleton_comparisons*.py` |
+| **Note** | Peaked at about 40 GB of memory (22 GB resident) and took 2 minutes on a 36 GB Mac; both versions together take about 7 GB on disk. Check the result with `tools/check_raw_synapse_table.py` |
 
 ---
 

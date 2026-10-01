@@ -11,7 +11,7 @@ A candidate cut is any non-root node with exactly one child. The synapses on the
 cut node itself are left out of both sides. If SI_COMPARISONS_FTR already exists,
 it is kept and not overwritten.
 
-Needs SYNAPSE_TABLE_RAW_FTR (no script in this repo writes it) and the
+Needs SYNAPSE_TABLE_RAW_FTR (built by processing/build_raw_synapse_table.py) and the
 skeletons of every neuron under SWC_DIR. The batch range in the last section
 (X = 1, Y = 236: batches X to X + Y, that is 1 to 237) covers the 118,347
 intrinsic neurons of NEURON_TABLE_FTR in batches of 500; change it if that

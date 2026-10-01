@@ -15,7 +15,7 @@ the SI distribution, axon/dendrite split examples, and canonical vs mixed neuron
 
 | Panel | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|
-| Fig 1C | `figures/fig1/create_split_axon_dendrite_princeton.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_RAW_FTR` | `outputs/fig3/pc1_example/` |
+| Fig 1C | `figures/fig1/create_split_axon_dendrite_princeton.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_RAW_FTR` (from `processing/build_raw_synapse_table.py`; which version is set by `RAW_TABLE_KEEP_SELF_SYNAPSES`), skeletons in `SWC_DIR`, a FlyWire token for the links | `outputs/fig3/pc1_example/` |
 | Fig 1E | `figures/fig1/canonicality_axon_dend.py` | `NEURON_TABLE_FTR` | `outputs/fig1/canonicality_axon_dend/` |
 | Fig 1G | `figures/fig1/si_x_canonicality.py` | `NEURON_TABLE_FTR` | `outputs/fig1/si_x_canonicality/` |
 | Fig 1 Supp D | `figures/fig1/canonicality_violin_intrinsic_sclass.py` | `NEURON_TABLE_FTR` | `outputs/fig1/canonicality_violin_intrinsic_sclass/` |
@@ -112,6 +112,26 @@ reciprocity prediction.
 
 > `reciprocal_fraction_model.py` also generates `RF_MODEL_PKL`
 > (`data/intermediate/reciprocity/models/final_random_forest_model_princeton.pkl`).
+
+## Split methods (revision work) and supporting scripts
+
+Scripts ported from Amit's folder that are not panels of the submitted paper. The `split_methods/` ones
+compare the published (SFC) axon/dendrite cut with the alternative cuts; the `supporting/` one backs a
+number in the text.
+
+| Purpose | Script | Input tables | Output path |
+|-------|--------|-------------|-------------|
+| Supp 2-S2 D layout on the MaxSI cut's SI | `figures/split_methods/maxsi_x_primary_types.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SI_COMPARISONS_FTR` | `outputs/split_methods/maxsi_x_primary_types/` |
+| Supp 2-S2 A layout (left vs right) on the MaxSI cut's SI | `figures/split_methods/maxsi_x_primary_types_mirror.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SI_COMPARISONS_FTR`, `NEURON_ANNOTATIONS_CSV` | `outputs/split_methods/maxsi_x_primary_types_mirror/` |
+| Example cells: SFC split next to the MaxSI split | `figures/split_methods/skeleton_comparisons.py` | `SI_COMPARISONS_FTR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` | `outputs/split_methods/skeleton_comparisons/` |
+| The same for Kenyon cells (KCg-m) | `figures/split_methods/skeleton_comparisons_kc.py` | `NEURON_TABLE_FTR`, `SI_COMPARISONS_FTR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` | `outputs/split_methods/skeleton_comparisons_kc/` |
+| Text: "simple neurons (PC1 < 0.5), which are primarily optic neurons" | `figures/supporting/pc1_x_nt_sclass_pies.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_FTR` | `outputs/supporting/pc1_x_nt_sclass_pies/` |
+
+> Run `processing/build_raw_synapse_table.py` first: it writes `SYNAPSE_TABLE_RAW_FTR`. `SI_COMPARISONS_FTR` comes from step 08
+> (Amit's delivered copy can stand in). With `ONLY_CELLS_WITH_SKELETONS = "auto"` (the default) the skeleton scripts use
+> Amit's own cell selection when all of those cells' skeletons are on disk; if even one is missing they replace the
+> whole selection with cells that have a skeleton (and print that they did), so the images are then not Amit's cells.
+> Amit's cells need the full skeleton download.
 
 ## Figure 6
 
