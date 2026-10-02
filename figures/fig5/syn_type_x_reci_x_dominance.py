@@ -205,7 +205,7 @@ sns.heatmap(
     annot_kws={"size": 4}
 )
 
-# ✅ Change colorbar tick size
+# Change colorbar tick size
 colorbar = ax.collections[0].colorbar
 colorbar.ax.tick_params(labelsize=4)
 
@@ -235,7 +235,7 @@ sns.heatmap(
 )
 
 
-# ✅ Change colorbar tick size
+# Change colorbar tick size
 colorbar = ax.collections[0].colorbar
 colorbar.ax.tick_params(labelsize=4)
 

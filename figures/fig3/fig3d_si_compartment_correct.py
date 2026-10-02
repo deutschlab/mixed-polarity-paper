@@ -374,27 +374,27 @@ colors = [custom_palette.get(c, default_color) for c in comp_counts_pct.columns]
 
 # --- Neuropil color families ---
 npil_colors = {
-    # 🟦 Blue family
+    # Blue family
     'FB': '#00bfbf', 'EB': '#00cccc', 'PB': '#0099cc', 'NO': '#0073b2',
     'AMMC': '#4040ff', 'FLA': '#3366ff', 'CAN': '#3366ff', 'PRW': '#3333ff',
     'SAD': '#3333ff', 'GNG': '#3333ff', 'AL': '#3399ff', 'LH': '#3366ff', 'BU': '#3333ff',
 
-    # 🟧 Orange family
+    # Orange family
     'MB-CA': '#ff9966', 'MB-PED': '#ff9966', 'MB-VL': '#ff9966',
     'MB-VLCP': '#ff9966', 'MB-ML': '#ff9966',
 
-    # 🟨 Yellow family
+    # Yellow family
     'LAL': '#ffcc33', 'SLP': '#ffcc33', 'SIP': '#ffcc33', 'SMP': '#ffcc33',
     'CRE': '#ffcc33', 'IB': '#ffcc33', 'ATL': '#ffcc33',
 
-    # 🟩 Green family
+    # Green family
     'VES': '#33cc66', 'EPA': '#00cc66', 'GOR': '#00cc66', 'SPS': '#00cc66',
     'IPS': '#00cc66', 'AOTU': '#00cc66',
 
-    # 🟦 Light blue family
+    # Light blue family
     'AVLP': '#3399ff', 'PVLP': '#3399ff', 'PLP': '#3399ff', 'WED': '#3399ff',
 
-    # 💜 Purple family
+    # Purple family
     'ME': '#cc3399', 'AME': '#cc3399', 'LO': '#9933cc',
     'LOP': '#9933cc', 'LA': '#9933cc', 'OCG': '#9933cc'
 }

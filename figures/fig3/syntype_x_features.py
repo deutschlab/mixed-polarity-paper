@@ -433,7 +433,7 @@ disp = ConfusionMatrixDisplay(confusion_matrix=cm_percentage, display_labels=rf_
 
 # Plot confusion matrix with formatting
 disp.plot(cmap='Blues', values_format='.2f', ax=ax, colorbar=False)
-for text in disp.text_.ravel():  # ✅ flatten the array
+for text in disp.text_.ravel():  # flatten the array
     text.set_fontsize(4)
 # Format axis labels and ticks
 ax.set_xlabel('Predicted Label', fontsize=8)

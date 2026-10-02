@@ -606,7 +606,7 @@ feat_imp_df = pd.DataFrame(feature_importance_data)
 # Remove dummy-encoded features for clarity
 feat_imp_df = feat_imp_df[~feat_imp_df['Feature'].str.startswith('super_class_')]
 
-# ✅ Apply reversed dendrogram order (to match heatmap + other plots)
+# Apply reversed dendrogram order (to match heatmap + other plots)
 feat_imp_df['Feature'] = pd.Categorical(
     feat_imp_df['Feature'],
     categories=ordered_features[::-1],
@@ -614,7 +614,7 @@ feat_imp_df['Feature'] = pd.Categorical(
 )
 feat_imp_df = feat_imp_df.sort_values('Feature')
 
-# ✅ Barplot
+# Barplot
 plt.figure(figsize=(14, 6))
 sns.barplot(
     data=feat_imp_df,

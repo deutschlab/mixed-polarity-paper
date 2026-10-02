@@ -174,7 +174,7 @@ print(f"Levene’s test for equal variances: p = {lev_p:.3e}")
 
 # --- If parametric assumptions hold ---
 if (lev_p > 0.05) and all(norm_p > 0.05):
-    print("\n✅ Assumptions met → Performing one-way ANOVA:")
+    print("\nAssumptions met → Performing one-way ANOVA:")
     f_stat, p_val = f_oneway(*(df_nt.loc[df_nt["nt_type"] == g, "SI"] for g in main_nt))
     print(f"One-way ANOVA: F = {f_stat:.3f}, p = {p_val:.3e}")
 
@@ -185,7 +185,7 @@ if (lev_p > 0.05) and all(norm_p > 0.05):
 
 else:
     # --- Nonparametric path (if not normal or equal variances) ---
-    print("\n❌ Nonparametric distributions → Using Kruskal–Wallis test:")
+    print("\nNonparametric distributions → Using Kruskal–Wallis test:")
     from scipy.stats import kruskal
     h_stat, p_val = kruskal(*(df_nt.loc[df_nt["nt_type"] == g, "SI"] for g in main_nt))
     print(f"Kruskal–Wallis: H = {h_stat:.3f}, p = {p_val:.3e}")

@@ -301,8 +301,8 @@ for ax, (type_name, values), col in zip(axs, data.items(), colors):
     sizes = [v / total * 100 for v in values]
     ax.pie(
         sizes,
-        #labels=labels,              # ✅ outside labels
-        autopct='%1.1f%%',          # ✅ inside percentages
+        #labels=labels,              # outside labels
+        autopct='%1.1f%%',          # inside percentages
         colors=col,
         textprops={'fontsize': 8},
         labeldistance=1.25,         # push Pure/Mixed outside

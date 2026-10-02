@@ -222,11 +222,11 @@ print(f"Cohen's d (arcsine sqrt): d = {d:.3f}")
 #  INTERPRETATION SUMMARY
 # ======================
 if p_mw < 0.05:
-    print("\n✅ Significant difference between Adult and Larva SI distributions (Mann–Whitney).")
+    print("\nSignificant difference between Adult and Larva SI distributions (Mann–Whitney).")
 else:
-    print("\n❌ No significant difference (Mann–Whitney).")
+    print("\nNo significant difference (Mann–Whitney).")
 
 if p_t < 0.05:
-    print("✅ Welch t-test (after transform) also significant.")
+    print("Welch t-test (after transform) also significant.")
 else:
-    print("❌ Welch t-test not significant.")
+    print("Welch t-test not significant.")

@@ -191,7 +191,7 @@ mask = np.triu(np.ones_like(corr, dtype=bool))  # Upper triangle (keep lower)
 # Plot heatmap showing only lower triangle + diagonal
 heatmap = sns.heatmap(
     corr,
-    mask=mask,                  # 🔹 hides upper triangle
+    mask=mask,                  # hides upper triangle
     cmap='Blues',
     annot=True,
     annot_kws={"size": annot_size},
@@ -204,13 +204,13 @@ heatmap = sns.heatmap(
 # Get the colorbar object
 cbar = heatmap.collections[0].colorbar
 
-# ✅ Change tick label size
+# Change tick label size
 cbar.ax.tick_params(labelsize=4)
 
-# ✅ Change tick formatting (e.g., 2 decimal places)
+# Change tick formatting (e.g., 2 decimal places)
 cbar.ax.yaxis.set_major_formatter(mticker.FormatStrFormatter('%.2f'))
 
-# ✅ Change the colorbar label font size
+# Change the colorbar label font size
 cbar.set_label("Correlation", fontsize=4)
 
 # Optional: set specific ticks on the colorbar

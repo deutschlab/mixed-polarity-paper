@@ -71,7 +71,7 @@ def process_first_part(
 
     # === Skip large neurons ===
     if len(swc.nodes) > 80000:
-        print(f"⚠️ Skipping neuron {swc_id} — {len(swc.nodes)} nodes (> 80000)")
+        print(f"Skipping neuron {swc_id} — {len(swc.nodes)} nodes (> 80000)")
         return pd.DataFrame()  # return empty so main loop can continue
 
     swc_att = heal_attach(swc, syn_)
@@ -170,7 +170,7 @@ def process_first_part(
 
     final_filtered = final[keep_mask].reset_index(drop=True)
 
-    # ✅ Enforce Int64 dtypes for IDs including synapse_id before returning
+    # Enforce Int64 dtypes for IDs including synapse_id before returning
     for col in ['pre', 'post', 'synapse_id']:
         if col in final_filtered.columns:
             final_filtered[col] = final_filtered[col].astype('Int64')
@@ -194,7 +194,7 @@ def process_second_part(swc_id: int, filopodia_info: pd.DataFrame):
         nodes = filopodia_info[filopodia_info['post'] == swc_id].dropna(subset=['node_id']).copy()
 
         if nodes.empty:
-            print(f"⚠️ Skipping second stage for neuron {swc_id} — no valid nodes found.")
+            print(f"Skipping second stage for neuron {swc_id} — no valid nodes found.")
             return pd.DataFrame({c: pd.Series(dtype='Int64') for c in ['pre', 'post', 'synapse_id']})
 
         nodes_continue, nodes_stop = node_test2(nodes, G)
@@ -233,7 +233,7 @@ def process_second_part(swc_id: int, filopodia_info: pd.DataFrame):
         filtered_nodes['base'] = filtered_nodes['base_node'].map(unique_bases)
         filtered_nodes_final = pd.concat([filtered_nodes_final, filtered_nodes], ignore_index=True)
 
-        # ✅ Enforce Int64 dtypes for pre, post, and synapse_id before returning
+        # Enforce Int64 dtypes for pre, post, and synapse_id before returning
         for col in ['pre', 'post', 'synapse_id']:
             if col in filtered_nodes_final.columns:
                 filtered_nodes_final[col] = filtered_nodes_final[col].astype('Int64')
@@ -241,7 +241,7 @@ def process_second_part(swc_id: int, filopodia_info: pd.DataFrame):
         return filtered_nodes_final
 
     except Exception as e:
-        print(f"  ⚠️ Error in second stage for neuron {swc_id}: {e}")
+        print(f"  Error in second stage for neuron {swc_id}: {e}")
         traceback.print_exc()
         # Explicitly preserve synapse_id in empty return schema
         return pd.DataFrame({c: pd.Series(dtype='Int64') for c in ['pre', 'post', 'synapse_id']})
@@ -255,7 +255,7 @@ def run_pipeline(config: Config | None = None) -> pd.DataFrame:
 
     # === configuration ===
     allsynapses = pd.read_feather(cfg.synapse_table_path)
-    # ✅ enforce Int64 to preserve large IDs safely
+    # enforce Int64 to preserve large IDs safely
     allsynapses['pre'] = allsynapses['pre'].astype('Int64')
     allsynapses['post'] = allsynapses['post'].astype('Int64')
     # Load the file safely
@@ -287,7 +287,7 @@ def run_pipeline(config: Config | None = None) -> pd.DataFrame:
             filtered_nodes['neuron_id'] = swc_id
             final_combined_df = pd.concat([final_combined_df, filtered_nodes], ignore_index=True)
         except Exception as e:
-            print(f"⚠️ Error processing neuron {swc_id}: {e}")
+            print(f"Error processing neuron {swc_id}: {e}")
             traceback.print_exc()
             continue
 
@@ -312,7 +312,7 @@ def main() -> None:
 
     # save final combined file post_on_MSB.ftr in the data directory
     final_combined_df.to_feather(output_path)
-    print(f"✅ Saved final combined file: {output_path}")
+    print(f"Saved final combined file: {output_path}")
 
 
 if __name__ == "__main__":
