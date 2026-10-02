@@ -166,6 +166,21 @@ python tools/check_split_methods_on_subset.py --out outputs/split_methods_check/
 
 On 1,144 intrinsic neurons (macOS, 2 Oct 2026) it took 28 minutes, with a peak memory footprint of 24.7 GB, almost all of it step 08's own work on a batch of 500 neurons; 20 neurons took 13 seconds and 1.0 GB. Use `--limit` on a smaller machine.
 
+### Checking the simple PC1 model
+
+`tools/check_simple_pc1_model.py` rebuilds the model of `figures/fig4/syntype_x_pc1_simple_model.py` (a random forest that predicts a synapse's type from PC1 of its two cells) in its own code, following the script's filters, balancing, split and settings, and prints the counts, the test accuracy, the confusion matrix and the feature importances. With `--run DIR`, a `tools/run_figure.py` run of the figure script, it first checks that the run finished (and warns if the synapse or neuron table, from step 05, or the PCA table, from step 07, is newer than the run), then compares: the accuracy in `stdout.log` exactly, the 16 confusion-matrix percentages in the SVG to 0.005 (after checking the axis labels), and the two feature importances measured from the bar lengths in the SVG, to `--tol-importance` (default 0.001), after checking they sum to 1. It prints PASS or FAIL and exits with status 1 on FAIL. A PASS means the script computes what its code says on the same tables; it does not test the tables or whether the model is statistically sound (rows are resampled before the split, and the split is by synapse).
+
+`--variants` repeats the rebuild with one change each (balancing seed 7, PC1 sign flipped, synapses of cells without PC1 left out) and prints how much the accuracy and each confusion-matrix cell move; three runs give only a rough idea of the noise. `--earlier DIR` (with `--run`) compares the run with an earlier run's two SVGs, for information only; the earlier accuracy is the mean of its confusion-matrix diagonal. `--report FILE` also writes everything printed to a file.
+
+```bash
+python tools/run_figure.py figures/fig4/syntype_x_pc1_simple_model.py --out outputs/check/simple_model
+python tools/check_simple_pc1_model.py --run outputs/check/simple_model --variants
+```
+
+The `--out` folder of `run_figure.py` must be new or empty.
+
+It reads only the five needed columns of the synapse table, batch by batch, and needs about 7 GB of memory; with `--variants` it took about 8 minutes (macOS, 2 Oct 2026). The result is exact only with the pinned library versions.
+
 ## Main generated tables
 
 The pipeline writes these to `data/derived/`.
@@ -223,6 +238,7 @@ tools/
   synapse_type_shares.py   share of each synapse type in a synapse table
   split_agreement.py       agreement of synapse types between splits
   check_split_methods_on_subset.py  run step 08 on some neurons and compare with a reference table
+  check_simple_pc1_model.py  rebuild the Fig 4 simple PC1 model and check a run of its script
 
 demo/               the demo notebook and its 200-neuron data set
 
