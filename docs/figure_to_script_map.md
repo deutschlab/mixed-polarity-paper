@@ -90,9 +90,10 @@ multiple classification models.
 
 > `syntype_x_pc1_simple_model.py` saves a feature-importance plot, a confusion matrix and a decision surface
 > for a model on PC1, the same kinds of plot as Fig 4A and 4D. It reads the PCA table step 07 writes
-> (`PCA_TABLE_FTR`), like `syntype_x_pc1.py`; the authors' earlier copies of its plots were made from an older
-> PCA table that no longer exists, so a rerun differs from them (by up to 3.4 points in each cell of the
-> confusion matrix; accuracy 40.5% against 39.6%). A rerun can be checked against an independent rebuild of
+> (`PCA_TABLE_FTR`), like `syntype_x_pc1.py`. The authors' earlier copies of its plots were made from an older
+> PCA table that no longer exists, and a rerun differs from them (by up to 3.4 points in a cell of the
+> confusion matrix; accuracy 40.5% against 39.6%). That is more than the seed or the sign of PC1 changes, and fits
+> the different table, but the older table cannot be checked. A rerun can be checked against an independent rebuild of
 > the model with `tools/check_simple_pc1_model.py` (README, Tools). `syntype_x_pc1.py` draws a decision surface too, but its save line (586) is
 > commented out, so which script made the published Fig 4D is not settled. Fig 4 Supp 1 holds only skeleton
 > images of the Fig 4D neurons.
