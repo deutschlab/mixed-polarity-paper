@@ -43,7 +43,6 @@ CONNECTIONS_TABLE_FTR     = DERIVED_DATA_DIR / (
     "connections_by_syn_type_reciprocal_types_filtered_article_princeton.ftr"
 )
 PCA_TABLE_FTR             = DERIVED_DATA_DIR / "neurons_pca_princeton.ftr"
-PCA_TABLE_NONP_FTR        = DERIVED_DATA_DIR / "neurons_pca.ftr"
 SI_UPDATED_FTR            = DERIVED_DATA_DIR / "SI_updated.ftr"
 SWC_DATA_FTR              = DERIVED_DATA_DIR / "swc_data.ftr"
 RECI_PROP_FTR             = DERIVED_DATA_DIR / "reci_prop_princeton.ftr"

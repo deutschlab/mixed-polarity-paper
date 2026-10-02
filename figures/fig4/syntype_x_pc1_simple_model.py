@@ -12,7 +12,7 @@ import matplotlib.cm as cm
 import pickle
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from config import NEURON_TABLE_FTR, SYNAPSE_TABLE_FTR, PCA_TABLE_NONP_FTR, OUTPUT_DIR, METHODS_DIR
+from config import NEURON_TABLE_FTR, SYNAPSE_TABLE_FTR, PCA_TABLE_FTR, OUTPUT_DIR, METHODS_DIR
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
 import seaborn as sns
@@ -31,7 +31,7 @@ nodesG=nodesG[['neuron','super_class',
 nodesG=nodesG[nodesG['super_class'].isin(['central','optic','visual_projection','visual_centrifugal'])]
 #%%
 
-pcadf=pd.read_feather(PCA_TABLE_NONP_FTR)
+pcadf=pd.read_feather(PCA_TABLE_FTR)
 #%%
 
 nodesG=nodesG.merge(pcadf,on='neuron',how='left')

@@ -104,15 +104,14 @@ and [generated_tables.md](generated_tables.md) for key column descriptions.
 | `all_synapses_unprocess_larva_th0.9_SI_filt_issue_solved.ftr` | `data/larva/output/` | `processing/larva/larva_process.py` |
 | `SI_list_larva_th_0.9_linker_SI_filt_issue_solved` | `data/larva/results/` | `processing/larva/larva_process.py` |
 
-Seven inputs are read by the code but not written by any script in this repository:
+Six inputs are read by the code but not written by any script in this repository:
 
 - `neurons_nt_bwf_frac.ftr`, read by `figures/fig5/reciprocal_fraction_x_bwf.py` and `figures/fig7/filopodia_x_mirror_neurons.py`
 - `syn_bouton_filopodia.ftr`, read by the four Fig 7 scripts listed in the Fig 7 section below
 - `swc_data.ftr`, read by `05_build_neuron_metadata_table.py` (the only code that writes it is commented out)
 - three tables from the earlier, non-Princeton synapse detection: `neuron_data_full_article.ftr` (read by `figures/fig2/si_comparisons.py`, `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` and `figures/fig5/fig5d_chi_reci_identity.py`), `synapses_783_article.ftr` (read by `figures/fig2/si_comparisons.py`, `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` and `figures/fig3/si_x_npil_x_synapse_detection.py`) and `connections_by_syn_type_reciprocal_types_filtered_article.ftr` (read by `figures/fig5/fig5d_chi_reci_identity.py`)
-- `neurons_pca.ftr`, read by `figures/fig4/syntype_x_pc1_simple_model.py`, which merges it onto the Princeton neuron table
 
-None of these seven files is deposited with this repository. Those scripts cannot run until the files are supplied. (`synapses_783_article_princeton_raw.ftr` used to be on this list; `processing/build_raw_synapse_table.py` now builds it from the Codex CSV.) Because step 05 needs `swc_data.ftr`, the neuron table, and every step and figure that reads it, cannot be rebuilt from the downloads alone.
+None of these six files is deposited with this repository. Those scripts cannot run until the files are supplied. (`synapses_783_article_princeton_raw.ftr` used to be on this list; `processing/build_raw_synapse_table.py` now builds it from the Codex CSV.) Because step 05 needs `swc_data.ftr`, the neuron table, and every step and figure that reads it, cannot be rebuilt from the downloads alone.
 
 ### The Buhmann tables (earlier synapse detection)
 
@@ -147,9 +146,6 @@ Whether the Buhmann run differed in anything else is not recorded here.
 line 554, after it has saved all its figures. Nothing from them is saved or printed: the reciprocal
 fractions there are bare expressions, shown only when the script is run cell by cell. Without those
 files the script stops at line 554, with its figures already written.
-
-`neurons_pca.ftr` (`PCA_TABLE_NONP_FTR` in `config.py`) is also listed above; how it was made is not
-recorded in this repository.
 
 ---
 
