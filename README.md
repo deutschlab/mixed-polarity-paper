@@ -151,6 +151,21 @@ python tools/synapse_type_shares.py --si corrected
 
 Both tools accept `--table` to point at another synapse table with the same columns. `synapse_type_shares.py --column` counts a different column of synapse types, and `split_agreement.py` takes the columns to compare as arguments. They were written for a synapse table with one type column per split method, like the one the alternative-split pipeline produces. Step 08 only scores the splits per neuron; the pipeline that labels each synapse under each split hasn't been added to the repository yet, so for now no table here has more than one type column.
 
+### Checking the split methods
+
+`tools/check_split_methods_on_subset.py` runs step 08 on some of the neurons, by default every intrinsic neuron whose skeleton is under `SWC_DIR`, so the split methods can be checked without the full skeleton download. It needs the raw synapse table (`processing/build_raw_synapse_table.py`). It does not keep its own copy of step 08: it patches five places in `processing/08_alternative_split_methods.py` (the repository path, the two output paths, the neuron list, the synapse read and the batch range of the combine step) and stops if any of them is not found exactly once. Everything is written to the `--out` folder, which has to be new or empty, including the patched copy and a `provenance.txt` with the commit, the step 08 checksum and the pandas and numpy versions. `--ids FILE` and `--limit N` choose other neurons, and `--resume` continues an interrupted run, refusing if step 08 or the list of neurons has changed.
+
+Afterwards it writes `per_neuron.csv`. This holds step 08's four scores for each neuron, whether step 08 listed the neuron as failed, and two values computed from the per-node tables: the MinFisherP Phi under a second tie rule (the first node in table order with the lowest p) and MaxPhi (the highest |Phi| over the candidate nodes, a fourth split method that step 08 does not compute). Ties for the lowest p are common, but usually between nodes that give the same cut; the two rules give a different Phi only when the tied nodes give different cuts, which on the 1,144 neurons tested happened in 37, all where the p-value underflowed to 0 or to the smallest float. It also prints how many neurons have tied nodes and how many have MaxSI below the SFC SI. With `--compare REF.ftr`, each score is compared, neuron by neuron, with a reference table that has a `neuron_id` column (`original_SI` is read as `SFC_SI`). A neuron counts as a problem if a score differs by more than `--tol` (default 1e-9), is empty in one table only, is missing from the reference, or failed in the run; a reference with no score column in common fails. A failing `MaxPhi` means the tool's own computation disagrees with the reference, not step 08. The tool prints PASS or FAIL for each reference, lists the problem neurons in `differences_*.csv`, and exits with status 1 if any reference fails. `--compare-only` repeats the analysis on a finished run. Without `--compare` nothing is checked and the exit status is 0. A PASS covers only the neurons run; against a table made by the same step 08 code it shows that the result does not depend on which neurons are run together, not that the method is right. `other_summary.ftr` below stands for any table with a `neuron_id` column.
+
+```bash
+python tools/check_split_methods_on_subset.py --out outputs/split_methods_check/run1 \
+    --compare data/derived/SI_comparisons.ftr
+python tools/check_split_methods_on_subset.py --out outputs/split_methods_check/run1 --compare-only \
+    --compare data/derived/SI_comparisons.ftr other_summary.ftr
+```
+
+On 1,144 intrinsic neurons (macOS, 2 Oct 2026) it took 28 minutes, with a peak memory footprint of 24.7 GB, almost all of it step 08's own work on a batch of 500 neurons; 20 neurons took 13 seconds and 1.0 GB. Use `--limit` on a smaller machine.
+
 ## Main generated tables
 
 The pipeline writes these to `data/derived/`.
@@ -207,6 +222,7 @@ tools/
   check_raw_synapse_table.py  check the two raw synapse tables after building them
   synapse_type_shares.py   share of each synapse type in a synapse table
   split_agreement.py       agreement of synapse types between splits
+  check_split_methods_on_subset.py  run step 08 on some neurons and compare with a reference table
 
 demo/               the demo notebook and its 200-neuron data set
 
