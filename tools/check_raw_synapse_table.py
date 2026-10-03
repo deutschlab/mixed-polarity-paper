@@ -137,4 +137,12 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # No inputs needed: it reads the tables named in config.py, on this machine
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/synapses_783_article_princeton_raw.ftr            (without self-synapses)
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/synapses_783_article_princeton_raw_with_self.ftr  (with self-synapses)
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/synapses_783_article_princeton.ftr                (processed, from step 04)
+    # and prints its checks; it writes no file. To also count the rows of the Codex CSV
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/raw/fafb_v783_princeton_synapse_table.csv  (7 GB)
+    # uncomment:
+    # sys.argv[1:] = ["--csv"]
     main()

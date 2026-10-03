@@ -404,4 +404,17 @@ def main():
 
 
 if __name__ == "__main__":
+    # Compares the cuts of two step 08 runs on the same 1,144 neurons:
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/split_methods_check/run_2oct/batches                    (A: cuts chosen on the raw synapse table)
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/split_raw_vs_processed/run_processed_table/batches  (B: cuts chosen on the processed table)
+    # --exact processed rebuilds the differing neurons from the skeletons under
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/raw/swc/783
+    # with run B's synapse table
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/synapses_783_article_princeton.ftr
+    # and writes summary.txt and per_neuron.csv to
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/compare_split_runs
+    # To run it, uncomment:
+    # sys.argv[1:] = ["/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/split_methods_check/run_2oct/batches",
+    #                 "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/split_raw_vs_processed/run_processed_table/batches",
+    #                 "--exact", "processed"]
     main()

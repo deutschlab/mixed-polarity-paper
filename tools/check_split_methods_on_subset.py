@@ -461,4 +461,17 @@ def main():
 
 
 if __name__ == "__main__":
+    # Runs step 08 (/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/processing/08_alternative_split_methods.py)
+    # on the first 20 intrinsic neurons whose skeletons are under
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/raw/swc/783
+    # with the raw synapse table
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/synapses_783_article_princeton_raw.ftr
+    # writes the run (batches, patched step 08, provenance, per_neuron.csv) to
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/split_methods_check/ide_run   (must be new or empty)
+    # and compares it with
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/SI_comparisons.ftr
+    # To run it, uncomment:
+    # sys.argv[1:] = ["--out", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/split_methods_check/ide_run",
+    #                 "--limit", "20",
+    #                 "--compare", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/SI_comparisons.ftr"]
     main()

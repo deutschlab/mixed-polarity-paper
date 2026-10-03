@@ -464,4 +464,10 @@ def main():
 
 
 if __name__ == "__main__":
+    # No inputs needed: it checks the step 08 code in
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/processing/08_alternative_split_methods.py
+    # on test trees it builds itself (named ones in this file and 300 random ones), and writes
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/split_functions/report.txt
+    # To test with more random trees, uncomment:
+    # sys.argv[1:] = ["--random", "1000", "--seed", "1"]
     main()

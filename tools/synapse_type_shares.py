@@ -166,4 +166,12 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # Prints the share of each synapse type (AA, AD, DA, DD) in
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/synapses_783_article_princeton.ftr
+    # in four groups: all synapses, SI >= 0.1 on both ends, intrinsic neurons, and intrinsic neurons with
+    # SI >= 0.1 (intrinsic cells from /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/neuron_data_full_article_princeton.ftr).
+    # --si corrected takes the SI from
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/SI_updated.ftr
+    # instead of the table's own SI_pre / SI_post. It writes no file. To run it, uncomment:
+    # sys.argv[1:] = ["--si", "corrected"]
     main()

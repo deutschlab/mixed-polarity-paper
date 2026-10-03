@@ -395,4 +395,14 @@ def main():
 
 
 if __name__ == "__main__":
+    # Checks a run of figures/fig4/syntype_x_pc1_simple_model.py made with tools/run_figure.py:
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/simple_model_final   (the 2 Oct run)
+    # against the tool's own rebuild of the model from the tables named in config.py:
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/synapses_783_article_princeton.ftr
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/neuron_data_full_article_princeton.ftr
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/neurons_pca_princeton.ftr
+    # --variants also refits three variants (seed 7, PC1 sign flipped, cells without PC1 left out).
+    # It prints PASS or FAIL; it writes no file unless --report is given. To run it, uncomment:
+    # sys.argv[1:] = ["--run", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/simple_model_final",
+    #                 "--variants"]
     main()

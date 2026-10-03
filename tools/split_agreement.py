@@ -401,4 +401,14 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # Compares the synapse types that four splits give, in the per-method synapse table
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/internal_communication/amit_files/synapse_table_SIALT-001.ftr
+    # (columns comp = published SFC split, maxSI_compartment, fisher_compartment, maxPhi_compartment),
+    # with the intrinsic neurons from
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/neuron_data_full_article_princeton.ftr
+    # and the SI_pre / SI_post columns of the same table for the SI >= 0.1 groups. It also counts what
+    # that table lacks against /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/synapses_783_article_princeton.ftr.
+    # It prints the agreement tables; it writes no file. To run it, uncomment:
+    # sys.argv[1:] = ["--table", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/internal_communication/amit_files/synapse_table_SIALT-001.ftr",
+    #                 "comp", "maxSI_compartment", "fisher_compartment", "maxPhi_compartment"]
     main()

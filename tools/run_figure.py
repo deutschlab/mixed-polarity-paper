@@ -223,4 +223,11 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # Runs one figure script without opening windows:
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/figures/fig2/si_x_sclass.py
+    # on the tables named in config.py, and writes its figures, stdout.log, stderr.log and run_status.txt to
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/si_x_sclass_ide   (must be new or empty)
+    # To run it, uncomment:
+    # sys.argv[1:] = ["/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/figures/fig2/si_x_sclass.py",
+    #                 "--out", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/si_x_sclass_ide"]
     main()
