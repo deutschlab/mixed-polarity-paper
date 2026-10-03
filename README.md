@@ -166,6 +166,24 @@ python tools/check_split_methods_on_subset.py --out outputs/split_methods_check/
 
 On 1,144 intrinsic neurons (macOS, 2 Oct 2026) a run took 28 to 36 minutes. Step 08's own process peaked at a memory footprint of 24.7 GB in a run of the same patched code, almost all of it its work on a batch of 500 neurons; 20 neurons took 13 seconds and about 1 GB. Use `--limit` on a smaller machine.
 
+### Checking step 08's split code
+
+`tools/check_split_functions.py` runs step 08's own batch function (`run_neuron_batch_pipeline` and the functions it calls, taken from `processing/08_alternative_split_methods.py` without running the file) on small made-up neurons, with only the loading and the SFC split replaced, and compares the results with a reference written separately: the side counts, SI and Fisher p of every candidate cut, `absolute_phi`, the nodes MaxSI and MinFisherP choose, the side counts saved for them, the axon side (including ties and empty sides), and that neurons with no valid cut fail. It also runs random trees, a 20,000-node chain and re-rooted trees, and reports how often a tie between equally good cuts decided the choice. It does not test the SFC split, the loading of skeletons and synapses, or the IG, `fisher_q` and odds-ratio columns. It prints PASS or FAIL per check, writes `outputs/check/split_functions/report.txt` (with the checksum of the step 08 file) and exits with status 1 if anything fails; about 40 seconds. `--script FILE` checks another version of the same functions.
+
+```bash
+python tools/check_split_functions.py
+```
+
+### Comparing two runs of step 08
+
+`tools/compare_split_runs.py` compares two step 08 runs on the same neurons, for example two runs of `tools/check_split_methods_on_subset.py` that choose their cuts on different synapse tables. For each neuron and each of MaxSI and MinFisherP it looks up run A's chosen node in run B's node table, so both cuts are scored on run B's synapses, and reports how many nodes and how many cuts differ (a different node can give the same cut), the scores of both cuts, how many neurons cross a cutoff (SI 0.1; |Phi| 0.36, the value `processing/phi_threshold.py` recommends), how many MinFisherP differences are ties at p = 0, and how many synapses change between axon and dendrite. From the node tables alone that last number is a range; `--exact raw|processed` rebuilds the differing neurons from the skeletons with the synapse table run B used, checks that they give run B's side counts, and counts exactly. It first checks that each run's summary matches its own node tables and that both runs have the same candidate nodes. `--expect-identical` exits with status 1 unless the neuron sets, the chosen nodes, the node tables' side counts and the SFC SI all agree. Output: `summary.txt` and `per_neuron.csv` in `outputs/check/compare_split_runs/`.
+
+```bash
+python tools/compare_split_runs.py RUN_A/batches RUN_B/batches --exact processed
+```
+
+On the 1,144 neurons of skeleton folder 7, choosing the cut on the processed instead of the raw synapse table changed the MaxSI cut in 34 neurons and the MinFisherP cut in 55, none across its cutoff (3 Oct 2026).
+
 ### Checking the simple PC1 model
 
 `tools/check_simple_pc1_model.py` rebuilds the model of `figures/fig4/syntype_x_pc1_simple_model.py` (a random forest that predicts a synapse's type from PC1 of its two cells) in its own code, following the script's filters, balancing, split and settings, and prints the counts, the test accuracy, the confusion matrix and the feature importances. With `--run DIR`, a `tools/run_figure.py` run of the figure script, it first checks that the run finished (and warns if the synapse or neuron table, from step 05, or the PCA table, from step 07, is newer than the run), then compares: the accuracy in `stdout.log` exactly, the 16 confusion-matrix percentages in the SVG to 0.005 (after checking the axis labels), and the two feature importances measured from the bar lengths in the SVG, to `--tol-importance` (default 0.001), after checking they sum to 1. It prints PASS or FAIL and exits with status 1 on FAIL. A PASS means the script computes what its code says on the same tables; it does not test the tables or whether the model is statistically sound (rows are resampled before the split, and the split is by synapse).
@@ -239,6 +257,8 @@ tools/
   split_agreement.py       agreement of synapse types between splits
   check_split_methods_on_subset.py  run step 08 on some neurons and compare with a reference table
   check_simple_pc1_model.py  rebuild the Fig 4 simple PC1 model and check a run of its script
+  check_split_functions.py  check step 08's split code on made-up neurons against a separate reference
+  compare_split_runs.py    compare the cuts of two step 08 runs on the same neurons
 
 demo/               the demo notebook and its 200-neuron data set
 
