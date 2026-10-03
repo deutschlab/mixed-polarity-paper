@@ -1,10 +1,10 @@
 # Split methods: the Fig 2 within- vs between-type SD plot (Supp 2-S2 D layout), redone with the MaxSI cut's SI.
-# Ported from Amit's Fig2/fig_2/SI x Primary_types/MaxSI x Primary_types.py.
+# Ported from the authors' original script Fig2/fig_2/SI x Primary_types/MaxSI x Primary_types.py.
 # Changes: paths via config.py and the repository preamble (which also sets editable Arial text in the SVGs);
 # nothing else.
 # The Welch ANOVA here covers the types with at least 2 neurons (F(7402, ...)); the one in the Supp 2-S2 D
 # legend has F(7510, ...), so it was run on all 7,511 types, singletons included.
-# Reads MaxSI_SI from SI_COMPARISONS_FTR (Amit's table of the four cuts' scores; intrinsic neurons only).
+# Reads MaxSI_SI from SI_COMPARISONS_FTR (the authors' table of the four cuts' scores; intrinsic neurons only).
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))

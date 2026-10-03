@@ -1,9 +1,9 @@
 # Split methods: draws, for chosen cells, the published (SFC) split next to the MaxSI split, to show how the
 # cut moves (one cell split in different ways).
-# Ported from Amit's ALT_SI_COMP/Skeleton_comparisons.py.
-# Changes: paths via config.py and the repository preamble; each split image is also saved (Amit's only
+# Ported from the authors' original script ALT_SI_COMP/Skeleton_comparisons.py.
+# Changes: paths via config.py and the repository preamble; each split image is also saved (the original only
 # showed it); the repository preamble also sets editable Arial text in the SVGs; and the ONLY_CELLS_WITH_SKELETONS
-# option below ("auto" keeps Amit's exact selection when all its skeletons are on disk, and otherwise replaces it).
+# option below ("auto" keeps the original selection exactly when all its skeletons are on disk, and otherwise replaces it).
 # The SFC SI here is the one in SI_COMPARISONS_FTR and SI_updated.ftr; the delivered neuron table's SI differs when
 # the cell has self-synapses (see RAW_TABLE_KEEP_SELF_SYNAPSES in config.py).
 # Reads SYNAPSE_TABLE_RAW_FTR (built by processing/build_raw_synapse_table.py; RAW_TABLE_KEEP_SELF_SYNAPSES
@@ -1223,7 +1223,7 @@ def show_split_image(
 
     # SHOW ONLY
     # NO savefig
-    # Port: Amit's script did not save the split images; this does, named after the title.
+    # Port: the original script did not save the split images; this does, named after the title.
     fig.savefig(_out_dir / (re.sub(r"[^A-Za-z0-9_.-]+", "_", str(title))[:120] + ".svg"), bbox_inches="tight")
     plt.show()
 
@@ -2172,11 +2172,11 @@ def run_neuron_batch_pipeline(
     )
 
 
-#%% Port option, not in Amit's script.
-# "auto" (default): Amit's own selection if every cell in it has a skeleton in SWC_DIR. If even one is
+#%% Port option, not in the original script.
+# "auto" (default): the original selection if every cell in it has a skeleton in SWC_DIR. If even one is
 #   missing, the whole selection is replaced (printed): the first cells of the same sorted list that have a
-#   skeleton, so not cells near row X. False: always Amit's selection (a cell without a skeleton fails to
-#   load and is reported as a failure). True: always the replacement, even when Amit's cells are present.
+#   skeleton, so not cells near row X. False: always the original selection (a cell without a skeleton fails to
+#   load and is reported as a failure). True: always the replacement, even when the original cells are present.
 ONLY_CELLS_WITH_SKELETONS = "auto"
 # The same layout upload_swc reads: SWC_DIR/<folder>/<id>.swc
 _have = {int(p.stem) for p in SWC_DIR.glob("*/*.swc") if p.stem.isdigit()}
@@ -2195,7 +2195,7 @@ SI_selected = (
 )
 _missing = ~SI_selected['neuron_id'].astype('int64').isin(_have)
 if ONLY_CELLS_WITH_SKELETONS is True or (ONLY_CELLS_WITH_SKELETONS == "auto" and _missing.any()):
-    print(f"Port: {int(_missing.sum())} of the {len(SI_selected)} cells Amit's settings select have no skeleton "
+    print(f"Port: {int(_missing.sum())} of the {len(SI_selected)} cells the original settings select have no skeleton "
           "in SWC_DIR; using the first cells of the same sorted list that have one.")
     _avail = SI_[SI_['neuron_id'].astype('int64').isin(_have)].reset_index(drop=True)
     SI_selected = _avail.iloc[0:Y].copy()

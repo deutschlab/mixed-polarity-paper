@@ -127,7 +127,7 @@ FILOPODIA_NODES_NO_FILOPODIA_FTR = FILOPODIA_DIR / "nodes_no_filopodia.ftr"
 FILOPODIA_NODES_SAMPLEOUT_FTR    = FILOPODIA_DIR / "nodes_sampleout.ftr"
 
 # --- raw synapse table (built by processing/build_raw_synapse_table.py from PRINCETON_SYNAPSE_CSV) ---
-# Two versions: without self-synapses (as steps 01/02a and Amit's v2 split-method script use the synapses;
+# Two versions: without self-synapses (as steps 01/02a and the authors' original split-method script use the synapses;
 # the default) and with them. A cell split without them gives the SI in SI_updated.ftr and SI_comparisons.ftr;
 # split with them, it gives the SI in the delivered neuron table (the same on 30 of 30 cells checked).
 # This switch decides which file SYNAPSE_TABLE_RAW_FTR points to, for every script that reads it: step 08,

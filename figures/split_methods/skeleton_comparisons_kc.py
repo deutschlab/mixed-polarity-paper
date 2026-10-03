@@ -1,10 +1,10 @@
 # Split methods: the same comparison for Kenyon cells (KCg-m) where the MaxSI cut scores higher than the
 # published one: a density of the SI difference per KC type, with a histogram over all KC types drawn on the
-# same axes (as in Amit's script), then 5 cells from each of five bands.
-# Ported from Amit's ALT_SI_COMP/Skeleton_comparisons_KC.py (see ALT_SI_COMP/note_for_kc.txt).
+# same axes (as in the original script), then 5 cells from each of five bands.
+# Ported from the authors' original script ALT_SI_COMP/Skeleton_comparisons_KC.py.
 # Changes: paths via config.py and the repository preamble, which also sets editable Arial text in the SVGs;
-# each split image is also saved; and the ONLY_CELLS_WITH_SKELETONS option ("auto" keeps Amit's exact
-# selection when all 25 skeletons are on disk, and otherwise replaces it). MaxSI scores higher than SFC in
+# each split image is also saved; and the ONLY_CELLS_WITH_SKELETONS option ("auto" keeps the original selection exactly
+# when all 25 skeletons are on disk, and otherwise replaces it). MaxSI scores higher than SFC in
 # 5,173 of the 5,174 KCs in SI_COMPARISONS_FTR, so the SFC_SI < MaxSI_SI filter removes almost nothing.
 # Reads SYNAPSE_TABLE_RAW_FTR (see processing/build_raw_synapse_table.py) and the skeletons under SWC_DIR.
 import sys
@@ -1203,7 +1203,7 @@ def show_split_image(
 
     # SHOW ONLY
     # NO savefig
-    # Port: Amit's script did not save the split images; this does, named after the title.
+    # Port: the original script did not save the split images; this does, named after the title.
     fig.savefig(_out_dir / (re.sub(r"[^A-Za-z0-9_.-]+", "_", str(title))[:120] + ".svg"), bbox_inches="tight")
     plt.show()
 
@@ -2152,10 +2152,10 @@ def run_neuron_batch_pipeline(
     )
 
 
-#%% Port option, not in Amit's script.
-# "auto" (default): Amit's own selection if every cell in it has a skeleton in SWC_DIR. If even one is
+#%% Port option, not in the original script.
+# "auto" (default): the original selection if every cell in it has a skeleton in SWC_DIR. If even one is
 #   missing, the whole selection is replaced (printed): up to 5 cells per band drawn, with the same seed,
-#   from the KCg-m cells that have a skeleton. False: always Amit's selection (a cell without a skeleton
+#   from the KCg-m cells that have a skeleton. False: always the original selection (a cell without a skeleton
 #   fails to load and is reported as a failure). True: always the replacement.
 ONLY_CELLS_WITH_SKELETONS = "auto"
 # The same layout upload_swc reads: SWC_DIR/<folder>/<id>.swc
@@ -2183,7 +2183,7 @@ SI_selected = pd.concat([
 ]).reset_index(drop=True)
 _missing = ~SI_selected['neuron'].astype('int64').isin(_have)
 if ONLY_CELLS_WITH_SKELETONS is True or (ONLY_CELLS_WITH_SKELETONS == "auto" and _missing.any()):
-    print(f"Port: {int(_missing.sum())} of the {len(SI_selected)} cells Amit's settings select have no skeleton "
+    print(f"Port: {int(_missing.sum())} of the {len(SI_selected)} cells the original settings select have no skeleton "
           "in SWC_DIR; drawing up to 5 per band from the KCg-m cells that have one.")
     _kc = KCg_m[KCg_m['neuron'].astype('int64').isin(_have)]
     SI_selected = pd.concat([

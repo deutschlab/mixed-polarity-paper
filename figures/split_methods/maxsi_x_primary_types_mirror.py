@@ -1,8 +1,8 @@
 # Split methods: the left/right SI plot (Supp 2-S2 A layout), redone with the MaxSI cut's SI.
-# Ported from Amit's Fig2/supp_fig_2/SI X primary_types mirror/max_SI X primary_types mirror.py.
+# Ported from the authors' original script Fig2/supp_fig_2/SI X primary_types mirror/max_SI X primary_types mirror.py.
 # Changes: paths via config.py and the repository preamble (which also sets editable Arial text in the SVGs);
 # nothing else.
-# Reads MaxSI_SI from SI_COMPARISONS_FTR (Amit's table of the four cuts' scores; intrinsic neurons only).
+# Reads MaxSI_SI from SI_COMPARISONS_FTR (the authors' table of the four cuts' scores; intrinsic neurons only).
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))

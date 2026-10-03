@@ -96,6 +96,9 @@ and [generated_tables.md](generated_tables.md) for key column descriptions.
 | `SI_comparisons.ftr` | `data/derived/` | `08_alternative_split_methods.py` (optional) |
 | `synapses_783_article_princeton_raw.ftr`, `synapses_783_article_princeton_raw_with_self.ftr` | `data/derived/` | `processing/build_raw_synapse_table.py` (optional; needs the Codex CSV in its original 13-column order) |
 | `PC1_table.csv` | `data/derived/` | `figures/fig4/build_pc1_table.py` |
+| `PC1_table_with_predictions.csv` | `data/derived/` | `figures/fig4/syntype_x_pc1.py` |
+| `SI_updated.ftr` | `data/derived/` | `05_build_neuron_metadata_table.py` |
+| `reciprocity_list_full_article_princeton.ftr`, `connections_by_syn_type_filtered_article_princeton.ftr`, `connections_by_syn_type_reciprocal_filtered_article_princeton.ftr` | `data/derived/` | `06_build_connection_reciprocity_table.py` |
 | Split-method batch files | `data/intermediate/alternative_to_SI/all_neurons_batches/` | `08_alternative_split_methods.py` (optional) |
 | Four PKL files per skeleton subfolder | `data/intermediate/processed_swc_data/` | `01_extract_compartments_SI.py` |
 | Large-neuron PKL files | `data/intermediate/processed_big_neurons/` | `02a_large_neurons_pipeline.py` |

@@ -2,7 +2,7 @@
 # Step 08, figures/fig1/create_split_axon_dendrite_princeton.py and figures/split_methods/ read it as
 # SYNAPSE_TABLE_RAW_FTR; until now no script wrote it.
 #
-# Same recipe as Amit's ALT_SI_COMP/1_NEW_SI_METHOD_v2.py (lines 29-52): read the Codex CSV, keep each
+# Same recipe as the authors' original split-method script (not in this repository): read the Codex CSV, keep each
 # row's number as synapse_id (the same ids every other table uses), drop the three cleft-coordinate
 # columns, rebuild the full root ids, optionally drop self-synapses, rename the 11 columns by position.
 #

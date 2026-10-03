@@ -1,12 +1,12 @@
 # Fig 7J input, no filopodia condition: SI recomputed per neuron with incoming synapses that sit on a filopodium removed.
-# Ported from Amit's Fig 7/filapodia_extraction/SI_sim/si_sim_no_filopodia.py.
+# Ported from the authors' original script Fig 7/filapodia_extraction/SI_sim/si_sim_no_filopodia.py.
 # Changes: paths via config.py; unused imports removed (nglui, fafbseg, navis, networkx, sklearn,
-# ng_methods_v2, Amit's colour module, the CAVEclient connection and others). SI_calc came from
-# altsi_methods_v2 in Amit's setup; the copy in methods/methods_all.py is identical.
-# Amit's copy read "syn_bouton_filopodia(new).ftr"; SYN_BOUTON_FTR names the file without "(new)".
+# ng_methods_v2, the authors' colour module, the CAVEclient connection and others). SI_calc came from
+# altsi_methods_v2 in the original setup; the copy in methods/methods_all.py is identical.
+# The original copy read "syn_bouton_filopodia(new).ftr"; SYN_BOUTON_FTR names the file without "(new)".
 # Writes filopodia_nodes_no_filopodia (FILOPODIA_NODES_NO_FILOPODIA_FTR), which figures/fig7/si_comb_analysis.py reads.
 # The compartments are not re-split: SI is recomputed on the existing A/D labels.
-# Also added: svg.fonttype='none' and Arial (repository convention). Amit's saved SVGs drew text as
+# Also added: svg.fonttype='none' and Arial (repository convention). The original saved SVGs drew text as
 # DejaVu Sans glyph paths, so text and spacing differ from his files; plotted values do not.
 import sys
 from pathlib import Path

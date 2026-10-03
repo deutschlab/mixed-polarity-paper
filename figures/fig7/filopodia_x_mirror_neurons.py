@@ -1,10 +1,10 @@
 # Supp 7-S4 A (within- vs between-type SD of filopodia_fraction, the fraction of a neuron's MSBs with a postsynaptic terminal) and B (left vs right mirror types).
-# Ported from Amit's Fig 7/filapodia_extraction/filopodia X mirror neurons.py.
+# Ported from the authors' original script Fig 7/filapodia_extraction/filopodia X mirror neurons.py.
 # Changes: paths via config.py, repeated import cells merged into the preamble, and the
 # bouton-fraction table renamed df2 -> bwf_df, because the ANOVA cells below reuse df1/df2
 # as degrees of freedom and the later merge would otherwise receive an int. The unused load of
 # SYN_BOUTON_FTR is commented out (see the TODO below; the import is kept so it can be restored).
-# Amit's copies read "syn_bouton_filopodia(new).ftr" and "neurons_nt_bwf_frac(new).ftr";
+# The original copies read "syn_bouton_filopodia(new).ftr" and "neurons_nt_bwf_frac(new).ftr";
 # the config.py constants name the files without "(new)".
 # The ANOVA cells (Welch ANOVA, Games-Howell over every primary type) take a long time and
 # only print; the two SVGs do not depend on them.
@@ -35,9 +35,9 @@ _out_dir = OUTPUT_DIR / "fig7" / "filopodia_x_mirror_neurons"
 _out_dir.mkdir(parents=True, exist_ok=True)
 #%%
 
-# TODO - ask Amit/Dudi: this table is loaded but never used here (df1 is next assigned as a
+# TODO (to confirm with the authors): this table is loaded but never used here (df1 is next assigned as a
 # degrees-of-freedom count in the ANOVA cells), and the file is not deposited, so this line alone
-# would stop Supp 7-S4 from running. Commented out until they confirm it is not needed.
+# would stop Supp 7-S4 from running. Commented out; to be confirmed with the authors.
 # df1=pd.read_feather(SYN_BOUTON_FTR)
 #%%
 

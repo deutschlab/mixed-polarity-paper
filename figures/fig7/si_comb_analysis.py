@@ -1,13 +1,13 @@
 # Fig 7J: mean SI with and without the incoming synapses that sit on filopodia.
 # Reads the three tables written by figures/fig7/si_sim_baseline.py, si_sim_no_filopodia.py
 # and si_sim_sampleout.py; run those first.
-# Ported from Amit's Fig 7/filapodia_extraction/SI_sim/SI_comb_analysis.py.
+# Ported from the authors' original script Fig 7/filapodia_extraction/SI_sim/SI_comb_analysis.py.
 # Changes: paths via config.py, unused imports removed, and one crash fixed in the
 # "conditions on x-axis" cell: it looked up 'Sample-out' in LABELS, which holds only
 # 'Baseline' and 'No filopodia', and raised before drawing. That cell now picks its columns
 # by name. It only shows a figure; the saved 7J panel (sim_results.svg) is drawn earlier
 # and does not change.
-# Also added: svg.fonttype='none' and Arial (repository convention). Amit's saved SVGs drew text as
+# Also added: svg.fonttype='none' and Arial (repository convention). The original saved SVGs drew text as
 # DejaVu Sans glyph paths, so text and spacing differ from his files; plotted values do not.
 import sys
 from pathlib import Path

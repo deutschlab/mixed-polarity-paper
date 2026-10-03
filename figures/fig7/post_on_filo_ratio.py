@@ -1,8 +1,8 @@
 # Fig 7H: mean fraction of incoming synapses that sit on a filopodium, axon vs dendrite.
-# Ported from Amit's Fig 7/filapodia_extraction/t/post_on_filo_ratio.py.
+# Ported from the authors' original script Fig 7/filapodia_extraction/t/post_on_filo_ratio.py.
 # Changes: paths via config.py, unused imports removed, a duplicated cell removed.
-# Amit's copy read "syn_bouton_filopodia(new).ftr"; SYN_BOUTON_FTR names the file without "(new)".
-# Also added: svg.fonttype='none' and Arial (repository convention). Amit's saved SVGs drew text as
+# The original copy read "syn_bouton_filopodia(new).ftr"; SYN_BOUTON_FTR names the file without "(new)".
+# Also added: svg.fonttype='none' and Arial (repository convention). The original saved SVGs drew text as
 # DejaVu Sans glyph paths, so text and spacing differ from his files; plotted values do not.
 import sys
 from pathlib import Path

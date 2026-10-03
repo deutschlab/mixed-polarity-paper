@@ -4,7 +4,7 @@ This document maps each manuscript figure panel to the script that generates it,
 tables it requires, and the output directory where figures are saved.
 
 All figure scripts import `config.py` (paths) and `methods/methods_all.py` (utilities).
-Figures are saved to `outputs/figN/`; a few scripts also write tables to `data/derived/` (shown as "writes" below). None of these are committed to this repository.
+Figures are saved under `outputs/` (`outputs/figN/` for the figure folders; the other folders and `processing/phi_threshold.py` use their own names, given below); a few scripts also write tables to `data/derived/` (shown as "writes" below). None of these are committed to this repository.
 
 ---
 
@@ -40,15 +40,23 @@ Includes an adult vs larva SI comparison and PCA of morphological features.
 | Fig 2C | `figures/fig2/si_x_nt.py` | `NEURON_TABLE_FTR` | `outputs/fig2/SI_x_nt/` |
 | Fig 2D | `figures/fig2/feat_x_si_x_sclass_corr.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR` | `outputs/fig2/feat_x_si_x_sclass_corr/` |
 | Fig 2E | `figures/fig2/feat_rf_and_lr_models.py` | `NEURON_TABLE_FTR` | `outputs/fig2/feat_rf_and_lr_models/` |
-| Fig 2F | `figures/fig2/pca_on_feat.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig2/pca_on_feat/` |
-| Fig 2G | `figures/fig2/si_x_pca.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig2/SI_x_PCA/`, with bar plots in `colored_bars/`; also writes `full_info.ftr` there |
+| Fig 2F | `figures/fig2/si_x_pca.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` (loaded, but nothing that runs uses it) | `outputs/fig2/SI_x_PCA/` |
+| Fig 2G | `figures/fig2/si_x_pca.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` (loaded, but nothing that runs uses it) | `outputs/fig2/SI_x_PCA/` |
 | Fig 2 Supp 1A | `figures/fig2/si_x_twigs.py` | `NEURON_TABLE_FTR`, `NEUROPIL_SYNAPSE_CSV` | `outputs/fig2/SI_x_twigs/` |
 | Fig 2 Supp 1B/C | `figures/fig2/si_comparisons.py` | `NEURON_TABLE_FTR`, `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig2/SI_comparisons/` |
-| Fig 2 Supp 2A | `figures/fig2/si_x_primary_types.py` | `NEURON_TABLE_FTR` | `outputs/fig2/SI_x_primary_types/` |
-| Fig 2 Supp 2B | `figures/fig2/si_x_primary_types_mirror.py` | `NEURON_ANNOTATIONS_CSV`, `NEURON_TABLE_FTR`, `SI_UPDATED_FTR` | `outputs/fig2/SI_x_primary_types_mirror/` |
+| Supp 2-S2 A | `figures/fig2/si_x_primary_types_mirror.py` | `NEURON_ANNOTATIONS_CSV`, `NEURON_TABLE_FTR`, `SI_UPDATED_FTR` | `outputs/fig2/SI_x_primary_types_mirror/` |
+| Supp 2-S2 D | `figures/fig2/si_x_primary_types.py` | `NEURON_TABLE_FTR` | `outputs/fig2/SI_x_primary_types/` |
+| Not a panel of the submitted paper | `figures/fig2/pca_on_feat.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` (loaded, but nothing that runs uses it) | `outputs/fig2/pca_on_feat/` |
 
 > Fig 2A requires larval data files — see [data_availability.md](data_availability.md).
 > Fig 2 Supp 1A requires the neuropil synapse CSV — see [data_availability.md](data_availability.md).
+> In `outputs/fig2/SI_x_PCA/`, Fig 2F is `weights.svg` (line 100) and Fig 2G is
+> `optic_visual_projection_PC1_SI_CDF_vertical_v2.svg` (last written at line 910; lines 614 and 753 write the same
+> name first; only the last write remains). The script also saves variants, saves bar plots in `colored_bars/`, and
+> writes `full_info.ftr` to `outputs/fig2/SI_x_PCA/`.
+> Supp 2-S2 A is `SI_corr_sides_princeton_v2.svg` and reads the SI from `SI_UPDATED_FTR`; Supp 2-S2 D is
+> `std_of_si_within_groups_vs_between_princeton.svg` and uses the SI in `NEURON_TABLE_FTR`. `pca_on_feat.py` saves
+> signed PC1 and PC2 contributions and violin plots.
 
 ---
 
@@ -64,7 +72,8 @@ whether neurons within the same type use the same synapse-type pattern.
 | Fig 3C | `figures/fig3/fig3c_mixed_example_sfc.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/mixed_example/` |
 | Fig 3D | `figures/fig3/fig3d_si_compartment_correct.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/SI_x_correct_compartment/` |
 | Fig 3D (AD content, mixed) | `figures/fig3/fig3supp_ad_content_si_mixed.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/supp_ad_content_si_mixed/` |
-| Fig 3E | `figures/fig3/fig3e_syntype_composition.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_composition/` |
+| Fig 3E (drawn with the neuron table's SI; see the note) | `figures/fig3/fig3d_si_compartment_correct.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/SI_x_correct_compartment/` |
+| Not a panel of the submitted paper (synapse types per neuropil with an SI cutoff; stops before saving, see the note) | `figures/fig3/fig3e_syntype_composition.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_composition/` |
 | Fig 3F (AD content) | `figures/fig3/fig3supp_ad_content_si.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/supp_ad_content_si/` |
 | Fig 3F (syntype x identity) | `figures/fig3/syntype_x_identity.py` | `CLASSIFICATION_CSV`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_x_identity/` |
 | Fig 3G | `figures/fig3/nt_syn_type_same_not_same.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/nt_syn_type_same_not_same/` |
@@ -73,6 +82,14 @@ whether neurons within the same type use the same synapse-type pattern.
 | Fig 3J | `figures/fig3/syntype_x_features.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_x_features/` |
 | Fig 3 Supp 1A (Buhmann curve) / 2A/B | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_correct_compartment_buhmann/` |
 | Fig 3 Supp 2C | `figures/fig3/si_x_npil_x_synapse_detection.py` | `SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_npil_x_synapse_detection/` |
+
+> Fig 3E is `synaptic_type_npils2_v2.svg` (line 428 of `fig3d_si_compartment_correct.py`), which marks a compartment mixed
+> by the same percentage cutoffs as Fig 3D. With lines 19-22 switched off, so that the script keeps the SI in
+> `NEURON_TABLE_FTR`, it draws the panel's bars exactly (the published figure also swaps two pairs of neuropil labels,
+> MB CA/BU and MB VL/AL). As committed, those lines replace that SI with `SI_UPDATED_FTR`, which changes the cutoffs, the
+> bars and their order. `fig3e_syntype_composition.py` instead marks each end of a synapse mixed when that cell's older SI
+> (`SI_pre`/`SI_post` in the synapse table) is below 0.1, and as committed it stops at line 40 (`KeyError: ['neuron']`)
+> before any figure is saved.
 
 ---
 
@@ -109,13 +126,21 @@ reciprocity prediction.
 | Panel | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|
 | Fig 5A-C / Supp | `figures/fig5/reciprocal_fraction.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/reciprocal_fraction/`; writes `RECI_PROP_FTR` |
-| Fig 5A (BWF variant) | `figures/fig5/reciprocal_fraction_x_bwf.py` | `CONNECTIONS_TABLE_FTR`, `NEURONS_NT_BWF_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/reciprocal_fraction_x_bwf/` |
+| Not a panel of the submitted paper (per super-class correlations of `filopodia_fraction` with the reciprocal ratio and with SI) | `figures/fig5/reciprocal_fraction_x_bwf.py` | `CONNECTIONS_TABLE_FTR`, `NEURONS_NT_BWF_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/reciprocal_fraction_x_bwf/` |
 | Fig 5D | `figures/fig5/fig5d_chi_reci_identity.py` | `CONNECTIONS_TABLE_FTR`, `CONNECTIONS_TABLE_NONP_FTR`, `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR`, `NEURON_TABLE_NONP_FTR` | `outputs/fig5/chi_reci_identity/` |
-| Fig 5E | `figures/fig5/syn_type_strength_identity.py` | `CONNECTIONS_TABLE_FTR`, `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_strength_identity/` |
-| Fig 5H | `figures/fig5/syn_type_x_reci_x_dominance_x_sides.py` | `CLASSIFICATION_CSV`, `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_x_reci_x_dominance_x_sides/` |
-| Fig 5H (base) | `figures/fig5/syn_type_x_reci_x_dominance.py` | `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_x_reci_x_dominance/` |
+| Fig 5E, 5F | No script: example reciprocal pairs (tables of synapse counts, an EM cross-section) | — | — |
+| Fig 5G (All) | `figures/fig5/syn_type_x_reci_x_dominance.py` | `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_x_reci_x_dominance/` |
+| Fig 5G (Ipsilateral, Contralateral) | `figures/fig5/syn_type_x_reci_x_dominance_x_sides.py` | `CLASSIFICATION_CSV`, `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_x_reci_x_dominance_x_sides/` |
+| Fig 5H | `figures/fig5/syn_type_x_reci_x_dominance.py` | `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_x_reci_x_dominance/` |
 | Fig 5I | `figures/fig5/syn_type_x_reci_x_npil.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig5/syn_type_x_reci_x_npil/` |
-| Fig 5 Supp 1C/D | `figures/fig5/reciprocal_fraction_model.py` | `NEURON_TABLE_FTR`, `RECI_PROP_FTR` | `outputs/fig5/reciprocal_fraction_model/`; writes `RF_MODEL_PKL` |
+| Not a panel of the submitted paper (Supp 5-S1 has only panels A and B, both examples) | `figures/fig5/reciprocal_fraction_model.py` | `NEURON_TABLE_FTR`, `RECI_PROP_FTR` | `outputs/fig5/reciprocal_fraction_model/`; writes `RF_MODEL_PKL` |
+| Not a panel of the submitted paper | `figures/fig5/syn_type_strength_identity.py` | `CONNECTIONS_TABLE_FTR`, `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_strength_identity/` |
+
+> Fig 5G and 5H: in `syn_type_x_reci_x_dominance/`, 5G (All) is `same_type_percentage_princeton.svg` (line 219) and 5H is
+> `not_same_type_percentage_princeton.svg` (line 247). In `syn_type_x_reci_x_dominance_x_sides/`, 5G Ipsilateral is
+> `same_type_percentage_same_side_totalnorm_princeton.svg` (line 271) and 5G Contralateral is
+> `not_same__side_type_percentage_totalnorm_princeton.svg` (line 312; same-type pairs on opposite sides, despite the
+> name). That script's other two SVGs, which reuse the base script's file names, are not panels.
 
 > `fig5d_chi_reci_identity.py` reads the Buhmann tables (`*_NONP_FTR`) from line 554, after all its figures are
 > saved; nothing from them is saved or printed. See the Buhmann section of [data_availability.md](data_availability.md).
@@ -128,7 +153,7 @@ reciprocity prediction.
 
 ## Split methods (revision work) and supporting scripts
 
-Scripts ported from Amit's folder that are not panels of the submitted paper. The `split_methods/` ones
+Scripts ported from the authors' original analysis scripts that are not panels of the submitted paper. The `split_methods/` ones
 compare the published (SFC) axon/dendrite cut with the alternative cuts; the `supporting/` one backs a
 number in the text.
 
@@ -141,10 +166,13 @@ number in the text.
 | Text: "simple neurons (PC1 < 0.5), which are primarily optic neurons" | `figures/supporting/pc1_x_nt_sclass_pies.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_FTR` | `outputs/supporting/pc1_x_nt_sclass_pies/` |
 
 > Run `processing/build_raw_synapse_table.py` first: it writes `SYNAPSE_TABLE_RAW_FTR`. `SI_COMPARISONS_FTR` comes from step 08
-> (Amit's delivered copy can stand in). With `ONLY_CELLS_WITH_SKELETONS = "auto"` (the default) the skeleton scripts use
-> Amit's own cell selection when all of those cells' skeletons are on disk; if even one is missing they replace the
-> whole selection with cells that have a skeleton (and print that they did), so the images are then not Amit's cells.
-> Amit's cells need the full skeleton download.
+> (`08_alternative_split_methods.py`, optional). With `ONLY_CELLS_WITH_SKELETONS = "auto"` (the default) the skeleton scripts use
+> the authors' original cell selection when all of those cells' skeletons are on disk; if even one is missing they replace the
+> whole selection with cells that have a skeleton (and print that they did), so the images are then not the original cells.
+> The original cells need the full skeleton download.
+
+> `processing/phi_threshold.py` saves `outputs/phi_threshold/phi_threshold.svg`, which shows how it finds the Phi
+> cutoff that matches SI = 0.1 (not a panel of the submitted paper).
 
 ## Figure 6
 
