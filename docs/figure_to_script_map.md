@@ -83,13 +83,13 @@ whether neurons within the same type use the same synapse-type pattern.
 | Fig 3 Supp 1A (Buhmann curve) / 2A/B | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_correct_compartment_buhmann/` |
 | Fig 3 Supp 2C | `figures/fig3/si_x_npil_x_synapse_detection.py` | `SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_npil_x_synapse_detection/` |
 
-> Fig 3E is `synaptic_type_npils2_v2.svg` (line 428 of `fig3d_si_compartment_correct.py`), which marks a compartment mixed
-> by the same percentage cutoffs as Fig 3D. With lines 19-22 switched off, so that the script keeps the SI in
-> `NEURON_TABLE_FTR`, it draws the panel's bars exactly (the published figure also swaps two pairs of neuropil labels,
-> MB CA/BU and MB VL/AL). As committed, those lines replace that SI with `SI_UPDATED_FTR`, which changes the cutoffs, the
-> bars and their order. `fig3e_syntype_composition.py` instead marks each end of a synapse mixed when that cell's older SI
-> (`SI_pre`/`SI_post` in the synapse table) is below 0.1, and as committed it stops at line 40 (`KeyError: ['neuron']`)
-> before any figure is saved.
+> Fig 3E is `synaptic_type_npils2_v2.svg` (line 428 of `fig3d_si_compartment_correct.py`), which marks a compartment
+> mixed by the same percentage cutoffs as Fig 3D. With lines 19-22 switched off, so that the script keeps the SI in
+> `NEURON_TABLE_FTR`, it draws the panel's bars exactly (the published figure also lists three neighbouring pairs of
+> neuropil labels in the opposite order: MB CA/BU, MB PED/FB and MB VL/AL). As committed, those lines replace that SI
+> with `SI_UPDATED_FTR`, which changes the cutoffs, the bars and their order. `fig3e_syntype_composition.py` instead
+> marks each end of a synapse mixed when that cell's older SI (`SI_pre`/`SI_post` in the synapse table) is below 0.1,
+> and as committed it stops at line 40 (`KeyError: ['neuron']`) before any figure is saved.
 
 ---
 
