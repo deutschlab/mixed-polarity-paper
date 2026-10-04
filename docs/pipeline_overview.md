@@ -149,6 +149,7 @@ the main neuron metadata table used by almost all figure scripts.
 | **Outputs** | `SI_UPDATED_FTR`, `NEURON_TABLE_FTR` (`neuron_data_full_article_princeton.ftr`) |
 | **Key columns** | `root_id`, `super_class`, `primary_type`, `nt_type`, `SI`, `cable_length`, synapse counts, morphological features, sensory rank columns |
 | **Downstream** | Scripts 06, 07, 08, `phi_threshold.py`; virtually all figure scripts |
+| **Note** | The left merge at line 261 keeps every synapse-table cell; those that are not among the annotated cells with an SI get an empty `root_id`, which makes that column float64, and at the size of these IDs a float64 rounds them (it holds only every 128th integer there). Line 298 drops those rows and line 299 sets `root_id` from `neuron`, so the table stores exact int64 IDs, as the delivered table does. Line 299 was added on 4 Oct; before it, a rerun wrote rounded `root_id` values (no other column differs). `tools/check_step05_root_id.py` runs these lines on the real IDs and checks the result. |
 
 ---
 

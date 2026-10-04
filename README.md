@@ -134,6 +134,8 @@ python tools/compare_runs.py outputs/runs/before outputs/runs/after \
 
 `tools/check_raw_synapse_table.py` checks the raw synapse tables that `processing/build_raw_synapse_table.py` writes: the columns and their types, `synapse_id` in order and unique, no self-synapses in the version without them, both versions differing by exactly the self-synapses, and every synapse of the processed synapse table present with the same pre and post cell. It also compares the six coordinates with the processed table, which catches a pre/post column swap. It needs the step 04 synapse table and about 10 GB of free memory; `--csv` also checks the row count against the Codex CSV. It takes one to two minutes.
 
+`tools/check_step05_root_id.py` checks that step 05 writes `root_id` as exact cell IDs. It runs step 05's own lines for the cell list, the merge with the annotated cells and the filter that follows, taken from the file and found by their content, on the real IDs, and checks that `root_id` is int64 and equal to `neuron` on every row, that nothing else in the frame changes, and that the cells kept are those of the neuron table. `--script` tests another copy of step 05. It needs step 05's outputs (`SI_updated.ftr` and the neuron table) as well as the annotation file and the pre and post columns of the synapse table, and takes a few seconds with about 5 GB of peak memory; the report goes to `outputs/check/check_step05_root_id/report.txt`.
+
 ### Synapse-type tools
 
 Both tools read the synapse and neuron tables from `data/derived/`, so they need step 05's output (and `SI_updated.ftr` if you use `--si corrected`). "Intrinsic" neurons here means super-class `central`, `optic`, `visual_projection` or `visual_centrifugal`, with `axon_correct`, `dend_correct` and `primary_type` filled in, the same set the figure scripts use. The SI filter keeps synapses where `SI_pre` and `SI_post` are both at least 0.1; `--si corrected` takes SI from `SI_updated.ftr` instead.
@@ -253,6 +255,7 @@ tools/
   run_all_figures.py       run every figure script, one after another
   compare_runs.py          compare two full runs script by script
   check_raw_synapse_table.py  check the two raw synapse tables after building them
+  check_step05_root_id.py  check that step 05 writes root_id as exact cell IDs
   synapse_type_shares.py   share of each synapse type in a synapse table
   split_agreement.py       agreement of synapse types between splits
   check_split_methods_on_subset.py  run step 08 on some neurons and compare with a reference table

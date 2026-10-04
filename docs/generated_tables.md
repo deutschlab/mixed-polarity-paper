@@ -42,7 +42,7 @@ Per-neuron metadata table. Used by virtually all figure scripts. It is not a lis
 | Column | Description |
 |--------|-------------|
 | `neuron` | Neuron root ID (int64); the column to join on |
-| `root_id` | The same ID a second time, from the annotation table merged on `neuron` (step 05); rows that found no match are dropped, so the two are equal on every row |
+| `root_id` | The same ID a second time (int64): step 05 merges the cells of the synapse table onto the annotated cells that have an SI, drops the rows that found no match, and then sets `root_id` from `neuron` (line 299), so the two are equal on every row |
 | `super_class` | Neuron super-class (e.g., sensory, motor, central) |
 | `primary_type` | Primary neuron type label |
 | `nt_type` | Predicted neurotransmitter type from `neurons.csv` (the FlyWire prediction); the neurotransmitter figures use this column. Empty for about 14% of neurons |
