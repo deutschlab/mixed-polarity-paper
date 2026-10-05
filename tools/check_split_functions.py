@@ -3,9 +3,11 @@
 Step 08 (processing/08_alternative_split_methods.py) scores every candidate cut of a
 neuron: each node that is not the root and has exactly one child. For a candidate, side 1
 is the subtree of its child, side 2 is everything outside its own subtree, and the
-synapses on the node itself are left out. Each cut gets an SI, a two-sided Fisher p on the
-2x2 table (side x pre/post) and |phi|. MaxSI keeps the cut with the highest SI, MinFisherP
-the cut with the lowest p, and the axon is the side with the higher presynaptic fraction.
+synapses on the node itself are left out. Each cut gets an SI and a two-sided Fisher p on
+the 2x2 table (side x pre/post). MaxSI keeps the cut with the highest SI, MinFisherP the cut
+with the lowest p, and the axon is the side with the higher presynaptic fraction. Step 08
+computes |phi| (absolute_phi) only after the batches are combined, for the SFC cut and the
+MinFisherP cut; this tool checks absolute_phi on every candidate's table.
 
 This tool takes step 08's code out of the file without running the file (its top level
 loads the full synapse table) and runs step 08's own batch function,
