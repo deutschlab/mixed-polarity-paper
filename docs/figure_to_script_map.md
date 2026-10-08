@@ -196,7 +196,8 @@ reads `NEURON_TABLE_FTR` and `SYNAPSE_TABLE_FTR` instead (and `SI_UPDATED_FTR` i
 > The script also saves, for each population, `<population>_SynapsesPerSameConnection.svg`, all three figures
 > of the olfactory and Kenyon-cell populations (not panels of the submitted paper), and `PopulationSummary.csv`.
 > With `DATA_SOURCE = 'princeton'` and the older SI (`SI_SOURCE = 'neuron_table'`), almost no Kenyon cell has
-> SI ≥ 0.1, so that population is skipped and writes no figures.
+> SI ≥ 0.1, so that population is skipped and writes no figures. `tools/check_fig6_logic.py` checks the script's
+> calculations on a made-up connectome, without the Buhmann tables (README, Tools).
 
 ## Figure 7 — Postsynaptic terminals on multisynaptic boutons
 
