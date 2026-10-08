@@ -24,7 +24,7 @@ flowchart TD
     S06["06_build_connection_reciprocity_table\nCONNECTIONS_TABLE_FTR"]
     S07["07_pca_morphology\nPCA_TABLE_FTR"]
     S08["08_alternative_split_methods (optional)\nSI_COMPARISONS_FTR"]
-    FIGS["Figure scripts\nfig1-fig5, fig7"]
+    FIGS["Figure scripts\nfig1-fig7"]
 
     RAW --> S01
     RAW --> S02A

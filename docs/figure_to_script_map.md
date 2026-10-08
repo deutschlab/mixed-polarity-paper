@@ -174,9 +174,29 @@ number in the text.
 > `processing/phi_threshold.py` saves `outputs/phi_threshold/phi_threshold.svg`, which shows how it finds the Phi
 > cutoff that matches SI = 0.1 (not a panel of the submitted paper).
 
-## Figure 6
+## Figure 6 — Reciprocal motifs in different neural systems
 
-There are no panel scripts for Figure 6 in this repository yet.
+One script, ported from the corresponding author's MATLAB script `FlyWire_AADD_specificCircuits.m` (not
+included in this repository). It reads the
+**Buhmann** tables by default (`DATA_SOURCE = 'buhmann'`), because the submitted Figure 6 was made from
+them: with them every Fig 6D box and whisker is reproduced exactly, Fig 6A–C and the per-type bars of
+Supp 6-S1/S2 come close (the Buhmann table's `primary_type` is not the Codex consolidated cell types the
+MATLAB script read), and the Supp 6-S3 graphs have the same edges. This repository does not build the
+Buhmann tables (see `docs/data_availability.md`), so from a clean clone Fig 6 does not run until they are
+provided. `DATA_SOURCE = 'princeton'` runs it on the paper's other tables, with different numbers; it then
+reads `NEURON_TABLE_FTR` and `SYNAPSE_TABLE_FTR` instead (and `SI_UPDATED_FTR` if `SI_SOURCE = 'SI_updated'`).
+
+| Panel | Script | Input tables | Output path |
+|-------|--------|-------------|-------------|
+| Fig 6A–D | `figures/fig6/aadd_specific_circuits.py` | `CLASSIFICATION_CSV`, `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig6/aadd_specific_circuits/SummaryPlot.svg` (its four panels, top to bottom, are the published 6B, 6A, 6C and 6D) |
+| Supp 6-S1A, 6-S1B, 6-S2A | `figures/fig6/aadd_specific_circuits.py` | as above | `outputs/fig6/aadd_specific_circuits/ALPN_conn_SameType.svg`, `Visual projection_conn_SameType.svg`, `Central complex_conn_SameType.svg` |
+| Supp 6-S3 | `figures/fig6/aadd_specific_circuits.py` | as above | `outputs/fig6/aadd_specific_circuits/ALPN_conn_BetweenTypes.svg`, `Visual projection_conn_BetweenTypes.svg`, `Central complex_conn_BetweenTypes.svg` |
+| Fig 6E–H, Supp 6-S2B | No script | — | Example neurons and EM images |
+
+> The script also saves, for each population, `<population>_SynapsesPerSameConnection.svg`, all three figures
+> of the olfactory and Kenyon-cell populations (not panels of the submitted paper), and `PopulationSummary.csv`.
+> With `DATA_SOURCE = 'princeton'` and the older SI (`SI_SOURCE = 'neuron_table'`), almost no Kenyon cell has
+> SI ≥ 0.1, so that population is skipped and writes no figures.
 
 ## Figure 7 — Postsynaptic terminals on multisynaptic boutons
 

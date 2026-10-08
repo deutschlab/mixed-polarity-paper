@@ -112,7 +112,7 @@ Six inputs are read by the code but not written by any script in this repository
 - `neurons_nt_bwf_frac.ftr`, read by `figures/fig5/reciprocal_fraction_x_bwf.py` and `figures/fig7/filopodia_x_mirror_neurons.py`
 - `syn_bouton_filopodia.ftr`, read by the four Fig 7 scripts listed in the Fig 7 section below
 - `swc_data.ftr`, read by `05_build_neuron_metadata_table.py` (the only code that writes it is commented out)
-- three tables from the earlier, non-Princeton synapse detection: `neuron_data_full_article.ftr` (read by `figures/fig2/si_comparisons.py`, `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` and `figures/fig5/fig5d_chi_reci_identity.py`), `synapses_783_article.ftr` (read by `figures/fig2/si_comparisons.py`, `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` and `figures/fig3/si_x_npil_x_synapse_detection.py`) and `connections_by_syn_type_reciprocal_types_filtered_article.ftr` (read by `figures/fig5/fig5d_chi_reci_identity.py`)
+- three tables from the earlier, non-Princeton synapse detection: `neuron_data_full_article.ftr` (read by `figures/fig2/si_comparisons.py`, `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py`, `figures/fig5/fig5d_chi_reci_identity.py` and `figures/fig6/aadd_specific_circuits.py`), `synapses_783_article.ftr` (read by `figures/fig2/si_comparisons.py`, `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py`, `figures/fig3/si_x_npil_x_synapse_detection.py` and `figures/fig6/aadd_specific_circuits.py`) and `connections_by_syn_type_reciprocal_types_filtered_article.ftr` (read by `figures/fig5/fig5d_chi_reci_identity.py`)
 
 None of these six files is deposited with this repository. Those scripts cannot run until the files are supplied. (`synapses_783_article_princeton_raw.ftr` used to be on this list; `processing/build_raw_synapse_table.py` now builds it from the Codex CSV.) Because step 05 needs `swc_data.ftr`, the neuron table, and every step and figure that reads it, cannot be rebuilt from the downloads alone.
 
@@ -144,6 +144,7 @@ Whether the Buhmann run differed in anything else is not recorded here.
 | Fig 3 Supp 1A (Buhmann curve) | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `neuron_data_full_article.ftr` |
 | Fig 3 Supp 2A/B | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `synapses_783_article.ftr` |
 | Fig 3 Supp 2C | `figures/fig3/si_x_npil_x_synapse_detection.py` | `synapses_783_article.ftr` |
+| Fig 6A–D, Supp 6-S1, 6-S2A, 6-S3 | `figures/fig6/aadd_specific_circuits.py` (with its default `DATA_SOURCE = 'buhmann'`) | `neuron_data_full_article.ftr`, `synapses_783_article.ftr` |
 
 `figures/fig5/fig5d_chi_reci_identity.py` also reads the Buhmann neuron and connection tables, from
 line 554, after it has saved all its figures. Nothing from them is saved or printed: the reciprocal
