@@ -115,7 +115,11 @@ LARVA_SYNAPSES_PRE_MERGE_FTR  = LARVA_DATA_DIR / "output" / "synapses_pre_merge_
 
 # --- fig5 additional data paths ---
 CONNECTIONS_TABLE_NONP_FTR    = DERIVED_DATA_DIR / "connections_by_syn_type_reciprocal_types_filtered_article.ftr"
-NEURONS_NT_BWF_FTR            = DERIVED_DATA_DIR / "neurons_nt_bwf_frac.ftr"
+NEURONS_NT_BWF_FTR            = DERIVED_DATA_DIR / "neurons_nt_bwf_frac.ftr"   # written by figures/fig7/fig7i_filopodia_fraction_x_nt.py
+
+# --- Fig 4E of the revision (figures/fig4/syntype_x_pathway_layers.py; made outside this repository, no script here writes them) ---
+PER_TYPE_SUMMARY_CSV          = DERIVED_DATA_DIR / "ex_table_npil_comp_pre_post_hiSI_PerTypeSummary.csv"   # synapses per pre type, post type, comp and npil, both cells SI >= 0.1
+OLFACTORY_CLASS_NEUROPIL_CSV  = DERIVED_DATA_DIR / "Olfactory_ClassNeuropilStats.csv"   # printed only
 
 # --- alternative split methods (processing/08_alternative_split_methods.py) ---
 ALT_SPLIT_BATCH_DIR           = INTERMEDIATE_DIR / "alternative_to_SI" / "all_neurons_batches"
@@ -125,6 +129,19 @@ SI_COMPARISONS_FTR            = DERIVED_DATA_DIR / "SI_comparisons.ftr"
 FILOPODIA_NODES_BASELINE_FTR     = FILOPODIA_DIR / "nodes_baseline.ftr"
 FILOPODIA_NODES_NO_FILOPODIA_FTR = FILOPODIA_DIR / "nodes_no_filopodia.ftr"
 FILOPODIA_NODES_SAMPLEOUT_FTR    = FILOPODIA_DIR / "nodes_sampleout.ftr"
+
+# --- Fig 7 bouton tables (made outside this repository; no script here writes them) ---
+# Read by the figures/fig7/fig7*.py panel scripts. One row per bouton (neuron, cluster),
+# and one row per bouton with a postsynaptic terminal (neuron, bwf); both carry NEURON_TABLE_FTR's SI
+# (13 bouton neurons are not in that table). Their neuron and bwf columns read back as pandas' nullable Int64.
+BOUTON_TABLE_FTR              = DERIVED_DATA_DIR / "b_table_full_prince(new)_filtered.ftr"
+BOUTON_FILOPODIA_TABLE_FTR    = DERIVED_DATA_DIR / "bwf_table_full_prince(new)_filtered.ftr"
+FILOPODIA_RECIPROCAL_FTR      = DERIVED_DATA_DIR / "filopodia_reciprocal.ftr"
+FILOPODIA_FILTERED_FTR        = DERIVED_DATA_DIR / "filopodia_filtered.ftr"
+BOUTON_INERTIA_FTR            = DERIVED_DATA_DIR / "inertia_all.ftr"
+NEURON_DATA_FTR               = DERIVED_DATA_DIR / "neuron_data.ftr"   # neuron metadata with neurons.csv's nt_type, class and sub_class; not NEURON_TABLE_FTR. Its SI equals the Buhmann neuron table's to 0.001 for 111,525 of the 129,903 cells they share; read by fig7e, fig7i and fig7s2b (nt_type, sub_class) and by the revised Fig 4E script (class, primary_type, cell_type); none reads its SI
+SYNAPSES_NO_SELF_FTR          = DERIVED_DATA_DIR / "t2.ftr"           # every synapse except self-synapses (pre == post)
+CONSOLIDATED_CELL_TYPES_CSV   = RAW_DATA_DIR / "consolidated_cell_types.csv.gz"   # Codex download
 
 # --- raw synapse table (built by processing/build_raw_synapse_table.py from PRINCETON_SYNAPSE_CSV) ---
 # Two versions: without self-synapses (as steps 01/02a and the authors' original split-method script use the synapses;

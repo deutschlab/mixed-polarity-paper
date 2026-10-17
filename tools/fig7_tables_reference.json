@@ -1,0 +1,266 @@
+{
+ "recorded": "2026-10-16",
+ "tables": {
+  "BOUTON_TABLE_FTR": {
+   "file": "b_table_full_prince(new)_filtered.ftr",
+   "columns": {
+    "neuron": "int64",
+    "cluster": "int64",
+    "count": "int64",
+    "SI": "double",
+    "npil": "string",
+    "comp": "string",
+    "primary_type": "string",
+    "super_class": "string",
+    "filopodia": "bool",
+    "__index_level_0__": "int64"
+   },
+   "rows": 4996970,
+   "pandas_id_dtypes": {
+    "neuron": "Int64",
+    "cluster": "int64"
+   },
+   "file_id_types": {
+    "neuron": "int64",
+    "cluster": "int64"
+   },
+   "sha256": "f177f2b28c8054409226407108c52ead454c67af3b2557f7aa955f1fecc47a12",
+   "duplicate_keys": 0
+  },
+  "BOUTON_FILOPODIA_TABLE_FTR": {
+   "file": "bwf_table_full_prince(new)_filtered.ftr",
+   "columns": {
+    "neuron": "int64",
+    "bwf": "int64",
+    "count": "int64",
+    "npil": "string",
+    "comp": "string",
+    "primary_type": "string",
+    "super_class": "string",
+    "SI": "double",
+    "__index_level_0__": "int64"
+   },
+   "rows": 2877645,
+   "pandas_id_dtypes": {
+    "neuron": "Int64",
+    "bwf": "Int64"
+   },
+   "file_id_types": {
+    "neuron": "int64",
+    "bwf": "int64"
+   },
+   "sha256": "bd4887eb3c8680db8905a20368ea1b209430b39f17bb9b7d71825feeae30d37e",
+   "duplicate_keys": 0
+  },
+  "FILOPODIA_RECIPROCAL_FTR": {
+   "file": "filopodia_reciprocal.ftr",
+   "columns": {
+    "pre_x": "double",
+    "pre_y": "double",
+    "pre_z": "double",
+    "post_x": "double",
+    "post_y": "double",
+    "post_z": "double",
+    "size": "double",
+    "pre": "int64",
+    "post": "int64",
+    "npil": "string",
+    "bwf": "int64",
+    "base": "double",
+    "synapse_id": "double",
+    "comp": "string",
+    "cluster": "int64",
+    "global_reciprocal": "bool",
+    "local_reciprocal": "bool"
+   },
+   "rows": 13382704,
+   "pandas_id_dtypes": {
+    "pre": "Int64",
+    "post": "Int64"
+   },
+   "file_id_types": {
+    "pre": "int64",
+    "post": "int64"
+   },
+   "sha256": "c67f3f74e52952ff8465c7166626ee465563e0fa56f18f19d5c3a214cf9b4f8d",
+   "duplicate_keys": 0
+  },
+  "BOUTON_INERTIA_FTR": {
+   "file": "inertia_all.ftr",
+   "columns": {
+    "neuron": "int64",
+    "mean_rms": "double",
+    "mean_centroid_dist": "double",
+    "quality_ratio": "double",
+    "density_index": "double"
+   },
+   "rows": 125553,
+   "pandas_id_dtypes": {
+    "neuron": "int64"
+   },
+   "file_id_types": {
+    "neuron": "int64"
+   },
+   "sha256": "94e5339f3ae9de205cebf8d10f43c5175a1778f21745e90c8ed23585fbe1be70",
+   "duplicate_keys": 0
+  },
+  "NEURON_DATA_FTR": {
+   "file": "neuron_data.ftr",
+   "columns": {
+    "root_id": "int64",
+    "SI": "double",
+    "super_class": "string",
+    "primary_type": "string",
+    "additional_type(s)": "string",
+    "flow": "string",
+    "class": "string",
+    "sub_class": "string",
+    "cell_type": "string",
+    "hemibrain_type": "string",
+    "hemilineage": "string",
+    "side": "string",
+    "nerve": "string",
+    "group": "string",
+    "nt_type": "string",
+    "length_nm": "double",
+    "area_nm": "double",
+    "size_nm": "double",
+    "linker": "int64"
+   },
+   "rows": 131045,
+   "pandas_id_dtypes": {
+    "root_id": "int64"
+   },
+   "file_id_types": {
+    "root_id": "int64"
+   },
+   "sha256": "2146cf910dc64a06d6bb0ba8202341c5aa37872b9ebcffb759b16ff8ebc90775",
+   "duplicate_keys": 0
+  },
+  "CONSOLIDATED_CELL_TYPES_CSV": {
+   "file": "consolidated_cell_types.csv.gz",
+   "columns": {
+    "root_id": "int64",
+    "primary_type": "object",
+    "additional_type(s)": "object"
+   },
+   "rows": 137677,
+   "pandas_id_dtypes": {
+    "root_id": "int64"
+   },
+   "file_id_types": {
+    "root_id": "int64"
+   },
+   "sha256": "74fb4a6f72cbcff9f2d899aa71c21bfbd5fd0dea99e1cf600568879cb3cf7a17",
+   "duplicate_keys": 0
+  },
+  "SYN_BOUTON_FTR": {
+   "file": "syn_bouton_filopodia.ftr",
+   "columns": {
+    "synapse_id": "int64",
+    "bouton_on_pre": "int64",
+    "filopodia_on_post": "int64",
+    "pre_x_cluster": "double",
+    "pre_x_filopodia": "double"
+   },
+   "rows": 76039057,
+   "pandas_id_dtypes": {
+    "synapse_id": "int64"
+   },
+   "file_id_types": {
+    "synapse_id": "int64"
+   },
+   "sha256": "be9aa7876fb05269c98a78315ace5a2188cdc21937dbbbdbef831c21a54c3286",
+   "duplicate_keys": 0
+  },
+  "NEURONS_NT_BWF_FTR": {
+   "file": "neurons_nt_bwf_frac.ftr",
+   "columns": {
+    "neuron": "int64",
+    "nt_type": "string",
+    "filopodia_fraction": "double"
+   },
+   "rows": 74937,
+   "pandas_id_dtypes": {
+    "neuron": "Int64"
+   },
+   "file_id_types": {
+    "neuron": "int64"
+   },
+   "content_hash": "67e423311f46ddcb63152ddc0376a8a1bbafe12529885f259f3fabed3460f898",
+   "duplicate_keys": 0
+  },
+  "NEURON_TABLE_FTR": {
+   "file": "neuron_data_full_article_princeton.ftr",
+   "columns": {
+    "neuron": "int64",
+    "pre_A": "int64",
+    "pre_D": "int64",
+    "pre_L": "int64",
+    "post_A": "int64",
+    "post_D": "int64",
+    "post_L": "int64",
+    "axon_correct": "double",
+    "dend_correct": "double",
+    "root_id": "int64",
+    "super_class": "string",
+    "nt_type_new": "string",
+    "primary_type": "string",
+    "length_nm": "double",
+    "area_nm": "double",
+    "size_nm": "double",
+    "SI": "double",
+    "linker": "double",
+    "nodes": "double",
+    "leafs": "double",
+    "branches": "double",
+    "cable_length": "float",
+    "out_synapses_count": "double",
+    "in_synapses_count": "double",
+    "max_out_degree": "double",
+    "max_in_degree": "double",
+    "mean_in_degree": "double",
+    "mean_out_degree": "double",
+    "out_partners": "double",
+    "in_partners": "double",
+    "partners_ratio": "double",
+    "max_degree_ratio": "double",
+    "mean_degree_ratio": "double",
+    "mean_out_synapses_per_partner": "double",
+    "mean_in_synapses_per_partner": "double",
+    "mean_synapses_per_partner_ratio": "double",
+    "allinputs_layer_mean": "double",
+    "allsensory_novisual_layer_mean": "double",
+    "ascending_layer_mean": "double",
+    "gustatory_layer_mean": "double",
+    "hygrosensory_layer_mean": "double",
+    "mechanosensory_layer_mean": "double",
+    "auditory_layer_mean": "double",
+    "jo_layer_mean": "double",
+    "peg_layer_mean": "double",
+    "ocellar_layer_mean": "double",
+    "olfactory_layer_mean": "double",
+    "thermosensory_layer_mean": "double",
+    "visual_projection_layer_mean": "double",
+    "nt_type": "string"
+   },
+   "rows": 138289,
+   "pandas_id_dtypes": {
+    "neuron": "int64",
+    "root_id": "int64"
+   },
+   "file_id_types": {
+    "neuron": "int64",
+    "root_id": "int64"
+   },
+   "sha256": "0e88a1eb4b9af90dbee839e34bc42d0d6b5295b7c3ac38d2779cf26ddbbbe8f2",
+   "duplicate_keys": 0
+  }
+ },
+ "cross": {
+  "bwf rows (neuron, bwf) with no (neuron, cluster) in the bouton table": 25,
+  "bouton neurons (distinct neuron in the bouton table)": 84969,
+  "NEURONS_NT_BWF neurons not in the bouton table": 0,
+  "inertia neurons not in the bouton table": 41976
+ }
+}

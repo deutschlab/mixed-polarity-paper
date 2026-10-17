@@ -49,7 +49,7 @@ flowchart TD
     RAW -.-> BUILDRAW["build_raw_synapse_table (optional)\nSYNAPSE_TABLE_RAW_FTR"]
     BUILDRAW -.-> S08
     SWCDATA["swc_data.ftr\n(no script writes it)"] -.-> S05
-    FILO["syn_bouton_filopodia.ftr, neurons_nt_bwf_frac.ftr\n(no script writes them)"] -.-> FIGS
+    FILO["syn_bouton_filopodia.ftr and the Fig 7 bouton tables\n(no script writes them)"] -.-> FIGS
     RAW -.-> S08
     S05 -.-> S08
     S08 -.-> PHI["phi_threshold (optional)\nprints and plots the Phi cutoff"]

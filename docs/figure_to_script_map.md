@@ -109,6 +109,7 @@ multiple classification models.
 | (table for Fig 4A / 4C) | `figures/fig4/build_pc1_table.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `PCA_TABLE_FTR` | writes `PC1_TABLE_CSV` (`data/derived/PC1_table.csv`); run before `syntype_x_pc1.py` |
 | Fig 4A / 4C / Supp | `figures/fig4/syntype_x_pc1.py` | `NEURON_TABLE_FTR`, `PC1_TABLE_CSV`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/syntype_x_pc1/`, where it also saves and reloads the model `rf_pc1_model.joblib`; writes `PC1_TABLE_PREDICTIONS_CSV` |
 | Fig 4B | `figures/fig4/models_comparison.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/models_comparison/` |
+| Fig 4E (revision) | `figures/fig4/syntype_x_pathway_layers.py` | `PER_TYPE_SUMMARY_CSV` (not deposited; or a stand-in rebuilt from `SYNAPSE_TABLE_FTR` and `NEURON_TABLE_FTR`, or the Buhmann tables, which need `NEURON_TABLE_NONP_FTR` and `SYNAPSE_TABLE_NONP_FTR` in `data/derived/` and are not deposited; see `DATA_SOURCE`), `NEURON_DATA_FTR`, `OLFACTORY_CLASS_NEUROPIL_CSV` (printed only, optional) | `outputs/fig4/syntype_x_pathway_layers/`: the four panels of the revised 4E are `LayerComposition_AllSynapses_collapsed_lines.svg`, `LayerComposition_WithinType_collapsed_lines.svg`, `LayerComposition_Olfactory_AllSynapses_lines.svg` and `LayerComposition_Olfactory_WithinType_lines.svg`; also two stacked-bar plots and the tables as CSV |
 | Not settled (see note) | `figures/fig4/syntype_x_pc1_simple_model.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/syntype_x_pc1_simple_model/` |
 
 > `syntype_x_pc1_simple_model.py` saves a feature-importance plot, a confusion matrix and a decision surface
@@ -120,6 +121,11 @@ multiple classification models.
 > the model with `tools/check_simple_pc1_model.py` (README, Tools). `syntype_x_pc1.py` draws a decision surface too, but its save line (586) is
 > commented out, so which script made the published Fig 4D is not settled. Fig 4 Supp 1 holds only skeleton
 > images of the Fig 4D neurons.
+>
+> In the revision, Fig 4E is new: `figures/fig4/syntype_x_pathway_layers.py`, ported from the corresponding
+> author's MATLAB script. Its input table is not deposited, so by default it stops with a message;
+> `tools/check_fig4e_logic.py` checks its calculations on a made-up table. The submitted 4E (example cells)
+> becomes Fig 4 Supplement 1 in the revision and has no script.
 
 ---
 
@@ -207,21 +213,38 @@ reads `NEURON_TABLE_FTR` and `SYNAPSE_TABLE_FTR` instead (and `SI_UPDATED_FTR` i
 
 ## Figure 7 — Postsynaptic terminals on multisynaptic boutons
 
-The filopodia panels. The two MSB pipelines in `MSB-and-Post-on-MSB-pipeline/` find multi-synapse
+The bouton and filopodia panels. The two MSB pipelines in `MSB-and-Post-on-MSB-pipeline/` find multi-synapse
 boutons and the postsynapses near them, but they do not make any panel, and no script in this
-repository writes `SYN_BOUTON_FTR` or `NEURONS_NT_BWF_FTR`, which these scripts read.
+repository writes `SYN_BOUTON_FTR` or the bouton tables (`BOUTON_TABLE_FTR`, `BOUTON_FILOPODIA_TABLE_FTR`,
+`FILOPODIA_RECIPROCAL_FTR`, `FILOPODIA_FILTERED_FTR`, `BOUTON_INERTIA_FTR`), `NEURON_DATA_FTR` or `SYNAPSES_NO_SELF_FTR`, which these scripts read
+(see `docs/data_availability.md`). The `fig7*.py` scripts are ported from the scripts that drew those panels.
 
 | Panel | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|
+| Fig 7E | `figures/fig7/fig7e_nt_presynaptic_pies.py` | `NEURON_DATA_FTR`, `SYNAPSES_NO_SELF_FTR`, `BOUTON_TABLE_FTR`, `FILOPODIA_FILTERED_FTR` | `outputs/fig7/fig7e_nt_presynaptic_pies/pie_plot_nt_post_frac_and_bwf_3_newest.svg` (cannot run: `SYNAPSES_NO_SELF_FTR` and `FILOPODIA_FILTERED_FTR` are not supplied) |
+| Fig 7F, Fig 7 Supp 4C | `figures/fig7/fig7f_filopodia_fraction_violins.py` | `BOUTON_TABLE_FTR` | `outputs/fig7/fig7f_filopodia_fraction_violins/super_fractions_split2_new(2).svg` (left half 7F, right half Supp 4C) |
+| Fig 7G | `figures/fig7/fig7g_filopodia_fraction_x_si.py` | `BOUTON_TABLE_FTR`, `BOUTON_FILOPODIA_TABLE_FTR` | `outputs/fig7/fig7g_filopodia_fraction_x_si/` (left: `SI_vs_fraction_all_new.svg`; right: `SI_vs_post_on_bouton_ALL_AXON_DENDRITE_2_new.svg`) |
 | Fig 7H | `figures/fig7/post_on_filo_ratio.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SYN_BOUTON_FTR` | `outputs/fig7/post_on_filo_ratio/` (the panel is `axon_dend_filo_ratio_by_superclass_lines.svg`; the other three SVGs are variants) |
+| Fig 7I | `figures/fig7/fig7i_filopodia_fraction_x_nt.py` | `BOUTON_TABLE_FTR`, `BOUTON_FILOPODIA_TABLE_FTR`, `NEURON_DATA_FTR` | `outputs/fig7/fig7i_filopodia_fraction_x_nt/nt_type_frac_new2.svg`; writes `NEURONS_NT_BWF_FTR` |
 | Fig 7J (input) | `figures/fig7/si_sim_baseline.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SYN_BOUTON_FTR` | `outputs/fig7/si_sim_baseline/`; writes `FILOPODIA_NODES_BASELINE_FTR` |
 | Fig 7J (input) | `figures/fig7/si_sim_no_filopodia.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SYN_BOUTON_FTR` | `outputs/fig7/si_sim_no_filopodia/`; writes `FILOPODIA_NODES_NO_FILOPODIA_FTR` |
 | Fig 7J (input) | `figures/fig7/si_sim_sampleout.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SYN_BOUTON_FTR` | `outputs/fig7/si_sim_sampleout/`; writes `FILOPODIA_NODES_SAMPLEOUT_FTR` |
 | Fig 7J | `figures/fig7/si_comb_analysis.py` | `FILOPODIA_NODES_BASELINE_FTR`, `FILOPODIA_NODES_NO_FILOPODIA_FTR`, `FILOPODIA_NODES_SAMPLEOUT_FTR`, `NEURON_TABLE_FTR` | `outputs/fig7/si_comb_analysis/sim_results.svg` |
+| Fig 7K | `figures/fig7/fig7k_reciprocal_composition.py` | `FILOPODIA_RECIPROCAL_FTR`, `NEURON_TABLE_FTR` | `outputs/fig7/fig7k_reciprocal_composition/super_classes_reciprocal_new.svg` |
+| Fig 7 Supp 2A | `figures/fig7/fig7s2a_bouton_spread.py` | `BOUTON_INERTIA_FTR`, `CONSOLIDATED_CELL_TYPES_CSV` | `outputs/fig7/fig7s2a_bouton_spread/inertia_all.svg` |
+| Fig 7 Supp 2B | `figures/fig7/fig7s2b_bouton_spread_by_type.py` | `BOUTON_INERTIA_FTR`, `CONSOLIDATED_CELL_TYPES_CSV`, `NEURON_DATA_FTR` | `outputs/fig7/fig7s2b_bouton_spread_by_type/inertia_grouped.svg` |
 | Fig 7 Supp 4A/B | `figures/fig7/filopodia_x_mirror_neurons.py` | `NEURON_TABLE_FTR`, `NEURONS_NT_BWF_FTR`, `SI_UPDATED_FTR`, `NEURON_ANNOTATIONS_CSV` | `outputs/fig7/filopodia_x_mirror_neurons/` (A: `std_of_filopodia_fraction_within_groups_vs_between_princeton.svg`; B: `filopodia_frac_corr_sides_princeton_v2.svg`) |
 
 > Run the three `si_sim_*.py` scripts before `si_comb_analysis.py`; it reads the three tables they write
-> to `data/derived/filopodia/`.
+> to `data/derived/filopodia/`. `fig7i_filopodia_fraction_x_nt.py` writes `NEURONS_NT_BWF_FTR`, which
+> `filopodia_x_mirror_neurons.py` and `figures/fig5/reciprocal_fraction_x_bwf.py` read, so run it first.
+
+> The `fig7*.py` scripts draw their own neuron sets from the bouton tables, which differ from the other
+> figures': no four-super-class filter in 7G's 'All' lines or anywhere in 7I, one value per neuron and compartment
+> in 7F's 'All' violins, and the bouton tables carry the neuron table's SI. 7D, Supp 7-S1, Supp 7-S3 and
+> Supp 7-S4 D-F have no script. The seven `fig7*.py` scripts are made from the authors' originals by
+> `tools/make_fig7_ports.py` (change them there, not in the scripts); `tools/check_fig7_ports.py` checks that
+> each draws what its original draws, and `tools/check_fig7_tables.py` checks their input tables.
 
 > The `si_sim_*.py` scripts recompute SI on the existing axon/dendrite labels; they do not re-split any neuron.
 > `post_on_filo_ratio.py`, `si_comb_analysis.py` and the three `si_sim_*.py` scripts load the whole synapse table
