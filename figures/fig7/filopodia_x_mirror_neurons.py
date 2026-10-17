@@ -153,6 +153,14 @@ from statsmodels.formula.api import ols
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 import pingouin as pg   # pip install pingouin
 
+# Run setting, as in figures/fig2/si_x_primary_types.py. SLOW_STATS = True runs the two slow steps of the
+# cell-type statistics as originally written: a model fit with one column per cell type, used only for the
+# sums of squares behind eta squared and omega squared, and a post-hoc test over every pair of cell types
+# (Games-Howell, or Tukey if Levene's test passes) that prints five pairs; for the 7,511 types of Supp 2-S2 D
+# they take 12 minutes and an estimated 4-5 days. With False, the sums of squares come from the group means
+# and the post-hoc test is skipped; every other printed number is the same to the printed precision.
+SLOW_STATS = False
+
 # Prepare data (already filtered in your script)
 anova_df = nodesG[['SI', 'primary_type']].dropna()
 
@@ -187,11 +195,17 @@ print(f"DF: {df1}, {df2}")
 
 # 2) Effect size: η² and ω²
 # ANOVA model for sums of squares
-model = ols('SI ~ C(primary_type)', data=anova_df).fit()
-anova_table = sm.stats.anova_lm(model, typ=2)
+if SLOW_STATS:
+    model = ols('SI ~ C(primary_type)', data=anova_df).fit()
+    anova_table = sm.stats.anova_lm(model, typ=2)
 
-ss_between = anova_table['sum_sq']['C(primary_type)']
-ss_within = anova_table['sum_sq']['Residual']
+    ss_between = anova_table['sum_sq']['C(primary_type)']
+    ss_within = anova_table['sum_sq']['Residual']
+else:
+    # one factor plus an intercept: the same sums of squares from the group means
+    by_type = anova_df.groupby('primary_type')['SI']
+    ss_between = (by_type.size() * (by_type.mean() - anova_df['SI'].mean()) ** 2).sum()
+    ss_within = ((anova_df['SI'] - by_type.transform('mean')) ** 2).sum()
 ss_total = ss_between + ss_within
 
 eta_sq = ss_between / ss_total
@@ -202,7 +216,9 @@ print(f"η² (eta squared) = {eta_sq:.3f}")
 print(f"ω² (omega squared) = {omega_sq:.3f}")
 
 # 3) Post-hoc analysis
-if levene_p >= 0.05:
+if not SLOW_STATS:
+    print("\nPost-hoc test over all pairs of cell types skipped (SLOW_STATS = False)")
+elif levene_p >= 0.05:
     print("\nTukey HSD Post-Hoc\n")
     tukey = pairwise_tukeyhsd(endog=anova_df['SI'],
                               groups=anova_df['primary_type'],

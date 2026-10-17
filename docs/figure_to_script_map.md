@@ -57,6 +57,12 @@ Includes an adult vs larva SI comparison and PCA of morphological features.
 > Supp 2-S2 A is `SI_corr_sides_princeton_v2.svg` and reads the SI from `SI_UPDATED_FTR`; Supp 2-S2 D is
 > `std_of_si_within_groups_vs_between_princeton.svg` and uses the SI in `NEURON_TABLE_FTR`. `pca_on_feat.py` saves
 > signed PC1 and PC2 contributions and violin plots.
+> `si_x_primary_types.py` has a run setting, `SLOW_STATS` (default `False`). With `False` the script finishes in
+> seconds: the sums of squares behind its eta squared and omega squared come from the group means, and the post-hoc
+> test over every pair of cell types is skipped (the paper reports no pairwise cell-type comparison). `True` runs the
+> original code: a model fit with one column per cell type (12 minutes measured) and Games-Howell over 28.2 million
+> pairs (an estimated 4-5 days), of which it prints five. Both print the same Welch ANOVA, eta and omega squared.
+> `figures/fig7/filopodia_x_mirror_neurons.py` (Supp 7-S4) has the same setting for the same block.
 
 ---
 
