@@ -10,7 +10,7 @@ abstract: >
   Computational pipeline accompanying the manuscript "Organizational principles
   governing synapse types in a whole-brain connectome". Analyses the Drosophila
   adult whole-brain connectome (FAFB v783, FlyWire / Princeton synapse table).
-  Implements per-neuron synaptic input index (SI) computation, compartment-level
+  Implements per-neuron segregation index (SI) computation, compartment-level
   synapse classification (AA/AD/DA/DD), synapse-type characterisation, random
   forest classifiers, reciprocal connectivity modelling, and PCA of morphological
   features.
@@ -27,6 +27,6 @@ keywords:
   - FAFB
   - FlyWire
   - synapse polarity
-  - synaptic input index
+  - segregation index
   - neuroscience
   - computational neuroscience
