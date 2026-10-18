@@ -4,8 +4,8 @@ No script in this repository writes these tables (apart from NEURONS_NT_BWF_FTR,
 figures/fig7/fig7i_filopodia_fraction_x_nt.py writes), so a figure can only be trusted to come
 from the same data if the files themselves are the same. For each table in TABLES below this
 checks, against tools/fig7_tables_reference.json:
-  - the file is there (FILOPODIA_FILTERED_FTR and SYNAPSES_NO_SELF_FTR are reported NOT SUPPLIED
-    until someone provides them, which is not a failure);
+  - the file is there (a table in NOT_YET_SUPPLIED is reported NOT SUPPLIED until someone provides it,
+    which is not a failure; every table was supplied to the maintainers by 18 Oct, and none is deposited);
   - its sha256 (for NEURONS_NT_BWF_FTR, which is regenerated, a hash of its content instead,
     since feather bytes can differ for the same table);
   - its columns and their types, and the number of rows;
@@ -64,11 +64,12 @@ TABLES = {
     "SYNAPSES_NO_SELF_FTR": (["pre", "post"], []),
     "CONSOLIDATED_CELL_TYPES_CSV": (["root_id"], ["root_id"]),
     "SYN_BOUTON_FTR": (["synapse_id"], ["synapse_id"]),
+    "SYN_BOUTON_NEW_FTR": (["synapse_id"], ["synapse_id"]),
     "NEURONS_NT_BWF_FTR": (["neuron"], ["neuron"]),
     "NEURON_TABLE_FTR": (["neuron", "root_id"], ["neuron"]),
 }
 CONTENT_HASH = {"NEURONS_NT_BWF_FTR"}
-NOT_YET_SUPPLIED = {"FILOPODIA_FILTERED_FTR", "SYNAPSES_NO_SELF_FTR"}
+NOT_YET_SUPPLIED = set()
 
 
 def file_sha256(path: Path) -> str:
@@ -283,19 +284,21 @@ def main() -> None:
 
 if __name__ == "__main__":
     # No inputs needed: it reads the Figure 7 tables named in config.py:
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/b_table_full_prince(new)_filtered.ftr  (BOUTON_TABLE_FTR)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/bwf_table_full_prince(new)_filtered.ftr  (BOUTON_FILOPODIA_TABLE_FTR)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/filopodia_reciprocal.ftr  (FILOPODIA_RECIPROCAL_FTR)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/inertia_all.ftr  (BOUTON_INERTIA_FTR)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/neuron_data.ftr  (NEURON_DATA_FTR)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/neurons_nt_bwf_frac.ftr  (NEURONS_NT_BWF_FTR, written by fig7i)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/raw/consolidated_cell_types.csv.gz  (CONSOLIDATED_CELL_TYPES_CSV)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/raw/syn_bouton_filopodia.ftr  (SYN_BOUTON_FTR)
-    #   and, once supplied, FILOPODIA_FILTERED_FTR and SYNAPSES_NO_SELF_FTR in data/derived/
+    #   data/derived/b_table_full_prince(new)_filtered.ftr  (BOUTON_TABLE_FTR)
+    #   data/derived/bwf_table_full_prince(new)_filtered.ftr  (BOUTON_FILOPODIA_TABLE_FTR)
+    #   data/derived/filopodia_reciprocal.ftr  (FILOPODIA_RECIPROCAL_FTR)
+    #   data/derived/inertia_all.ftr  (BOUTON_INERTIA_FTR)
+    #   data/derived/neuron_data.ftr  (NEURON_DATA_FTR)
+    #   data/derived/neurons_nt_bwf_frac.ftr  (NEURONS_NT_BWF_FTR, written by fig7i)
+    #   data/raw/consolidated_cell_types.csv.gz  (CONSOLIDATED_CELL_TYPES_CSV)
+    #   data/raw/syn_bouton_filopodia.ftr  (SYN_BOUTON_FTR)
+    #   data/raw/syn_bouton_filopodia(new).ftr  (SYN_BOUTON_NEW_FTR)
+    #   data/derived/filopodia_filtered.ftr  (FILOPODIA_FILTERED_FTR)
+    #   data/derived/t2.ftr  (SYNAPSES_NO_SELF_FTR)
     # It compares them with
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/tools/fig7_tables_reference.json  (recorded 16 Oct 2026)
+    #   tools/fig7_tables_reference.json  (recorded 18 Oct 2026)
     # and writes
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/check_fig7_tables/report.txt
+    #   outputs/check/check_fig7_tables/report.txt
     # To run the self-test instead, uncomment:
     # sys.argv[1:] = [
     #     "--selftest",

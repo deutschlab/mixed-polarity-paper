@@ -1,5 +1,5 @@
 {
- "recorded": "2026-10-16",
+ "recorded": "2026-10-18",
  "tables": {
   "BOUTON_TABLE_FTR": {
    "file": "b_table_full_prince(new)_filtered.ftr",
@@ -85,6 +85,33 @@
    "sha256": "c67f3f74e52952ff8465c7166626ee465563e0fa56f18f19d5c3a214cf9b4f8d",
    "duplicate_keys": 0
   },
+  "FILOPODIA_FILTERED_FTR": {
+   "file": "filopodia_filtered.ftr",
+   "columns": {
+    "pre_x": "double",
+    "pre_y": "double",
+    "pre_z": "double",
+    "post_x": "double",
+    "post_y": "double",
+    "post_z": "double",
+    "size": "double",
+    "pre": "int64",
+    "post": "int64",
+    "npil": "string",
+    "cluster": "int64",
+    "base": "double",
+    "synapse_id": "double",
+    "comp": "string"
+   },
+   "rows": 13461964,
+   "pandas_id_dtypes": {
+    "pre": "Int64"
+   },
+   "file_id_types": {
+    "pre": "int64"
+   },
+   "sha256": "48ccf7d6ad324936b68035a46e88dc28ca280f7b83f76bf312ed8093b13e0a39"
+  },
   "BOUTON_INERTIA_FTR": {
    "file": "inertia_all.ftr",
    "columns": {
@@ -137,6 +164,30 @@
    "sha256": "2146cf910dc64a06d6bb0ba8202341c5aa37872b9ebcffb759b16ff8ebc90775",
    "duplicate_keys": 0
   },
+  "SYNAPSES_NO_SELF_FTR": {
+   "file": "t2.ftr",
+   "columns": {
+    "index": "int64",
+    "pre": "int64",
+    "post": "int64",
+    "post_x": "int64",
+    "post_y": "int64",
+    "post_z": "int64",
+    "pre_x": "int64",
+    "pre_y": "int64",
+    "pre_z": "int64"
+   },
+   "rows": 70312046,
+   "pandas_id_dtypes": {
+    "pre": "int64",
+    "post": "int64"
+   },
+   "file_id_types": {
+    "pre": "int64",
+    "post": "int64"
+   },
+   "sha256": "0a280f1c067df8f5609b54c6c736bd0b10c95f6ed4e8656450d3bd2125f5ee65"
+  },
   "CONSOLIDATED_CELL_TYPES_CSV": {
    "file": "consolidated_cell_types.csv.gz",
    "columns": {
@@ -171,6 +222,25 @@
     "synapse_id": "int64"
    },
    "sha256": "be9aa7876fb05269c98a78315ace5a2188cdc21937dbbbdbef831c21a54c3286",
+   "duplicate_keys": 0
+  },
+  "SYN_BOUTON_NEW_FTR": {
+   "file": "syn_bouton_filopodia(new).ftr",
+   "columns": {
+    "synapse_id": "int64",
+    "bouton_on_pre": "int64",
+    "filopodia_on_post": "int64",
+    "pre_x_cluster": "double",
+    "pre_x_filopodia": "double"
+   },
+   "rows": 76039057,
+   "pandas_id_dtypes": {
+    "synapse_id": "int64"
+   },
+   "file_id_types": {
+    "synapse_id": "int64"
+   },
+   "sha256": "4085171d1e74a9d5a08c877a1aea9d9a0667aab4aedc796cb2a573c0abe7ea52",
    "duplicate_keys": 0
   },
   "NEURONS_NT_BWF_FTR": {
