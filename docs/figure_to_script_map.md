@@ -215,16 +215,16 @@ reads `NEURON_TABLE_FTR` and `SYNAPSE_TABLE_FTR` instead (and `SI_UPDATED_FTR` i
 
 The bouton and filopodia panels. The two MSB pipelines in `MSB-and-Post-on-MSB-pipeline/` find multi-synapse
 boutons and the postsynapses near them, but they do not make any panel, and no script in this
-repository writes `SYN_BOUTON_FTR` or the bouton tables (`BOUTON_TABLE_FTR`, `BOUTON_FILOPODIA_TABLE_FTR`,
+repository writes `SYN_BOUTON_FTR`, `SYN_BOUTON_NEW_FTR` or the bouton tables (`BOUTON_TABLE_FTR`, `BOUTON_FILOPODIA_TABLE_FTR`,
 `FILOPODIA_RECIPROCAL_FTR`, `FILOPODIA_FILTERED_FTR`, `BOUTON_INERTIA_FTR`), `NEURON_DATA_FTR` or `SYNAPSES_NO_SELF_FTR`, which these scripts read
 (see `docs/data_availability.md`). The `fig7*.py` scripts are ported from the scripts that drew those panels.
 
 | Panel | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|
-| Fig 7E | `figures/fig7/fig7e_nt_presynaptic_pies.py` | `NEURON_DATA_FTR`, `SYNAPSES_NO_SELF_FTR`, `BOUTON_TABLE_FTR`, `FILOPODIA_FILTERED_FTR` | `outputs/fig7/fig7e_nt_presynaptic_pies/pie_plot_nt_post_frac_and_bwf_3_newest.svg` (cannot run: `SYNAPSES_NO_SELF_FTR` and `FILOPODIA_FILTERED_FTR` are not supplied) |
+| Fig 7E | `figures/fig7/fig7e_nt_presynaptic_pies.py` | `NEURON_DATA_FTR`, `SYNAPSES_NO_SELF_FTR`, `BOUTON_TABLE_FTR`, `FILOPODIA_FILTERED_FTR` | `outputs/fig7/fig7e_nt_presynaptic_pies/pie_plot_nt_post_frac_and_bwf_3_newest.svg` |
 | Fig 7F, Fig 7 Supp 4C | `figures/fig7/fig7f_filopodia_fraction_violins.py` | `BOUTON_TABLE_FTR` | `outputs/fig7/fig7f_filopodia_fraction_violins/super_fractions_split2_new(2).svg` (left half 7F, right half Supp 4C) |
 | Fig 7G | `figures/fig7/fig7g_filopodia_fraction_x_si.py` | `BOUTON_TABLE_FTR`, `BOUTON_FILOPODIA_TABLE_FTR` | `outputs/fig7/fig7g_filopodia_fraction_x_si/` (left: `SI_vs_fraction_all_new.svg`; right: `SI_vs_post_on_bouton_ALL_AXON_DENDRITE_2_new.svg`) |
-| Fig 7H | `figures/fig7/post_on_filo_ratio.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SYN_BOUTON_FTR` | `outputs/fig7/post_on_filo_ratio/` (the panel is `axon_dend_filo_ratio_by_superclass_lines.svg`; the other three SVGs are variants) |
+| Fig 7H | `figures/fig7/post_on_filo_ratio.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SYN_BOUTON_NEW_FTR` | `outputs/fig7/post_on_filo_ratio/` (the panel is `axon_dend_filo_ratio_by_superclass_lines.svg`; the other three SVGs are variants) |
 | Fig 7I | `figures/fig7/fig7i_filopodia_fraction_x_nt.py` | `BOUTON_TABLE_FTR`, `BOUTON_FILOPODIA_TABLE_FTR`, `NEURON_DATA_FTR` | `outputs/fig7/fig7i_filopodia_fraction_x_nt/nt_type_frac_new2.svg`; writes `NEURONS_NT_BWF_FTR` |
 | Fig 7J (input) | `figures/fig7/si_sim_baseline.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SYN_BOUTON_FTR` | `outputs/fig7/si_sim_baseline/`; writes `FILOPODIA_NODES_BASELINE_FTR` |
 | Fig 7J (input) | `figures/fig7/si_sim_no_filopodia.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SYN_BOUTON_FTR` | `outputs/fig7/si_sim_no_filopodia/`; writes `FILOPODIA_NODES_NO_FILOPODIA_FTR` |

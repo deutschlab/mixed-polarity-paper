@@ -76,7 +76,7 @@ FILOPODIA_DIR             = DERIVED_DATA_DIR / "filopodia"
 CLASSIFICATION_CSV        = RAW_DATA_DIR / "classification.csv"
 NEURONS_CSV               = RAW_DATA_DIR / "neurons.csv"
 SYN_BOUTON_FTR            = RAW_DATA_DIR / "syn_bouton_filopodia.ftr"
-
+SYN_BOUTON_NEW_FTR        = RAW_DATA_DIR / "syn_bouton_filopodia(new).ftr"   # SYN_BOUTON_FTR with bouton_on_pre set to 0 where the presynaptic cell is not in BOUTON_TABLE_FTR, and filopodia_on_post set to 0 where the postsynaptic cell is not; read by Fig 7H (the plain table gives the published 7J, this one the published 7H)
 # ── Additional intermediate/derived files ───────────────────────────────────
 SYNAPSE_NON_PROCESSED_FTR     = DERIVED_DATA_DIR / "synapses_783_non_processed_princeton.ftr"
 PRE_CONNECTORS_FTR            = CONNECTORS_DIR / "pre_connectors_princeton.ftr"
@@ -140,7 +140,7 @@ FILOPODIA_RECIPROCAL_FTR      = DERIVED_DATA_DIR / "filopodia_reciprocal.ftr"
 FILOPODIA_FILTERED_FTR        = DERIVED_DATA_DIR / "filopodia_filtered.ftr"
 BOUTON_INERTIA_FTR            = DERIVED_DATA_DIR / "inertia_all.ftr"
 NEURON_DATA_FTR               = DERIVED_DATA_DIR / "neuron_data.ftr"   # neuron metadata with neurons.csv's nt_type, class and sub_class; not NEURON_TABLE_FTR. Its SI equals the Buhmann neuron table's to 0.001 for 111,525 of the 129,903 cells they share; read by fig7e, fig7i and fig7s2b (nt_type, sub_class) and by the revised Fig 4E script (class, primary_type, cell_type); none reads its SI
-SYNAPSES_NO_SELF_FTR          = DERIVED_DATA_DIR / "t2.ftr"           # every synapse except self-synapses (pre == post)
+SYNAPSES_NO_SELF_FTR          = DERIVED_DATA_DIR / "t2.ftr"           # a subset of SYNAPSE_TABLE_FTR (which has no self-synapses): 1,029,925 whole (pre, post) connections, 5,727,011 synapses, are left out, for a reason not known
 CONSOLIDATED_CELL_TYPES_CSV   = RAW_DATA_DIR / "consolidated_cell_types.csv.gz"   # Codex download
 
 # --- raw synapse table (built by processing/build_raw_synapse_table.py from PRINCETON_SYNAPSE_CSV) ---

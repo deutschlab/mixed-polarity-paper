@@ -3,7 +3,7 @@
 # Changes: paths via config.py; unused imports removed (nglui, fafbseg, navis, networkx, sklearn,
 # ng_methods_v2, the authors' colour module, the CAVEclient connection and others). SI_calc came from
 # altsi_methods_v2 in the original setup; the copy in methods/methods_all.py is identical. A stray bare path line was removed.
-# The original copy read "syn_bouton_filopodia(new).ftr"; SYN_BOUTON_FTR names the file without "(new)".
+# The original copy read "syn_bouton_filopodia(new).ftr"; this reads the plain SYN_BOUTON_FTR, which gives the published 7J.
 # Writes filopodia_nodes_baseline (FILOPODIA_NODES_BASELINE_FTR), which figures/fig7/si_comb_analysis.py reads.
 # The compartments are not re-split: SI is recomputed on the existing A/D labels.
 # Also added: svg.fonttype='none' and Arial (repository convention). The original saved SVGs drew text as
