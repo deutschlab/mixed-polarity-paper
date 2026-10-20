@@ -154,3 +154,6 @@ SYNAPSE_TABLE_RAW_NO_SELF_FTR    = SYNAPSE_TABLE_RAW_FTR   # the name set above
 SYNAPSE_TABLE_RAW_WITH_SELF_FTR  = DERIVED_DATA_DIR / "synapses_783_article_princeton_raw_with_self.ftr"
 SYNAPSE_TABLE_RAW_FTR = (SYNAPSE_TABLE_RAW_WITH_SELF_FTR if RAW_TABLE_KEEP_SELF_SYNAPSES
                          else SYNAPSE_TABLE_RAW_NO_SELF_FTR)
+
+# step 05 builds the neuron table here, then writes NEURON_TABLE_FTR and deletes this copy
+NEURON_TABLE_PARTIAL_FTR = NEURON_TABLE_FTR.with_name(NEURON_TABLE_FTR.stem + "_partial.ftr")

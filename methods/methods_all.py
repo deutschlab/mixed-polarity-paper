@@ -1419,3 +1419,28 @@ def load_swc(directory):
             swc = navis.read_swc(full_path)
             swc_list.append(swc)
     return swc_list
+
+
+
+def check_batch_record(batch_dir, neuron_ids, batch_size):
+    """Step 08 reuses the batch files already in batch_dir. Record what they were made from (the neuron list, the
+    batch size, the synapse table and the self-synapse switch) and stop if a later run differs, rather than mix two
+    runs in one comparison table."""
+    import hashlib
+    import json
+    from pathlib import Path
+    from config import SYNAPSE_TABLE_RAW_FTR, RAW_TABLE_KEEP_SELF_SYNAPSES
+    record = {"neurons_sha256": hashlib.sha256(np.asarray(neuron_ids, dtype=np.int64).tobytes()).hexdigest(),
+              "batch_size": int(batch_size), "synapse_table": SYNAPSE_TABLE_RAW_FTR.name,
+              "synapse_table_bytes": SYNAPSE_TABLE_RAW_FTR.stat().st_size,
+              "keep_self_synapses": bool(RAW_TABLE_KEEP_SELF_SYNAPSES)}
+    record_file = Path(batch_dir) / "batch_run.json"
+    if record_file.exists():
+        if json.loads(record_file.read_text()) != record:
+            raise SystemExit(f"The batches in {batch_dir} come from another run (see batch_run.json). "
+                             "Empty the folder, or point ALT_SPLIT_BATCH_DIR elsewhere.")
+    elif any(Path(batch_dir).glob("*_batch_*.ftr")):
+        raise SystemExit(f"{batch_dir} holds batches with no record of how they were made. "
+                         "Empty the folder, or point ALT_SPLIT_BATCH_DIR elsewhere.")
+    else:
+        record_file.write_text(json.dumps(record, indent=1))

@@ -17,7 +17,7 @@ import pickle
 
 from scipy.stats import gaussian_kde
 import matplotlib as mpl
-
+mpl.rcParams.update({'svg.fonttype': 'none', 'font.family': 'Arial'})   # SVG text stays editable
 #%%
 path = NEUROPIL_SYNAPSE_CSV
 

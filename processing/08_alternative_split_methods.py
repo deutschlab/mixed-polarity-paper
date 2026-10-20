@@ -1151,7 +1151,7 @@ batch_data_path.mkdir(
     parents=True,
     exist_ok=True
 )
-
+check_batch_record(batch_data_path, all_neurons[NEURON_ID_COL], BATCH_SIZE)   # stops on another run's batches
 
 print("Total neurons:", len(all_neurons))
 print("Batch size:", BATCH_SIZE)
@@ -1315,14 +1315,14 @@ Y = 236    # last batch will be X + Y
 
 START_BATCH = X
 END_BATCH = X + Y
-
+if END_BATCH != n_batches: raise SystemExit(f"batches {START_BATCH} to {END_BATCH} are combined, but the run made {n_batches}")
 batch_data_path = ALT_SPLIT_BATCH_DIR
 
 
 #%% 3. Read summary files from selected batches
 
 summary_frames = []
-
+missing_batches = []
 for batch_id in range(START_BATCH, END_BATCH + 1):
 
     print(f"Reading batch {batch_id}")
@@ -1340,11 +1340,11 @@ for batch_id in range(START_BATCH, END_BATCH + 1):
 
     else:
 
-        print(
-            f"Missing: {summary_file.name}"
+        missing_batches.append(
+            summary_file.name
         )
 
-
+if missing_batches: raise SystemExit(f"batch files missing, so their neurons would be left out: {missing_batches}")
 #%% 4. Combine selected batches
 
 if len(summary_frames) > 0:

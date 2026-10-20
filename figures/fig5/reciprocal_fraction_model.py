@@ -131,7 +131,7 @@ r2 = r2_score(y_test, y_pred)
 
 print(f"Test MSE: {mse:.3f}")
 print(f"Test R2: {r2:.3f}")
-
+# Optimistic: tuning saw the test rows, and no split is grouped by cell type (nested CV fixes only the first).
 # Get feature importances
 feature_importances = pd.DataFrame({
     'feature': X.columns,
@@ -152,7 +152,7 @@ plt.savefig(_out_dir / "feature_importance.svg", format='svg', dpi=300, bbox_inc
 plt.show()
 #%%
 import joblib
-
+RF_MODEL_PKL.parent.mkdir(parents=True, exist_ok=True)
 
 # Save the final model
 joblib.dump(

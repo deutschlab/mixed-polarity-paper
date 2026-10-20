@@ -13,7 +13,7 @@ import pickle
     #t1_reci_per_neuron
     #reci_running_neurons_on_self
 #%%
-#%%
+plt.rcParams.update({'svg.fonttype': 'none', 'font.family': 'Arial'})   # SVG text stays editable
 nodesG=pd.read_feather(NEURON_TABLE_FTR)
 #%%
 a=nodesG.head()

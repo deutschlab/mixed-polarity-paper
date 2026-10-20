@@ -6,7 +6,7 @@ from config import (
     METHODS_DIR, NEURON_ANNOTATIONS_CSV, CELL_STATS_CSV,
     PROCESSED_SWC_DIR, PROCESSED_BIG_NEURONS_DIR,
     SI_UPDATED_FTR, SWC_DATA_FTR, SYNAPSE_TABLE_FTR,
-    NEURON_TABLE_FTR, RANKS_DIR, NEURONS_CSV,
+    NEURON_TABLE_FTR, NEURON_TABLE_PARTIAL_FTR, RANKS_DIR, NEURONS_CSV,
     DERIVED_DATA_DIR,
 )
 sys.path.insert(0, str(METHODS_DIR))
@@ -299,9 +299,9 @@ df=df[df['neuron']==df['root_id']]
 df['root_id']=df['neuron']  # equal on every row kept; the left merge above returned root_id as rounded floats
 #%%
 NEURON_TABLE_FTR.parent.mkdir(parents=True, exist_ok=True)
-df.to_feather(NEURON_TABLE_FTR)
+df.to_feather(NEURON_TABLE_PARTIAL_FTR)   # built on a copy; NEURON_TABLE_FTR is written once, at the end
 #%%
-nodesG=pd.read_feather(NEURON_TABLE_FTR)
+nodesG=pd.read_feather(NEURON_TABLE_PARTIAL_FTR)
 #%%
 import os
 import pandas as pd
@@ -355,14 +355,14 @@ df_combined['neuron']=df_combined['neuron'].astype(np.int64)
 #%%
 nodesG2=nodesG.merge(df_combined,on='neuron',how='left')
 #%%
-nodesG2.to_feather(NEURON_TABLE_FTR)
+nodesG2.to_feather(NEURON_TABLE_PARTIAL_FTR)
 #%%
-nodesG2=pd.read_feather(NEURON_TABLE_FTR)
+nodesG2=pd.read_feather(NEURON_TABLE_PARTIAL_FTR)
 nodesG2=nodesG2.rename(columns={'cell_type':'primary_type'})
-nodesG2.to_feather(NEURON_TABLE_FTR)
+nodesG2.to_feather(NEURON_TABLE_PARTIAL_FTR)
 
 #%%
-df=pd.read_feather(NEURON_TABLE_FTR)
+df=pd.read_feather(NEURON_TABLE_PARTIAL_FTR)
 #%%
 nt_df=pd.read_csv(NEURONS_CSV)
 #%%
@@ -377,7 +377,7 @@ aa=df.head(1000)
 #%%
 NEURON_TABLE_FTR.parent.mkdir(parents=True, exist_ok=True)
 df.to_feather(NEURON_TABLE_FTR)
-
+NEURON_TABLE_PARTIAL_FTR.unlink(missing_ok=True)
 
 
 #%%

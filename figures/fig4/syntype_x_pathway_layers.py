@@ -2,16 +2,16 @@
 # (LA, ME, LO, LOP and the visual projection neurons) and of the olfactory pathway (AL, LH + MB_CA,
 # the mushroom body lobes, and CRE + SMP + SIP + LAL), the share of AD, AA, DD and DA synapses,
 # over all synapses and over synapses between cells of the same type (and, for olfaction, of
-# different types). Only synapses whose two cells both have SI >= 0.1. Tables and six plots; the
+# different types), for rows that pass an SI >= 0.1 filter (see the input below). Tables and six plots; the
 # revised Fig 4E is plots 3-6 (the DD and AA lines).
 # Ported from the corresponding author's MATLAB script FlyWire_VisualOlfactoryPathway_LayerStats.m
 # (not included in this repository).
 # Changes:
 #   - paths via config.py; the tables are written next to the figures (the MATLAB script wrote them
 #     into its data folder), and the MATLAB .fig copies of the figures are not made;
-#   - its input ex_table_npil_comp_pre_post_hiSI_PerTypeSummary.csv (synapses per pre type, post
-#     type, connection type and neuropil, both cells with SI >= 0.1) is not in the repository and
-#     no code here writes it: see DATA_SOURCE below;
+#   - its input ex_table_npil_comp_pre_post_hiSI_PerTypeSummary.csv (one row per pre type, post type and
+#     connection type, with one npil label; kept where the mean SI over the row's records, and over its
+#     two types' records, is >= 0.1) is not in the repository and no code here writes it: see DATA_SOURCE below;
 #   - neuron_data.csv, which the MATLAB script reads for the olfactory cell classes, is not in the
 #     repository either; NEURON_DATA_FTR stands in for it (same columns: class, primary_type, cell_type);
 #   - Olfactory_ClassNeuropilStats.csv is only printed by the MATLAB script; it is printed here if

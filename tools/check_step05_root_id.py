@@ -13,7 +13,7 @@ and found by their exact text (a reworded line is reported as a failure):
   - the cell list (`unique_neurons = ...` and `result_df = pd.DataFrame(...)`),
   - the merge (`df=result_df.merge(nodesG, ...)`),
   - everything from the filter (`df=df[df['neuron']==df['root_id']]`) up to the
-    first `df.to_feather(NEURON_TABLE_FTR)`, without the mkdir line before it.
+    first `df.to_feather(NEURON_TABLE_PARTIAL_FTR)`, without the mkdir line before it.
 `nodesG` is stood in by the annotated cells that have an SI in SI_UPDATED_FTR.
 That is enough for root_id: its type depends only on which synapse-table cells
 find no match. The real `nodesG` also has the cell_stats, linker and swc_data
@@ -69,7 +69,7 @@ CELL_LIST = ("unique_neurons = ", "result_df = pd.DataFrame(")
 MERGE = "df=result_df.merge(nodesG"
 FILTER = "df=df[df['neuron']==df['root_id']]"
 MKDIR = "NEURON_TABLE_FTR.parent.mkdir"
-SAVE = "df.to_feather(NEURON_TABLE_FTR)"
+SAVE = "df.to_feather(NEURON_TABLE_PARTIAL_FTR)"
 MAX_BLOCK = 10  # the save follows the filter within a few lines; more means the lookup went astray
 TARGETS_FRAME = re.compile(r"^(result_)?df\b")  # a statement that writes df or result_df
 # reassigning the key column, relabelling columns, or recasting the whole frame
