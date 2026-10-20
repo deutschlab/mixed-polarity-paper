@@ -118,7 +118,7 @@ CONNECTIONS_TABLE_NONP_FTR    = DERIVED_DATA_DIR / "connections_by_syn_type_reci
 NEURONS_NT_BWF_FTR            = DERIVED_DATA_DIR / "neurons_nt_bwf_frac.ftr"   # written by figures/fig7/fig7i_filopodia_fraction_x_nt.py
 
 # --- Fig 4E of the revision (figures/fig4/syntype_x_pathway_layers.py; made outside this repository, no script here writes them) ---
-PER_TYPE_SUMMARY_CSV          = DERIVED_DATA_DIR / "ex_table_npil_comp_pre_post_hiSI_PerTypeSummary.csv"   # synapses per pre type, post type, comp and npil, both cells SI >= 0.1
+PER_TYPE_SUMMARY_CSV          = DERIVED_DATA_DIR / "ex_table_npil_comp_pre_post_hiSI_PerTypeSummary.csv"   # one row per pre type, post type and comp, with its synapse count and one npil label; rows kept where the mean SI over the row's records, and over its two types' records, is >= 0.1
 OLFACTORY_CLASS_NEUROPIL_CSV  = DERIVED_DATA_DIR / "Olfactory_ClassNeuropilStats.csv"   # printed only
 
 # --- alternative split methods (processing/08_alternative_split_methods.py) ---

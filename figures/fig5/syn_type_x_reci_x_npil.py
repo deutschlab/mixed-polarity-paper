@@ -342,7 +342,7 @@ for col in plot_order:
     bottom = [i + j for i, j in zip(bottom, com_df_sorted[col])]
 
 # --- Annotate totals ---
-for i, row in com_df_raw_sorted.iterrows():
+for i, row in com_df_raw.set_index('npil').loc[com_df_sorted['npil'].values].reset_index().iterrows():   # in the bars' order (com_df_sorted)
     total_syns = row[all_cols].sum()
     ax.text(
         i + 0.4,
