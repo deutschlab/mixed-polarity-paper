@@ -15,9 +15,9 @@ Needs SYNAPSE_TABLE_RAW_FTR (built by processing/build_raw_synapse_table.py) and
 skeletons of every neuron under SWC_DIR. The batch range in the last section
 (X = 1, Y = 236: batches X to X + Y, that is 1 to 237) covers the 118,347
 intrinsic neurons of NEURON_TABLE_FTR in batches of 500; change it if that
-number changes. A batch is skipped if its files
-already exist, and a missing batch file is reported and skipped when the results
-are combined, so check the row count of the combined table.
+number changes. A batch is skipped if its files already exist; the run stops if
+those files have no record or come from another run (batch_run.json), and, when
+combining, if a batch file is missing or the range does not end at the last batch.
 """
 #%%1 Imports
 
