@@ -32,7 +32,7 @@ the same type are not independent.
 Reads SI_COMPARISONS_FTR, SI_UPDATED_FTR and, from NEURON_TABLE_FTR, super_class,
 primary_type and the axon and dendrite input and output counts (only to group
 neurons). Prints the results and saves one figure,
-OUTPUT_DIR / "phi_threshold" / "phi_threshold.svg".
+OUTPUT_DIR / "processing" / "phi_threshold" / "phi_threshold.svg".
 """
 import matplotlib as mpl
 mpl.rcParams['svg.fonttype'] = 'none'
@@ -189,7 +189,7 @@ for name, column in zip(['local median', 'same share', 'best agreement', 'median
     print(f"  {name:20s} {np.percentile(column, 2.5):.3f} to {np.percentile(column, 97.5):.3f}")
 
 #%% figure: the typical Phi at each SI, and the Phi of the neurons at SI = 0.1
-_out_dir = OUTPUT_DIR / "phi_threshold"
+_out_dir = OUTPUT_DIR / "processing" / "phi_threshold"
 _out_dir.mkdir(parents=True, exist_ok=True)
 
 step = 0.01

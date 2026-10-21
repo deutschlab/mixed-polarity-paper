@@ -183,7 +183,7 @@ number in the text.
 > whole selection with cells that have a skeleton (and print that they did), so the images are then not the original cells.
 > The original cells need the full skeleton download.
 
-> `processing/phi_threshold.py` saves `outputs/phi_threshold/phi_threshold.svg`, which shows how it finds the Phi
+> `processing/phi_threshold.py` saves `outputs/processing/phi_threshold/phi_threshold.svg`, which shows how it finds the Phi
 > cutoff that matches SI = 0.1 (not a panel of the submitted paper).
 
 ## Figure 6 — Reciprocal motifs in different neural systems

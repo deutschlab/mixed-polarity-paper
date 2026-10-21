@@ -83,7 +83,7 @@ The work is split into steps mostly to keep memory use down, since the synapse t
 
 Step 08 is optional. It compares the published axon/dendrite split with two single-node cuts, MaxSI and MinFisherP. It needs step 05's table, the skeletons of the intrinsic neurons, and `synapses_783_article_princeton_raw.ftr`, which `processing/build_raw_synapse_table.py` builds from the Codex CSV (run it first). That file must have `size` and `neuropil` columns, so the synapse table from step 04 can't be used in its place. The build writes two versions, without and with self-synapses; `RAW_TABLE_KEEP_SELF_SYNAPSES` in `config.py` chooses which one the scripts read.
 
-`phi_threshold.py` is also optional. It works out which Phi value matches the SI = 0.1 cutoff, using step 08's output plus the neuron table and `SI_updated.ftr` from step 05. It prints the results and saves a plot to `outputs/phi_threshold/phi_threshold.svg`.
+`phi_threshold.py` is also optional. It works out which Phi value matches the SI = 0.1 cutoff, using step 08's output plus the neuron table and `SI_updated.ftr` from step 05. It prints the results and saves a plot to `outputs/processing/phi_threshold/phi_threshold.svg`.
 
 The larval SI for Figure 2A comes from `processing/larva/larva_process.py`, which runs separately from these steps. As committed it gives no usable output (see above).
 

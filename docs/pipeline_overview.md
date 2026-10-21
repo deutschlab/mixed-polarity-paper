@@ -258,7 +258,7 @@ follow SI exactly, so the match holds on average, not for every neuron.
 | | |
 |--|--|
 | **Inputs** | `SI_COMPARISONS_FTR`, `SI_UPDATED_FTR` (the script stops unless `SFC_SI` equals it, so the cutoff matches the SI in this file), `NEURON_TABLE_FTR` (super_class, primary_type, and axon/dendrite input and output counts for grouping) |
-| **Outputs** | Printed results, and `outputs/phi_threshold/phi_threshold.svg` (the typical Phi at each SI, and the Phi of the neurons at SI = 0.1, with the three estimates) |
+| **Outputs** | Printed results, and `outputs/processing/phi_threshold/phi_threshold.svg` (the typical Phi at each SI, and the Phi of the neurons at SI = 0.1, with the three estimates) |
 | **Downstream** | None in this repository |
 
 ---

@@ -63,7 +63,7 @@ sys.path.insert(0, str(REPO))
 from config import OUTPUT_DIR, SWC_DIR, SYNAPSE_TABLE_FTR, SYNAPSE_TABLE_RAW_FTR  # noqa: E402
 
 # The |phi| that matches SI = 0.1: the cutoff processing/phi_threshold.py recommends on the
-# delivered SI_comparisons.ftr (its plot, outputs/phi_threshold/phi_threshold.svg, said 0.36 on
+# delivered SI_comparisons.ftr (its plot, outputs/processing/phi_threshold/phi_threshold.svg, said 0.36 on
 # 29 Sep 2026). Rerun that script if the SI or the split changes; set it here with --phi-cutoff.
 PHI_CUTOFF = 0.36
 SI_CUTOFF = 0.1
