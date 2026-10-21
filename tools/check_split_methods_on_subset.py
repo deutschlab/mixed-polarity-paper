@@ -56,10 +56,10 @@ PASS or FAIL per reference (MinFisherP_Phi_first does not count towards it) and 
 status 1 if any reference fails, or if step 08 itself stops.
 
 Usage:
-    python tools/check_split_methods_on_subset.py --out outputs/split_methods_check/run1
-    python tools/check_split_methods_on_subset.py --out outputs/split_methods_check/run1 \\
+    python tools/check_split_methods_on_subset.py --out outputs/tools/check_split_methods_on_subset/run1
+    python tools/check_split_methods_on_subset.py --out outputs/tools/check_split_methods_on_subset/run1 \\
         --compare data/derived/SI_comparisons.ftr
-    python tools/check_split_methods_on_subset.py --out outputs/split_methods_check/run1 \\
+    python tools/check_split_methods_on_subset.py --out outputs/tools/check_split_methods_on_subset/run1 \\
         --compare-only --compare data/derived/SI_comparisons.ftr other_summary.ftr
 
 Options: --ids FILE takes neuron IDs from a text file, one integer per line, instead of the
@@ -467,11 +467,11 @@ if __name__ == "__main__":
     # with the raw synapse table
     #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/synapses_783_article_princeton_raw.ftr
     # writes the run (batches, patched step 08, provenance, per_neuron.csv) to
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/split_methods_check/ide_run   (must be new or empty)
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_split_methods_on_subset/ide_run   (must be new or empty)
     # and compares it with
     #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/SI_comparisons.ftr
     # To run it, uncomment:
-    # sys.argv[1:] = ["--out", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/split_methods_check/ide_run",
+    # sys.argv[1:] = ["--out", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_split_methods_on_subset/ide_run",
     #                 "--limit", "20",
     #                 "--compare", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/SI_comparisons.ftr"]
     main()

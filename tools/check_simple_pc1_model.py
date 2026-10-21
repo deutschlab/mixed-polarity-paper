@@ -49,10 +49,10 @@ stratification), within the rounding of the two-decimal percentages. With --vari
 also says whether the differences are larger than the variants' movement.
 
 Usage:
-    python tools/run_figure.py figures/fig4/syntype_x_pc1_simple_model.py --out outputs/check/simple_model
-    python tools/check_simple_pc1_model.py --run outputs/check/simple_model
-    python tools/check_simple_pc1_model.py --run outputs/check/simple_model --variants \\
-        --earlier path/to/earlier_svgs --report outputs/check/simple_model/check_report.txt
+    python tools/run_figure.py figures/fig4/syntype_x_pc1_simple_model.py --out outputs/tools/run_figure/simple_model
+    python tools/check_simple_pc1_model.py --run outputs/tools/run_figure/simple_model
+    python tools/check_simple_pc1_model.py --run outputs/tools/run_figure/simple_model --variants \\
+        --earlier path/to/earlier_svgs --report outputs/tools/run_figure/simple_model/check_report.txt
 
 Reads only the five needed columns of the synapse table, batch by batch. Memory and time
 were measured on macOS on 2 Oct 2026 and are given in the README. The result is exact only
@@ -396,13 +396,13 @@ def main():
 
 if __name__ == "__main__":
     # Checks a run of figures/fig4/syntype_x_pc1_simple_model.py made with tools/run_figure.py:
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/simple_model_final   (the 2 Oct run)
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_figure/simple_model_final   (the 2 Oct run)
     # against the tool's own rebuild of the model from the tables named in config.py:
     #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/synapses_783_article_princeton.ftr
     #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/neuron_data_full_article_princeton.ftr
     #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/neurons_pca_princeton.ftr
     # --variants also refits three variants (seed 7, PC1 sign flipped, cells without PC1 left out).
     # It prints PASS or FAIL; it writes no file unless --report is given. To run it, uncomment:
-    # sys.argv[1:] = ["--run", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/simple_model_final",
+    # sys.argv[1:] = ["--run", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_figure/simple_model_final",
     #                 "--variants"]
     main()

@@ -68,7 +68,7 @@ Run:
     .venv/bin/python tools/check_fig7_ports.py --originals <folder> --only fig7g.py
     .venv/bin/python tools/check_fig7_ports.py --originals <folder> --mutants
 About a minute for the six runnable pairs, about 5 minutes for --mutants.
-Writes outputs/check/check_fig7_ports/ (or --out): report.txt (mutants: mutants_report.txt),
+Writes outputs/tools/check_fig7_ports/ (or --out): report.txt (mutants: mutants_report.txt),
 records/ (what each run drew), work/ and mutants/ (scratch).
 Exit code 0 on PASS, 1 on FAIL.
 """
@@ -90,7 +90,7 @@ sys.path.insert(0, str(REPO_ROOT / "tools"))
 from config import OUTPUT_DIR  # noqa: E402
 import make_fig7_ports as mk  # noqa: E402
 
-OUT_DIR = OUTPUT_DIR / "check" / "check_fig7_ports"
+OUT_DIR = OUTPUT_DIR / "tools" / "check_fig7_ports"
 PORTS_DIR = REPO_ROOT / "figures" / "fig7"
 RENAME_ROOT_ID = {"fig7S2b.py"}
 NOT_SUPPLIED_OK = ("t2.ftr", "filopodia_filtered.ftr")
@@ -606,7 +606,7 @@ def main() -> None:
     parser.add_argument("--ports", type=Path, default=PORTS_DIR, help="folder of the ports (default figures/fig7)")
     parser.add_argument("--only", nargs="+", help="original script names, e.g. fig7g.py (default: all seven)")
     parser.add_argument("--mutants", action="store_true", help="plant the built-in bugs and require each to FAIL")
-    parser.add_argument("--out", type=Path, default=OUT_DIR, help="report folder (default outputs/check/check_fig7_ports)")
+    parser.add_argument("--out", type=Path, default=OUT_DIR, help="report folder (default outputs/tools/check_fig7_ports)")
     parser.add_argument("--timeout", type=int, default=1200, help="seconds each script may run (default 1200)")
     args = parser.parse_args()
     out_dir = args.out.resolve()
@@ -656,9 +656,9 @@ if __name__ == "__main__":
     #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/figures/fig7/  (the seven fig7*.py ports)
     #   the tables config.py names for Figure 7 (read by the ports)
     # Writes:
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/check_fig7_ports/report.txt  (one line per pair)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/check_fig7_ports/mutants_report.txt  (with --mutants)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/check_fig7_ports/records/  (what each run drew)
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_fig7_ports/report.txt  (one line per pair)
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_fig7_ports/mutants_report.txt  (with --mutants)
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_fig7_ports/records/  (what each run drew)
     # To run it, uncomment:
     # sys.argv[1:] = [
     #     "--originals", "<folder with the seven original scripts>",

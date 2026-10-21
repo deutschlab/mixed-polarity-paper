@@ -24,8 +24,8 @@ difference while the rest of the line, which can hold a statistic, still does:
         --mask "[A-Z][a-z]{2}, \\d{2} [A-Z][a-z]{2} \\d{4}" --mask "\\d{2}:\\d{2}:\\d{2}"
 
 Usage:
-    python tools/compare_runs.py outputs/runs/before outputs/runs/after
-    python tools/compare_runs.py outputs/runs/before outputs/runs/after --report report.md
+    python tools/compare_runs.py outputs/tools/run_all_figures/before outputs/tools/run_all_figures/after
+    python tools/compare_runs.py outputs/tools/run_all_figures/before outputs/tools/run_all_figures/after --report report.md
 
 Exits with status 1 if any script differs or is found in only one run; scripts that
 did not finish in either run but did so in the same way do not change the exit status.
@@ -165,9 +165,9 @@ def main() -> None:
 
 if __name__ == "__main__":
     # Compares two full runs of every figure script (made with tools/run_all_figures.py), script by script:
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/repro_runs/2026-09-29_full   (29 Sep)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/repro_runs/2026-10-01_full   (1 Oct)
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/2026-09-29_full   (29 Sep)
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/2026-10-01_full   (1 Oct)
     # It prints the report; with --report FILE it also writes it to that file. To run it, uncomment:
-    # sys.argv[1:] = ["/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/repro_runs/2026-09-29_full",
-    #                 "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/repro_runs/2026-10-01_full"]
+    # sys.argv[1:] = ["/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/2026-09-29_full",
+    #                 "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/2026-10-01_full"]
     main()

@@ -30,7 +30,7 @@ Run:
     .venv/bin/python tools/check_fig7_tables.py
     .venv/bin/python tools/check_fig7_tables.py --selftest
     .venv/bin/python tools/check_fig7_tables.py --record
-About a minute (it reads about 1.7 GB). Writes outputs/check/check_fig7_tables/report.txt.
+About a minute (it reads about 1.7 GB). Writes outputs/tools/check_fig7_tables/report.txt.
 Exit code 0 on PASS, 1 on FAIL.
 """
 import argparse
@@ -50,7 +50,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 import config  # noqa: E402
 
-OUT_DIR = config.OUTPUT_DIR / "check" / "check_fig7_tables"
+OUT_DIR = config.OUTPUT_DIR / "tools" / "check_fig7_tables"
 REFERENCE = REPO_ROOT / "tools" / "fig7_tables_reference.json"
 
 # config constant -> (ID columns, key columns that must be unique)
@@ -298,7 +298,7 @@ if __name__ == "__main__":
     # It compares them with
     #   tools/fig7_tables_reference.json  (recorded 18 Oct 2026)
     # and writes
-    #   outputs/check/check_fig7_tables/report.txt
+    #   outputs/tools/check_fig7_tables/report.txt
     # To run the self-test instead, uncomment:
     # sys.argv[1:] = [
     #     "--selftest",

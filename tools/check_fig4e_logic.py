@@ -43,7 +43,7 @@ Usage:
     python tools/check_fig4e_logic.py
     python tools/check_fig4e_logic.py --script path/to/another_copy.py
 
-Needs no data. Takes a few seconds. Writes outputs/check/check_fig4e_logic/report.txt.
+Needs no data. Takes a few seconds. Writes outputs/tools/check_fig4e_logic/report.txt.
 Exits with status 1 if a check fails.
 """
 
@@ -75,7 +75,7 @@ from config import OUTPUT_DIR  # noqa: E402
 warnings.filterwarnings("ignore", message="FigureCanvasAgg is non-interactive")
 
 SCRIPT = REPO_ROOT / "figures" / "fig4" / "syntype_x_pathway_layers.py"
-OUT_DIR = OUTPUT_DIR / "check" / "check_fig4e_logic"
+OUT_DIR = OUTPUT_DIR / "tools" / "check_fig4e_logic"
 TOL = 1e-6
 SETTING_SOURCE = "DATA_SOURCE = 'csv'\n"
 SETTING_SI = "SI_SOURCE = 'neuron_table'\n"
@@ -438,7 +438,7 @@ if __name__ == "__main__":
     # No inputs needed: it makes its own tables in a temporary folder, runs
     #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/figures/fig4/syntype_x_pathway_layers.py
     # on them, and writes its report to
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/check_fig4e_logic/report.txt
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_fig4e_logic/report.txt
     # To test another copy of the script, uncomment:
     # sys.argv[1:] = [
     #     "--script", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/figures/fig4/syntype_x_pathway_layers.py",

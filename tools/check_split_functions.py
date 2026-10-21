@@ -35,7 +35,7 @@ Run from the repository root:
     python tools/check_split_functions.py --script path/to/another_version.py
 PASS means step 08's per-node scores, its MaxSI and MinFisherP choices, its saved side
 counts, axon side and |phi| agree with the reference on every tree. The tool prints one line
-per check, writes the same to outputs/check/split_functions/report.txt and exits with
+per check, writes the same to outputs/tools/check_split_functions/report.txt and exits with
 status 1 if anything fails. About 40 seconds with the defaults.
 """
 import argparse
@@ -388,8 +388,8 @@ def main():
                     help="file holding the step 08 functions (default: processing/08_alternative_split_methods.py)")
     ap.add_argument("--random", type=int, default=300, help="number of random trees (default 300)")
     ap.add_argument("--seed", type=int, default=0, help="first random-tree seed (default 0)")
-    ap.add_argument("--out", type=Path, default=OUTPUT_DIR / "check" / "split_functions",
-                    help="output folder (default outputs/check/split_functions)")
+    ap.add_argument("--out", type=Path, default=OUTPUT_DIR / "tools" / "check_split_functions",
+                    help="output folder (default outputs/tools/check_split_functions)")
     args = ap.parse_args()
     if args.random < 0:
         ap.error("--random must be 0 or more")
@@ -469,7 +469,7 @@ if __name__ == "__main__":
     # No inputs needed: it checks the step 08 code in
     #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/processing/08_alternative_split_methods.py
     # on test trees it builds itself (named ones in this file and 300 random ones), and writes
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/split_functions/report.txt
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_split_functions/report.txt
     # To test with more random trees, uncomment:
     # sys.argv[1:] = ["--random", "1000", "--seed", "1"]
     main()

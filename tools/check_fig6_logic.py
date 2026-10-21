@@ -62,7 +62,7 @@ Usage:
     python tools/check_fig6_logic.py
     python tools/check_fig6_logic.py --script path/to/another_copy.py
 
-Needs no data. Takes a few seconds. Writes outputs/check/check_fig6_logic/report.txt.
+Needs no data. Takes a few seconds. Writes outputs/tools/check_fig6_logic/report.txt.
 Exits with status 1 if a check fails.
 """
 
@@ -95,7 +95,7 @@ sys.path.insert(0, str(REPO_ROOT))
 from config import OUTPUT_DIR  # noqa: E402
 
 SCRIPT = REPO_ROOT / "figures" / "fig6" / "aadd_specific_circuits.py"
-OUT_DIR = OUTPUT_DIR / "check" / "check_fig6_logic"
+OUT_DIR = OUTPUT_DIR / "tools" / "check_fig6_logic"
 TOL = 1e-9
 
 # Lines added to the script to record values: (exact anchor line, line inserted after it).
@@ -493,7 +493,7 @@ if __name__ == "__main__":
     # No inputs needed: it makes its own tables in a temporary folder, runs
     #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/figures/fig6/aadd_specific_circuits.py
     # on them, and writes its report to
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/check_fig6_logic/report.txt
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_fig6_logic/report.txt
     # To test another copy of the script, uncomment:
     # sys.argv[1:] = [
     #     "--script", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/figures/fig6/aadd_specific_circuits.py",

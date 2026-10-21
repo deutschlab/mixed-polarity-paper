@@ -38,7 +38,7 @@ Usage:
 
 Needs step 05's outputs (SI_updated.ftr and the neuron table), the annotation
 file and the pre and post columns of the synapse table. Takes a few seconds with
-about 5 GB of peak memory. Writes outputs/check/check_step05_root_id/report.txt.
+about 5 GB of peak memory. Writes outputs/tools/check_step05_root_id/report.txt.
 Exits with status 1 if a check fails.
 """
 
@@ -63,7 +63,7 @@ from config import (NEURON_ANNOTATIONS_CSV, NEURON_TABLE_FTR, OUTPUT_DIR,  # noq
                     SI_UPDATED_FTR, SYNAPSE_TABLE_FTR)
 
 STEP05 = REPO_ROOT / "processing" / "05_build_neuron_metadata_table.py"
-OUT_DIR = OUTPUT_DIR / "check" / "check_step05_root_id"
+OUT_DIR = OUTPUT_DIR / "tools" / "check_step05_root_id"
 
 CELL_LIST = ("unique_neurons = ", "result_df = pd.DataFrame(")
 MERGE = "df=result_df.merge(nodesG"
@@ -202,11 +202,11 @@ if __name__ == "__main__":
     #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/SI_updated.ftr                            (root_id, SI)
     #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/neuron_data_full_article_princeton.ftr    (neuron, the delivered cell set)
     # and writes its report to
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/check_step05_root_id/report.txt
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_step05_root_id/report.txt
     # To test a copy of step 05 from before the 4 Oct fix (made with
-    #   git show 3cb03a6:processing/05_build_neuron_metadata_table.py > outputs/check/check_step05_root_id/step05_before_fix.py)
+    #   git show 3cb03a6:processing/05_build_neuron_metadata_table.py > outputs/tools/check_step05_root_id/step05_before_fix.py)
     # uncomment:
     # sys.argv[1:] = [
-    #     "--script", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/check_step05_root_id/step05_before_fix.py",
+    #     "--script", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_step05_root_id/step05_before_fix.py",
     # ]
     main()

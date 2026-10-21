@@ -35,9 +35,9 @@ The command exits with status 1 if any script did not finish. On this repository
 scripts whose input tables are not supplied always stop with an error.
 
 Usage:
-    python tools/run_all_figures.py --out outputs/runs/before
-    python tools/run_all_figures.py --out outputs/runs/after --only fig4
-    python tools/compare_runs.py outputs/runs/before outputs/runs/after
+    python tools/run_all_figures.py --out outputs/tools/run_all_figures/before
+    python tools/run_all_figures.py --out outputs/tools/run_all_figures/after --only fig4
+    python tools/compare_runs.py outputs/tools/run_all_figures/before outputs/tools/run_all_figures/after
 
 On a 36 GB Mac most scripts took seconds and syntype_x_features.py about an hour;
 si_x_primary_types.py (6 to 10 hours, its Games-Howell tests) and
@@ -172,8 +172,8 @@ def main() -> None:
 if __name__ == "__main__":
     # Runs every figure script whose path contains "fig2" (figures/fig2/*.py) through tools/run_figure.py,
     # on the tables named in config.py, and writes each script's figures and logs to
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/repro_runs/ide_run   (reuse it to continue an interrupted run)
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/ide_run   (reuse it to continue an interrupted run)
     # To run it, uncomment:
-    # sys.argv[1:] = ["--out", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/repro_runs/ide_run",
+    # sys.argv[1:] = ["--out", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/ide_run",
     #                 "--only", "fig2"]
     main()

@@ -24,7 +24,7 @@ usual place and are not compared.
 Usage:
     python tools/run_figure.py figures/fig1/canonicality_axon_dend.py
     python tools/run_figure.py figures/fig1/canonicality_axon_dend.py \
-        --dpi 72 --out outputs/check/fig1e
+        --dpi 72 --out outputs/tools/run_figure/fig1e
 
 The published SVGs were saved at 72 dpi, the default for plots shown inside
 Spyder. A plain script run uses 100 dpi, which gives a slightly different plot
@@ -212,12 +212,12 @@ def main() -> None:
     parser.add_argument("--dpi", type=float, default=72,
                         help="figure dpi; 72 matches the published SVGs (default: 72)")
     parser.add_argument("--out", type=Path, default=None,
-                        help="output folder, empty or new (default: outputs/check/<script name>)")
+                        help="output folder, empty or new (default: outputs/tools/run_figure/<script name>)")
     parser.add_argument("--replace", nargs=2, action="append", metavar=("OLD", "NEW"),
                         help="replace one exact piece of source text before running")
     args = parser.parse_args()
 
-    out_dir = args.out or OUTPUT_DIR / "check" / args.script.stem
+    out_dir = args.out or OUTPUT_DIR / "tools" / "run_figure" / args.script.stem
     run_figure(args.script, out_dir, args.dpi, [tuple(pair) for pair in args.replace or []])
     print(f"Output written to {out_dir}")
 

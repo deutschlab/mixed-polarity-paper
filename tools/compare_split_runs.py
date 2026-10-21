@@ -44,7 +44,7 @@ and the same SFC SI.
 SYNAPSE_TABLE_RAW_FTR, processed = SYNAPSE_TABLE_FTR); it checks that the rebuilt neurons
 give run B's side counts before counting, and takes about 3 seconds per differing neuron. Output: summary.txt,
 per_neuron.csv and, when the neuron sets differ, only_in_A.csv / only_in_B.csv, in
-outputs/check/compare_split_runs/ (or --out). Node tables are read one batch file at a time;
+outputs/tools/compare_split_runs/ (or --out). Node tables are read one batch file at a time;
 1,144 neurons take about 2 seconds and 1 GB.
 """
 import argparse
@@ -330,8 +330,8 @@ def main():
                     help="count label changes exactly from the skeletons, with the synapse table run B used")
     ap.add_argument("--expect-identical", action="store_true",
                     help="exit with status 1 unless the neuron sets, every cut and every SFC SI agree")
-    ap.add_argument("--out", type=Path, default=OUTPUT_DIR / "check" / "compare_split_runs",
-                    help="output folder (default outputs/check/compare_split_runs)")
+    ap.add_argument("--out", type=Path, default=OUTPUT_DIR / "tools" / "compare_split_runs",
+                    help="output folder (default outputs/tools/compare_split_runs)")
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     for old in ("summary.txt", "per_neuron.csv", "only_in_A.csv", "only_in_B.csv"):
@@ -405,16 +405,16 @@ def main():
 
 if __name__ == "__main__":
     # Compares the cuts of two step 08 runs on the same 1,144 neurons:
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/split_methods_check/run_2oct/batches                    (A: cuts chosen on the raw synapse table)
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_split_methods_on_subset/run_2oct/batches                    (A: cuts chosen on the raw synapse table)
     #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/split_raw_vs_processed/run_processed_table/batches  (B: cuts chosen on the processed table)
     # --exact processed rebuilds the differing neurons from the skeletons under
     #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/raw/swc/783
     # with run B's synapse table
     #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/synapses_783_article_princeton.ftr
     # and writes summary.txt and per_neuron.csv to
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/compare_split_runs
+    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/compare_split_runs
     # To run it, uncomment:
-    # sys.argv[1:] = ["/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/split_methods_check/run_2oct/batches",
+    # sys.argv[1:] = ["/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_split_methods_on_subset/run_2oct/batches",
     #                 "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/split_raw_vs_processed/run_processed_table/batches",
     #                 "--exact", "processed"]
     main()
