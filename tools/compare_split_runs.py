@@ -404,17 +404,17 @@ def main():
 
 
 if __name__ == "__main__":
-    # Compares the cuts of two step 08 runs on the same 1,144 neurons:
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_split_methods_on_subset/run_2oct/batches                    (A: cuts chosen on the raw synapse table)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/split_raw_vs_processed/run_processed_table/batches  (B: cuts chosen on the processed table)
-    # --exact processed rebuilds the differing neurons from the skeletons under
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/raw/swc/783
+    # Compares the cuts of two step 08 runs on the same neurons, for example two runs of
+    # tools/check_split_methods_on_subset.py:
+    #   outputs/tools/check_split_methods_on_subset/run_a/batches  (A: cuts chosen on the raw synapse table)
+    #   outputs/tools/check_split_methods_on_subset/run_b/batches  (B: cuts chosen on the processed table)
+    # --exact processed rebuilds the differing neurons from the skeletons under data/raw/swc/783
     # with run B's synapse table
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/synapses_783_article_princeton.ftr
+    #   data/derived/synapses_783_article_princeton.ftr
     # and writes summary.txt and per_neuron.csv to
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/compare_split_runs
+    #   outputs/tools/compare_split_runs
     # To run it, uncomment:
-    # sys.argv[1:] = ["/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_split_methods_on_subset/run_2oct/batches",
-    #                 "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/check/split_raw_vs_processed/run_processed_table/batches",
+    # sys.argv[1:] = ["outputs/tools/check_split_methods_on_subset/run_a/batches",
+    #                 "outputs/tools/check_split_methods_on_subset/run_b/batches",
     #                 "--exact", "processed"]
     main()
