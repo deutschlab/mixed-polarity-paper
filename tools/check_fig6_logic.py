@@ -491,11 +491,12 @@ def main() -> None:
 
 if __name__ == "__main__":
     # No inputs needed: it makes its own tables in a temporary folder, runs
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/figures/fig6/aadd_specific_circuits.py
+    #   figures/fig6/aadd_specific_circuits.py
     # on them, and writes its report to
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_fig6_logic/report.txt
+    #   outputs/tools/check_fig6_logic/report.txt
+    # The paths below are relative to the repository root, so run it from there.
     # To test another copy of the script, uncomment:
     # sys.argv[1:] = [
-    #     "--script", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/figures/fig6/aadd_specific_circuits.py",
+    #     "--script", "figures/fig6/aadd_specific_circuits.py",
     # ]
     main()

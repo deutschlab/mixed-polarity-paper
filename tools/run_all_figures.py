@@ -172,8 +172,9 @@ def main() -> None:
 if __name__ == "__main__":
     # Runs every figure script whose path contains "fig2" (figures/fig2/*.py) through tools/run_figure.py,
     # on the tables named in config.py, and writes each script's figures and logs to
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/ide_run   (reuse it to continue an interrupted run)
+    #   outputs/tools/run_all_figures/ide_run   (reuse it to continue an interrupted run)
+    # The paths below are relative to the repository root, so run it from there.
     # To run it, uncomment:
-    # sys.argv[1:] = ["--out", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/ide_run",
+    # sys.argv[1:] = ["--out", "outputs/tools/run_all_figures/ide_run",
     #                 "--only", "fig2"]
     main()

@@ -653,12 +653,12 @@ def main() -> None:
 if __name__ == "__main__":
     # Reads the seven original Figure 7 scripts and the tables they read from the folder given with
     # --originals (not in this repository; --inputs names other folders for the tables), and
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/figures/fig7/  (the seven fig7*.py ports)
+    #   figures/fig7/  (the seven fig7*.py ports)
     #   the tables config.py names for Figure 7 (read by the ports)
     # Writes:
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_fig7_ports/report.txt  (one line per pair)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_fig7_ports/mutants_report.txt  (with --mutants)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_fig7_ports/records/  (what each run drew)
+    #   outputs/tools/check_fig7_ports/report.txt  (one line per pair)
+    #   outputs/tools/check_fig7_ports/mutants_report.txt  (with --mutants)
+    #   outputs/tools/check_fig7_ports/records/  (what each run drew)
     # To run it, uncomment:
     # sys.argv[1:] = [
     #     "--originals", "<folder with the seven original scripts>",

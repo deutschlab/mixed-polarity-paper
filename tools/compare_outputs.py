@@ -276,9 +276,9 @@ def main() -> None:
 
 if __name__ == "__main__":
     # Compares two runs of one figure script (here figures/fig2/si_x_sclass.py), file by file:
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/2026-09-29_full/si_x_sclass   (29 Sep full run)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/2026-10-01_full/si_x_sclass   (1 Oct full run)
-    # It prints identical or what differs for each file; it writes no file. To run it, uncomment:
-    # sys.argv[1:] = ["/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/2026-09-29_full/si_x_sclass",
-    #                 "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/2026-10-01_full/si_x_sclass"]
+    #   outputs/tools/run_all_figures/before/si_x_sclass   (first run)
+    #   outputs/tools/run_all_figures/after/si_x_sclass    (second run)
+    # It prints identical or what differs for each file; it writes no file. To run it from the repository root, uncomment:
+    # sys.argv[1:] = ["outputs/tools/run_all_figures/before/si_x_sclass",
+    #                 "outputs/tools/run_all_figures/after/si_x_sclass"]
     main()

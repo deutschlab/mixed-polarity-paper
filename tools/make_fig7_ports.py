@@ -323,7 +323,7 @@ def main() -> None:
 if __name__ == "__main__":
     # Reads the seven original Figure 7 scripts from the folder given with --originals (not in this repository),
     # and compares what it makes with
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/figures/fig7/  (the seven fig7*.py ports)
+    #   figures/fig7/  (the seven fig7*.py ports)
     # With --write it overwrites those seven ports. It writes nothing else.
     # To run it, uncomment:
     # sys.argv[1:] = [

@@ -195,18 +195,19 @@ def main() -> None:
 
 if __name__ == "__main__":
     # No inputs needed: it runs the step 05 lines from
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/processing/05_build_neuron_metadata_table.py
-    # on the tables named in config.py, on this machine
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/synapses_783_article_princeton.ftr       (pre and post only)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/raw/Supplemental_file1_neuron_annotations.csv      (root_id)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/SI_updated.ftr                            (root_id, SI)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/data/derived/neuron_data_full_article_princeton.ftr    (neuron, the delivered cell set)
+    #   processing/05_build_neuron_metadata_table.py
+    # on the tables named in config.py:
+    #   data/derived/synapses_783_article_princeton.ftr        (pre and post only)
+    #   data/raw/Supplemental_file1_neuron_annotations.csv     (root_id)
+    #   data/derived/SI_updated.ftr                            (root_id, SI)
+    #   data/derived/neuron_data_full_article_princeton.ftr    (neuron, the cells to compare with)
     # and writes its report to
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_step05_root_id/report.txt
+    #   outputs/tools/check_step05_root_id/report.txt
+    # The paths below are relative to the repository root, so run it from there.
     # To test a copy of step 05 from before the 4 Oct fix (made with
     #   git show 3cb03a6:processing/05_build_neuron_metadata_table.py > outputs/tools/check_step05_root_id/step05_before_fix.py)
     # uncomment:
     # sys.argv[1:] = [
-    #     "--script", "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/check_step05_root_id/step05_before_fix.py",
+    #     "--script", "outputs/tools/check_step05_root_id/step05_before_fix.py",
     # ]
     main()

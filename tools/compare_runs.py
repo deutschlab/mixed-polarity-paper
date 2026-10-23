@@ -165,9 +165,9 @@ def main() -> None:
 
 if __name__ == "__main__":
     # Compares two full runs of every figure script (made with tools/run_all_figures.py), script by script:
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/2026-09-29_full   (29 Sep)
-    #   /Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/2026-10-01_full   (1 Oct)
-    # It prints the report; with --report FILE it also writes it to that file. To run it, uncomment:
-    # sys.argv[1:] = ["/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/2026-09-29_full",
-    #                 "/Users/ohajyahia/PycharmProjects/mixed-polarity-paper/outputs/tools/run_all_figures/2026-10-01_full"]
+    #   outputs/tools/run_all_figures/before   (first run)
+    #   outputs/tools/run_all_figures/after    (second run)
+    # It prints the report; with --report FILE it also writes it to that file. To run it from the repository root, uncomment:
+    # sys.argv[1:] = ["outputs/tools/run_all_figures/before",
+    #                 "outputs/tools/run_all_figures/after"]
     main()
