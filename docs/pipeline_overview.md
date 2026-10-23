@@ -194,7 +194,7 @@ computes SI, for the larval curve in Figure 2A. Independent of scripts 01–08.
 
 | | |
 |--|--|
-| **Inputs** | `LARVA_SWC_DIR`, `LARVA_SYNAPSE_TABLE_CSV`, `LARVA_NEURON_LIST_CSV` (the larval raw files, from the corresponding author) |
+| **Inputs** | `LARVA_SWC_DIR`, `LARVA_SYNAPSE_TABLE_CSV`, `LARVA_NEURON_LIST_CSV` (the larval raw files, from the corresponding authors) |
 | **Outputs** | `LARVA_SI_FTR`, `LARVA_SYNAPSES_FTR`, and intermediate connector tables in `LARVA_DATA_DIR` |
 | **Downstream** | `figures/fig2/fig2a_si_cdf_adult_larva.py` |
 | **Note** | As committed it produces no usable output: it calls `attach_synapses_larva2` (line 101), which is not defined in this repository; the bare `except` in `heal_attach`, which is called once on the whole neuron list (line 147), turns that error into a text string, so no neuron is split and the SI output is empty |
