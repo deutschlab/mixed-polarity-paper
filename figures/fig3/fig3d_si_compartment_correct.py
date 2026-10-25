@@ -158,23 +158,23 @@ allsynapses['comp_second']=allsynapses['comp'].str[1]
 aaa=allsynapses.head(1000)
 #%%
 #%%
-allsynapses['comp_first_corrected'] = allsynapses.apply(
-    lambda row: (
-        row['axon_label_x'] if row['comp_first'] == 'A'
-        else row['dend_label_x'] if row['comp_first'] == 'D'
-        else 'O'
-    ),
-    axis=1
+# np.select, not a row-wise apply: that copies the whole table into Python objects
+allsynapses['comp_first_corrected'] = np.select(
+    [allsynapses['comp_first'] == 'A',
+     allsynapses['comp_first'] == 'D'],
+    [allsynapses['axon_label_x'],
+     allsynapses['dend_label_x']],
+    default='O'
 )
 
 #%%
-allsynapses['comp_second_corrected'] = allsynapses.apply(
-    lambda row: (
-        row['axon_label_y'] if row['comp_second'] == 'A'
-        else row['dend_label_y'] if row['comp_second'] == 'D'
-        else 'O'
-    ),
-    axis=1
+# np.select, not a row-wise apply: that copies the whole table into Python objects
+allsynapses['comp_second_corrected'] = np.select(
+    [allsynapses['comp_second'] == 'A',
+     allsynapses['comp_second'] == 'D'],
+    [allsynapses['axon_label_y'],
+     allsynapses['dend_label_y']],
+    default='O'
 )
 
 #%%
