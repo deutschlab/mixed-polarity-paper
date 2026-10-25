@@ -193,7 +193,7 @@ for folder_name in folders_to_process:
                     issues_in_comp.append([n.id,'issue1'])
                     all_non_succsessfull_connectors=pd.concat([all_non_succsessfull_connectors,split.connectors])
 
-                continue
+                    continue
         elif len(split) == 2:
             if split[0].compartment=='dendrite' and split[1].compartment=='axon':
         
@@ -212,7 +212,7 @@ for folder_name in folders_to_process:
                     issues_in_comp.append([n.id,'issue2'])
                     all_non_succsessfull_connectors=pd.concat([all_non_succsessfull_connectors,split.connectors])
 
-                continue  
+                    continue
         else:
 
             issues_in_comp.append([n.id,'issue3'])

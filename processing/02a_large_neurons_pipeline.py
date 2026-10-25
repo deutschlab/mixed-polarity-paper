@@ -326,7 +326,7 @@ for i, id_ in enumerate(lista):
                     issues_in_comp.append([n.id, 'issue1'])
   
 
-                continue
+                    continue
 
         elif len(split) == 2:
             if split[0].compartment == 'dendrite' and split[1].compartment == 'axon':
@@ -346,7 +346,7 @@ for i, id_ in enumerate(lista):
                     with open(os.path.join(output_folder, f'non_success_connectors_{swcid}.pkl'), 'wb') as f:
                         pickle.dump(all_non_succsessfull_connectors, f)
 
-                continue
+                    continue
 
         else:
             issues_in_comp.append([n.id, 'issue3'])
