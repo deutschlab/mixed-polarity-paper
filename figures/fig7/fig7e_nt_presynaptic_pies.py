@@ -1,7 +1,7 @@
 # Fig 7E: neurotransmitter pies, 'Neuron presynaptic to bouton' (left, from FILOPODIA_FILTERED_FTR) against
 # 'Any presynaptic neuron (control)' (right: every synapse whose presynaptic neuron has boutons).
 # Ported from the authors' original script fig7e.py.
-# Changes: paths via config.py; figure saves switched on and placed before plt.show().
+# Paths come from config.py; every figure is saved before plt.show().
 # Cannot run until SYNAPSES_NO_SELF_FTR (t2.ftr) and FILOPODIA_FILTERED_FTR are supplied; neither is in this repository.
 # Both pies count table rows (synapses), not neurons. The left pie keeps every row of FILOPODIA_FILTERED_FTR,
 # whatever its presynaptic neuron; the right pie only synapses whose presynaptic neuron is in BOUTON_TABLE_FTR.

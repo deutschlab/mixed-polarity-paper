@@ -24,8 +24,7 @@ from scipy.stats import f, f_oneway, gaussian_kde, levene, ttest_1samp
 from statsmodels.formula.api import ols
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 
-# Run setting. SLOW_STATS = True runs the two slow steps of the cell-type statistics as originally
-# written: a model fit with one column per cell type, used only for the sums of squares behind eta
+# Run setting. SLOW_STATS = True runs the two slow steps of the cell-type statistics: a model fit with one column per cell type, used only for the sums of squares behind eta
 # squared and omega squared (7,511 types: a 7 GB design matrix, 12 minutes measured), and a post-hoc test
 # over every pair of cell types (Games-Howell, or Tukey if Levene's test passes: 28.2 million pairs, an
 # estimated 4-5 days) that prints five pairs. With False, the sums of squares come from the group means and

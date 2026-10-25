@@ -1,10 +1,10 @@
 # Supporting numbers, not a panel: neurotransmitter and super-class make-up of neurons with PC1 < 0.5 vs >= 0.5
 # (SI >= 0.1). Backs the text's "simple neurons (PC1 < 0.5), which are primarily optic neurons".
 # Ported from the authors' original script Fig3/Fig_3/syntype X PC1/PC1_ber_nt_sclass/PC1_ber_nt_sclass.py.
-# Changes: paths via config.py and the repository preamble (which also sets editable Arial text in the SVGs);
-# The authors' colour module and binomial_methods imports removed (nothing from them is used); nothing else.
+# Paths come from config.py, and the repository preamble sets editable Arial text in the SVGs. The authors' colour
+# module and binomial_methods are not imported (nothing from them is used). Otherwise the code is the original's.
 # Uses the neuron table's SI column for SI >= 0.1. In the delivered table that is the older SI; a neuron table
-# rebuilt by step 05 holds the corrected SI (SI_updated.ftr), which selects a different set of neurons.
+# rebuilt by step 05 holds the SI without self-synapses (SI_updated.ftr), which selects a different set of neurons.
 # The neurotransmitter is nt_type (the FlyWire prediction); neurons without one are left out of those pies.
 import sys
 from pathlib import Path
@@ -66,7 +66,7 @@ pcadf=pd.read_feather(
 )
 #%%
 
-nodesG=nodesG.merge(pcadf,on='neuron',how='left')
+nodesG=nodesG.merge(pcadf,on='neuron',how='left',validate='1:1')
 #%%
 
 

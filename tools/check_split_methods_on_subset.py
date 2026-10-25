@@ -6,15 +6,14 @@ and many hours. This tool runs the same code on fewer neurons, by default every 
 neuron whose skeleton is under SWC_DIR, so the method can be checked on a partial download.
 
 How it works. The tool does not keep its own copy of step 08. It reads
-processing/08_alternative_split_methods.py and makes five text substitutions:
+processing/08_alternative_split_methods.py and makes four text substitutions:
 
 1. the repository root is given as a path, because the patched copy runs from --out;
 2. ALT_SPLIT_BATCH_DIR and SI_COMPARISONS_FTR are redirected into --out;
 3. the neuron list is cut to the chosen neurons, after step 08's own super-class filter;
 4. only the synapses that touch a chosen neuron are read from SYNAPSE_TABLE_RAW_FTR.
    Step 08 selects each neuron's synapses as pre == neuron or post == neuron, so this
-   changes no neuron's synapses, only the memory and time needed;
-5. the batch range of the combine step is set to the number of batches written.
+   changes no neuron's synapses, only the memory and time needed.
 
 Each substitution must match exactly once, or the tool stops before running anything, so
 a changed step 08 cannot be run half-patched. The patched copy is saved as
@@ -179,9 +178,6 @@ def patched_step08(out, ids_path):
          "_dataset = _ds.dataset(str(SYNAPSE_TABLE_RAW_FTR), format='feather')\n"
          "allsynapses = _dataset.to_table(filter=_ds.field('pre').isin(_SUBSET_IDS)\n"
          "                                | _ds.field('post').isin(_SUBSET_IDS)).to_pandas()"),
-        ("combine range",
-         "Y = 236    # last batch will be X + Y",
-         "Y = n_batches - 1    # subset run: every batch written"),
     ]
     for name, old, new in patches:
         n = src.count(old)

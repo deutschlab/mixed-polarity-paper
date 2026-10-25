@@ -1,13 +1,11 @@
 # Fig 7J input, no filopodia condition: SI recomputed per neuron with incoming synapses that sit on a filopodium removed.
 # Ported from the authors' original script Fig 7/filapodia_extraction/SI_sim/si_sim_no_filopodia.py.
-# Changes: paths via config.py; unused imports removed (nglui, fafbseg, navis, networkx, sklearn,
-# ng_methods_v2, the authors' colour module, the CAVEclient connection and others). SI_calc came from
-# altsi_methods_v2 in the original setup; the copy in methods/methods_all.py is identical.
-# The original copy read "syn_bouton_filopodia(new).ftr"; this reads the plain SYN_BOUTON_FTR, which gives the published 7J.
+# Paths come from config.py. SI_calc is the one in methods/methods_all.py (the same as the authors' altsi_methods_v2).
+# Reads the plain SYN_BOUTON_FTR, which gives the published 7J.
 # Writes filopodia_nodes_no_filopodia (FILOPODIA_NODES_NO_FILOPODIA_FTR), which figures/fig7/si_comb_analysis.py reads.
 # The compartments are not re-split: SI is recomputed on the existing A/D labels.
-# Also added: svg.fonttype='none' and Arial (repository convention). The original saved SVGs drew text as
-# DejaVu Sans glyph paths, so text and spacing differ from his files; plotted values do not.
+# svg.fonttype='none' and Arial (repository convention): text in the saved SVGs is live Arial text, so text
+# and spacing differ from the authors' SVGs (drawn as DejaVu Sans paths); plotted values do not.
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -44,7 +42,7 @@ allsynapses=allsynapses[['synapse_id', 'pre', 'post', 'comp']]
 allsynapses=allsynapses[allsynapses['comp'].isin(['AA','AD','DA','DD'])]
 #%%
 
-allsynapses=allsynapses.merge(df,on='synapse_id',how='left')
+allsynapses=allsynapses.merge(df,on='synapse_id',how='left',validate='1:1')
 #%%
 del df
 #%%

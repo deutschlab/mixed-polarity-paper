@@ -1,9 +1,9 @@
 # Fig 7H: mean fraction of incoming synapses that sit on a filopodium, axon vs dendrite.
 # Ported from the authors' original script Fig 7/filapodia_extraction/t/post_on_filo_ratio.py.
-# Changes: paths via config.py, unused imports removed, a duplicated cell removed.
-# Reads SYN_BOUTON_NEW_FTR, the "(new)" table the original read; the plain SYN_BOUTON_FTR does not give the published 7H.
-# Also added: svg.fonttype='none' and Arial (repository convention). The original saved SVGs drew text as
-# DejaVu Sans glyph paths, so text and spacing differ from his files; plotted values do not.
+# Paths come from config.py.
+# Reads SYN_BOUTON_NEW_FTR; the plain SYN_BOUTON_FTR does not give the published 7H.
+# svg.fonttype='none' and Arial (repository convention): text in the saved SVGs is live Arial text, so text
+# and spacing differ from the authors' SVGs (drawn as DejaVu Sans paths); plotted values do not.
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -31,7 +31,7 @@ df=pd.read_feather(SYN_BOUTON_NEW_FTR)
 allsynapses=pd.read_feather(SYNAPSE_TABLE_FTR)
 #%%
 #%%
-allsynapses=allsynapses.merge(df,on='synapse_id',how='left')
+allsynapses=allsynapses.merge(df,on='synapse_id',how='left',validate='1:1')
 #%%
 allsynapses=allsynapses[['post','comp','filopodia_on_post','SI_post']]
 #%%

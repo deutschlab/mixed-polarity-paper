@@ -14,7 +14,7 @@ The data: SI_comparisons.ftr, written by 08_alternative_split_methods.py, gives
 each neuron both scores for the published SFC split (SFC_SI and SFC_Phi). Only
 intrinsic neurons (central, optic, visual_projection, visual_centrifugal) are used,
 because the figures that use the cutoff keep only those. The script stops if SFC_SI
-is not the corrected SI from SI_updated.ftr.
+is not the SI without self-synapses from SI_updated.ftr.
 
 The Phi cutoff is found in three ways:
   1. local median: the typical Phi of the neurons with SI within 0.005 of 0.1;
@@ -74,7 +74,7 @@ print("missing values:", scores[['SFC_SI', 'SFC_Phi', 'MaxSI_SI', 'MinFisherP_Ph
 scores = scores.dropna(subset=['SFC_SI', 'SFC_Phi']).reset_index(drop=True)
 print(f"neurons with both SFC_SI and SFC_Phi (used below): {len(scores)}")
 
-# SFC_SI should be the corrected SI
+# SFC_SI should be the SI without self-synapses (SI_updated.ftr)
 si_updated = pd.read_feather(SI_UPDATED_FTR)
 si_updated['root_id'] = si_updated['root_id'].astype(np.int64)
 if si_updated['root_id'].duplicated().any():
@@ -84,7 +84,7 @@ check = scores[['neuron_id', 'SFC_SI']].merge(si_updated[['root_id', 'SI']],
 largest = np.nanmax(np.abs(check['SFC_SI'] - check['SI']))
 print(f"SFC_SI vs SI_updated: {check['SI'].notna().sum()} matched, largest difference {largest:.2e}")
 if check['SI'].isna().any() or largest > 1e-12:
-    raise ValueError("SFC_SI is not the corrected SI; the cutoff would be calibrated on a different SI")
+    raise ValueError("SFC_SI does not match SI_updated.ftr (SI without self-synapses); the cutoff would be calibrated on a different SI")
 
 #%% the three estimates
 def same_share_cutoff(phi, n_mixed):

@@ -27,7 +27,7 @@ with SI >= 0.1 (the n of the paper's Fig 3F).
 --table points the tool at another synapse table with the same columns (pre, post,
 comp, and SI_pre and SI_post for the default SI filter). --column counts another
 column of synapse types instead of comp, for example a column of types made with a
-different axon/dendrite split. The intrinsic neurons and the corrected SI still come
+different axon/dendrite split. The intrinsic neurons and the SI without self-synapses still come
 from the delivered neuron table and SI_updated.ftr. The default SI filter uses the
 table's own SI_pre and SI_post, whatever they hold: in a table made with a different
 split they may still be the published split's SI, so check that before reading the
@@ -75,7 +75,7 @@ def intrinsic_ids() -> pa.Array:
 
 
 def corrected_si(ids: pa.ChunkedArray) -> np.ndarray:
-    """Corrected SI of each neuron in ids (NaN if it has none)."""
+    """SI_updated.ftr's SI (without self-synapses) of each neuron in ids (NaN if it has none)."""
     updated = feather.read_table(SI_UPDATED_FTR, columns=["root_id", "SI"]).to_pandas()
     if updated["root_id"].duplicated().any():
         sys.exit(f"{SI_UPDATED_FTR.name} has duplicated root_id values")
@@ -144,7 +144,7 @@ def main() -> None:
     else:
         polarized = pa.array((corrected_si(table["pre"]) >= SI_CUTOFF)
                              & (corrected_si(table["post"]) >= SI_CUTOFF))
-        si_source = "SI_updated.ftr (corrected SI)"
+        si_source = "SI_updated.ftr (SI without self-synapses)"
     ids = intrinsic_ids()
     intrinsic = pc.and_(pc.is_in(table["pre"], value_set=ids),
                         pc.is_in(table["post"], value_set=ids))
@@ -152,7 +152,7 @@ def main() -> None:
     print(f"Synapse table: {args.table}")
     if args.table.resolve() != SYNAPSE_TABLE_FTR.resolve():
         print("Note: the intrinsic neurons come from the delivered neuron table"
-              + (", and the corrected SI from SI_updated.ftr" if args.si == "corrected" else ""))
+              + (", and the SI without self-synapses from SI_updated.ftr" if args.si == "corrected" else ""))
     print(f"Synapse types: {args.column}")
     print(f"SI filter: {si_source}")
     unlabelled = len(comp) - pc.sum(labelled).as_py()

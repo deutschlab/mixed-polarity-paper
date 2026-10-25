@@ -12,7 +12,7 @@ derived tables used by the figure scripts.
 ## Pipeline flow
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#ff0000', 'primaryBorderColor': '#555555', 'lineColor': '#555555'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#000000', 'primaryBorderColor': '#555555', 'lineColor': '#555555'}}}%%
 flowchart TD
     RAW["Raw inputs\nPrinceton synapse CSV + SWC skeletons\n+ annotation CSVs"]
     S01["01_extract_compartments_SI\nfour PKLs per skeleton folder"]
@@ -149,7 +149,7 @@ the main neuron metadata table used by almost all figure scripts.
 | **Outputs** | `SI_UPDATED_FTR`, `NEURON_TABLE_FTR` (`neuron_data_full_article_princeton.ftr`). The table is built in passes on a working copy, `NEURON_TABLE_PARTIAL_FTR`, and written once at the end, when the copy is deleted |
 | **Key columns** | `root_id`, `super_class`, `primary_type`, `nt_type`, `SI`, `cable_length`, synapse counts, morphological features, sensory rank columns |
 | **Downstream** | Scripts 06, 07, 08, `phi_threshold.py`; virtually all figure scripts |
-| **Note** | The left merge at line 261 keeps every synapse-table cell; those that are not among the annotated cells with an SI get an empty `root_id`, which makes that column float64, and at the size of these IDs a float64 rounds them (it holds only every 128th integer there). Line 298 drops those rows and line 299 sets `root_id` from `neuron`, so the table stores exact int64 IDs, as the delivered table does. Line 299 was added on 4 Oct; before it, a rerun wrote rounded `root_id` values (no other column differs). `tools/check_step05_root_id.py` runs these lines on the real IDs and checks the result. |
+| **Note** | The left merge at line 261 keeps every synapse-table cell; those that are not among the annotated cells with an SI get an empty `root_id`, which makes that column float64, and at the size of these IDs a float64 rounds them (it holds only every 128th integer there). Line 298 drops those rows and line 299 sets `root_id` from `neuron`, so the table stores exact int64 IDs, as the delivered table does. Without line 299 the column would hold the rounded float values (no other column would differ); a neuron table written without that line has rounded `root_id` values and should be rebuilt. `tools/check_step05_root_id.py` runs these lines on the real IDs and checks the result. |
 
 ---
 
@@ -174,14 +174,14 @@ reciprocal pairs, and produces the connection-level analysis table.
 **File:** `processing/07_pca_morphology.py`
 
 Runs PCA on per-neuron morphological feature vectors from the neuron metadata table. Produces
-per-neuron PCA scores used in Figure 4.
+per-neuron PCA scores used in Figure 4 and one supporting script.
 
 | | |
 |--|--|
 | **Inputs** | `NEURON_TABLE_FTR` |
 | **Outputs** | `PCA_TABLE_FTR` (`neurons_pca_princeton.ftr`) |
 | **Key columns** | `neuron`, `PC1`, `PC2` |
-| **Downstream** | `figures/fig4/build_pc1_table.py`, `figures/fig4/syntype_x_pc1.py` |
+| **Downstream** | `figures/fig4/build_pc1_table.py`, `figures/fig4/syntype_x_pc1.py`, `figures/fig4/syntype_x_pc1_simple_model.py`, `figures/supporting/pc1_x_nt_sclass_pies.py` |
 
 ---
 
@@ -216,7 +216,7 @@ single cut places every synapse except those on the cut node on one side, and on
 | | |
 |--|--|
 | **Inputs** | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` |
-| **Outputs** | Per batch in `ALT_SPLIT_BATCH_DIR`: `summary_batch_NNNN.ftr`, `nodes_batch_NNNN.ftr`, `failures_batch_NNNN.ftr`, and `batch_run.json`, a record of what the batches were made from (a rerun that differs, batch files with no record, or a missing batch stop the script); combined `SI_COMPARISONS_FTR` (`SI_comparisons.ftr`), written only if that file does not already exist |
+| **Outputs** | Per batch in `ALT_SPLIT_BATCH_DIR`: `summary_batch_NNNN.ftr`, `nodes_batch_NNNN.ftr`, `failures_batch_NNNN.ftr`, and `batch_run.json`, a record of what the batches were made from (a rerun that differs, batch files with no record, a missing batch, or summaries and failures that together do not cover every neuron of the run stop the script; a neuron whose split has not one axon and one dendrite is a failure); combined `SI_COMPARISONS_FTR` (`SI_comparisons.ftr`), written only if that file does not already exist |
 | **Key columns** | `neuron_id`, `SFC_SI`, `SFC_Phi`, `MaxSI_SI`, `MinFisherP_Phi` |
 | **Downstream** | `processing/phi_threshold.py` |
 | **Note** | `SYNAPSE_TABLE_RAW_FTR` is built by `processing/build_raw_synapse_table.py`; `SWC_DIR` must hold the skeletons of every intrinsic neuron, so the script cannot be run from the downloads alone. Unlike scripts 01 and 02a, it does not drop synapses from a neuron to itself, so its `SFC_SI` matches the SI that script 05 writes (`SI_updated.ftr`) only if the raw table has none: the default version (`RAW_TABLE_KEEP_SELF_SYNAPSES = False`) has none. When combining, a missing batch file stops the combine step. To run it on some neurons only, for example those whose skeletons you have, use `tools/check_split_methods_on_subset.py` (README, Tools); `tools/check_split_functions.py` checks step 08's split code on made-up neurons, and `tools/compare_split_runs.py` compares the cuts of two runs |

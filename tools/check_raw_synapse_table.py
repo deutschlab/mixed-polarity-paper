@@ -48,8 +48,8 @@ ID_COLUMNS = ["synapse_id", "pre", "post"]
 XYZ = ["pre_x", "pre_y", "pre_z", "post_x", "post_y", "post_z"]
 
 
-def check_version(path: Path, ref, expect_no_self: bool) -> tuple[bool, np.ndarray | None]:
-    """Check one raw table; return (passed, its synapse_ids)."""
+def check_version(path: Path, ref, expect_no_self: bool) -> tuple[bool, tuple | None]:
+    """Check one raw table; return (passed, (synapse_ids, ids without self-synapses, rows, self-synapses))."""
     ok = True
     schema = feather.read_table(path, memory_map=True).schema
     if schema.names != COLUMNS:

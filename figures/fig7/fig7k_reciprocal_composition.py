@@ -1,7 +1,7 @@
 # Fig 7K: share of postsynaptic terminals on boutons that are 'hand shake', other reciprocal, or not reciprocal,
 # by super-class of the neuron that owns the bouton (the postsynaptic neuron of these synapses).
 # Ported from the authors' original script fig7k.py.
-# Changes: paths via config.py; figure saves switched on and placed before plt.show(); svg.fonttype='none' and Arial added (repository convention).
+# Paths come from config.py; every figure is saved before plt.show(); svg.fonttype='none' and Arial (repository convention).
 # Reads super_class from NEURON_TABLE_FTR. The original read a copy of that table whose super_class is the same for all 138,289 neurons (only its nt_type column differs, and it is not used).
 # The bars pool terminals (synapses) across neurons and connections.
 import sys

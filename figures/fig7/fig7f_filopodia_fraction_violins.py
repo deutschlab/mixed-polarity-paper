@@ -1,6 +1,6 @@
 # Fig 7F (left half: intrinsic super-classes) and Supp 7-S4 C (right half: the other super-classes): per-neuron fraction of boutons with a postsynaptic terminal.
 # Ported from the authors' original script fig7f_fig7S4c.py.
-# Changes: paths via config.py; figure saves switched on and placed before plt.show().
+# Paths come from config.py; every figure is saved before plt.show().
 # Each violin value is one neuron and compartment (the mean of 'filopodia' over its boutons), with no minimum bouton count.
 # The 'All' violins use every compartment row with no SI filter; the axon and dendrite violins keep SI >= 0.1.
 # Boutons with no compartment are left out of the violins but count in the bouton-level means that order the super-classes.

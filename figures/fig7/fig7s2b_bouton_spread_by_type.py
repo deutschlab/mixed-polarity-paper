@@ -1,8 +1,8 @@
 # Supp 7-S2 B: the same per cell type, coloured by why a type was excluded from the bouton analysis.
 # Ported from the authors' original script fig7S2b.py.
-# Changes: paths via config.py; figure saves switched on and placed before plt.show().
-# Fix: the cell-type table names its id column root_id; renamed to neuron so the merge runs (the original stopped with a KeyError).
-# Not changed: the excluded-type lists write 'R1–6' with an en dash, while the table has 'R1-6', so R1-6 is coloured 'included'.
+# Paths come from config.py; every figure is saved before plt.show().
+# The cell-type table's root_id column is renamed to neuron for the merge.
+# The excluded-type lists write 'R1–6' with an en dash, while the table has 'R1-6', so R1-6 is coloured 'included'.
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))

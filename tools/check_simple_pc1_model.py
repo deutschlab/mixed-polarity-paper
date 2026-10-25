@@ -55,7 +55,7 @@ Usage:
         --earlier path/to/earlier_svgs --report outputs/tools/run_figure/simple_model/check_report.txt
 
 Reads only the five needed columns of the synapse table, batch by batch. Memory and time
-were measured on macOS on 2 Oct 2026 and are given in the README. The result is exact only
+are given in the README. The result is exact only
 with the pinned library versions (scikit-learn 1.5.2, pandas, numpy, matplotlib): other
 versions can resample or split differently, or write the SVGs differently.
 """
@@ -389,7 +389,7 @@ def main():
     finally:
         if args.report:
             args.report.parent.mkdir(parents=True, exist_ok=True)
-            args.report.write_text("\n".join(lines) + "\n")
+            args.report.write_text("\n".join(lines) + "\n", encoding="utf-8")
     if not ok:
         sys.exit(1)
 

@@ -285,7 +285,10 @@ def run(source: str, tmp: Path, settings: dict[str, str]):
     matplotlib.figure.Figure.savefig = recording_savefig
     try:
         with contextlib.redirect_stdout(out):
-            exec(compile(source, str(fake), "exec"), ns)
+            try:
+                exec(compile(source, str(fake), "exec"), ns)
+            except SystemExit as stop:
+                raise RuntimeError(f"the script called sys.exit({stop.code})") from None
         return ns, out.getvalue(), None
     except Exception as error:  # noqa: BLE001  a stop is a result here
         return ns, out.getvalue(), f"{type(error).__name__}: {error}"
@@ -369,7 +372,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--script", type=Path, default=SCRIPT, help="the copy of the Fig 4E script to check")
     args = ap.parse_args()
-    source = args.script.read_text(encoding="utf-8")
+    source = args.script.read_text(encoding="utf-8-sig")
     report = []
 
     with tempfile.TemporaryDirectory() as t:

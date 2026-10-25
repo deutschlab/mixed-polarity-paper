@@ -19,14 +19,13 @@ Modes:
              (default figures/fig7/). PASS means every script is exactly what this tool makes from
              the originals, so nobody has edited one by hand and every fix is still applied.
              A difference prints a unified diff.
-  --write    write the generated scripts into --ports. Refused unless every original's sha256
-             equals ORIGINAL_SHA256 below (the files the ports were made from).
+  --write    write the generated scripts into --ports (nothing is written if any check fails).
 Both modes also check, for every port: that each original's sha256 equals ORIGINAL_SHA256 below
-(the files the ports were made from); that each fix and each path replacement applied, and every
+(the files the ports are made from); that each fix and each path replacement applied, and every
 file name read or written has a config constant; that no Windows path (any drive letter) is left;
 that the figure saves switched on are exactly EXPECTED_SAVES; that each save comes before the
 next plt.show(); and that svg.fonttype 'none' and Arial are set. --selftest plants mistakes in
-the fix list (a save after plt.show(), the Arial line left out, a fix that no longer matches)
+the fix list (a save after plt.show(), the Arial line left out, a fix whose old text is not in the original)
 and requires each to be reported. It prints its result and writes no report file.
 Exit code 0 on PASS, 1 on FAIL.
 
@@ -62,7 +61,7 @@ READS = {
 # file name an original writes -> the config.py constant the port writes instead
 WRITES = {"neurons_nt_bwf_frac_filtered.ftr": "NEURONS_NT_BWF_FTR"}
 
-# sha256 of the originals the ports were made from (received 15 Oct 2026)
+# sha256 of the originals the ports are made from
 ORIGINAL_SHA256 = {
     "fig7e.py": "a39bd0704e54dccb271e3c142e0f39df4be1204071cccafc38dca5d66064fa43",
     "fig7f_fig7S4c.py": "e92211a212750d085c7b5328a0d1b548d69c410757423279542377f78a516a1a",
@@ -115,7 +114,7 @@ PORTS = {
         "fig7g_filopodia_fraction_x_si.py",
         "Fig 7G: fraction of boutons with a postsynaptic terminal (left) and postsynaptic sites per bouton, among boutons "
         "with at least one (right), against SI.",
-        ["The second plot had two commented-out saves under different names; the first is switched on, the second (after plt.show()) stays off.",
+        ["Of the second plot's two saves, the one before plt.show() runs; the one after it is commented out.",
          "The dashed lines at 0.24 and 0.75 are typed in; the 'All' lines use every super-class with no SI filter.",
          "The axon and dendrite lines keep intrinsic boutons with SI >= 0.1 (left) or SI > 0.1 (right), binned in equal-count",
          "SI bins over axon and dendrite boutons together; r and p are computed over boutons, not neurons."],
@@ -126,8 +125,8 @@ PORTS = {
     "fig7i.py": (
         "fig7i_filopodia_fraction_x_nt.py",
         "Fig 7I: per-neuron fraction of boutons with a postsynaptic terminal, by neurotransmitter.",
-        ["It writes NEURONS_NT_BWF_FTR, which figures/fig7/filopodia_x_mirror_neurons.py and figures/fig5/reciprocal_fraction_x_bwf.py read;",
-         "the original wrote neurons_nt_bwf_frac_filtered.ftr. Its neuron column is pandas' nullable Int64, as in the original.",
+        ["It writes NEURONS_NT_BWF_FTR, which figures/fig7/filopodia_x_mirror_neurons.py and figures/fig5/reciprocal_fraction_x_bwf.py read.",
+         "Its neuron column is pandas' nullable Int64.",
          "Its neuron set is every bouton neuron with a neurotransmitter in NEURON_DATA_FTR, all super-classes, no SI filter.",
          "Each neuron's fraction pools its axonal and dendritic boutons, with no minimum bouton count."],
         [("plt.show()\n# plt.savefig(_out_dir / 'nt_type_frac_new2.svg', format='svg')",
@@ -149,8 +148,8 @@ PORTS = {
     "fig7S2b.py": (
         "fig7s2b_bouton_spread_by_type.py",
         "Supp 7-S2 B: the same per cell type, coloured by why a type was excluded from the bouton analysis.",
-        ["Fix: the cell-type table names its id column root_id; renamed to neuron so the merge runs (the original stopped with a KeyError).",
-         "Not changed: the excluded-type lists write 'R1\u20136' with an en dash, while the table has 'R1-6', so R1-6 is coloured 'included'."],
+        ["The cell-type table's root_id column is renamed to neuron for the merge.",
+         "The excluded-type lists write 'R1\u20136' with an en dash, while the table has 'R1-6', so R1-6 is coloured 'included'."],
         [("neuron_types = pd.read_csv(CONSOLIDATED_CELL_TYPES_CSV)\n",
           "neuron_types = pd.read_csv(CONSOLIDATED_CELL_TYPES_CSV)\nneuron_types = neuron_types.rename(columns={'root_id': 'neuron'})\n"),
          ("plt.show()\n# plt.savefig(_out_dir / 'inertia_grouped.svg', format='svg')",
@@ -196,8 +195,8 @@ def generate(originals: Path, src_name: str, ledger: list) -> str:
     has_font = "svg.fonttype" in text
     head = ["# " + panel,
             "# Ported from the authors' original script %s." % src_name,
-            "# Changes: paths via config.py; figure saves switched on and placed before plt.show()"
-            + ("" if has_font else "; svg.fonttype='none' and Arial added (repository convention)") + "."]
+            "# Paths come from config.py; every figure is saved before plt.show()"
+            + ("" if has_font else "; svg.fonttype='none' and Arial (repository convention)") + "."]
     head += ["# " + n for n in notes]
     pre = ["import sys", "from pathlib import Path", "sys.path.insert(0, str(Path(__file__).parent.parent.parent))",
            "from config import %s" % ", ".join(sorted(used | {"OUTPUT_DIR"})), ""]
@@ -284,7 +283,7 @@ def selftest(originals: Path) -> list:
         FONT = saved_font
         name, panel, notes, fixes = saved_ports["fig7k.py"]
         PORTS["fig7k.py"] = (name, panel, notes, [(fixes[0][0] + "x", fixes[0][1])])
-        cases.append(("a fix that no longer matches", "fix:"))
+        cases.append(("a fix whose old text is not in the original", "fix:"))
         ledger = []
         generate(originals, "fig7k.py", ledger)
         got3 = [w for n, w, c in ledger if c != 1]

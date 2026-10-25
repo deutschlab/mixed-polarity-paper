@@ -153,7 +153,8 @@ allsynapses=allsynapses[['comp','dend_label_x',
 'axon_label_x', 'neuron_y', 'dend_label_y', 'axon_label_y',
 'comp_first', 'comp_second','npil']]
 #%%
-# np.select, not a row-wise apply: that copies the whole table into Python objects
+# each side's compartment label: the cell's axon label on an A side, its dendrite label on a D side
+# ('O' for any other side, L); vectorised, so the whole synapse table fits in memory
 allsynapses['comp_first_corrected'] = np.select(
     [allsynapses['comp_first'] == 'A',
      allsynapses['comp_first'] == 'D'],
@@ -163,7 +164,7 @@ allsynapses['comp_first_corrected'] = np.select(
 )
 
 #%%
-# np.select, not a row-wise apply: that copies the whole table into Python objects
+# the same for the second side
 allsynapses['comp_second_corrected'] = np.select(
     [allsynapses['comp_second'] == 'A',
      allsynapses['comp_second'] == 'D'],

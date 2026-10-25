@@ -27,7 +27,7 @@ It then prints:
   neurons: pooled, median, mean, and the share of neurons with every end the same,
   below 90% and at most 50%, and the median number of ends compared per neuron. This
   counts every neuron once, whatever its size, so neurons with only a few ends weigh as
-  much as large ones. Here a neuron is intrinsic if it is itself, whatever its partner,
+  much as large ones. In this per-neuron view a neuron counts as intrinsic by its own super-class, whatever its partner's,
   and the typed end of a synapse with a linker type (the A end of AL) is counted.
 
 Agreement is counted only on synapses typed in both columns: a synapse with a linker
@@ -259,7 +259,7 @@ def main() -> None:
     if other_table:
         coverage_against_delivered(args.table)
         print("Note: the intrinsic neurons come from the delivered neuron table"
-              + (", and the corrected SI from SI_updated.ftr" if args.si == "corrected" else ""))
+              + (", and the SI without self-synapses from SI_updated.ftr" if args.si == "corrected" else ""))
 
     if args.si == "table":
         si = feather.read_table(args.table, columns=["SI_pre", "SI_post"])
@@ -269,7 +269,7 @@ def main() -> None:
         si_source = "SI_pre and SI_post in the table" + ("" if other_table else " (older SI)")
     else:
         si_pre, si_post = corrected_si(ids["pre"]), corrected_si(ids["post"])
-        si_source = "SI_updated.ftr (corrected SI)"
+        si_source = "SI_updated.ftr (SI without self-synapses)"
     lower_si = np.fmin(si_pre, si_post)
     lower_si[np.isnan(si_pre) | np.isnan(si_post)] = np.nan
     polarized = lower_si >= SI_CUTOFF  # NaN compares False

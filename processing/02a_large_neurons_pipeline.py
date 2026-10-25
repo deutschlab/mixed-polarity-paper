@@ -388,7 +388,7 @@ for i, id_ in enumerate(lista):
         with open(os.path.join(output_folder, f'linker_{swcid}.pkl'), 'wb') as f:
             pickle.dump(linker_neurons, f)
 
-        # (added) save non-success connectors per neuron
+        # save non-success connectors per neuron
 
 
     except Exception as e:

@@ -18,9 +18,7 @@ both cuts are scored on run B's synapses. It reports
   - how many synapses change between axon and dendrite. From the node tables alone the
     two cuts can sit in up to three tree layouts (one below the other, either way, or
     neither), so the tool gives the smallest and largest change over the layouts the counts
-    allow. On the 89 differing cuts of skeleton folder 7, raw against processed synapse
-    table (3 Oct 2026), the exact value was the smallest in 87, and the largest can be far
-    off. With --exact the tool rebuilds
+    allow. The largest can be far off. With --exact the tool rebuilds
     the neurons from the skeletons, as step 08 does, and counts exactly. The axon is the side
     with the higher presynaptic fraction (side 1 on a tie), step 08's rule for MaxSI; step 08
     names no axon for MinFisherP, and the tool applies the same rule there. Synapses on the
@@ -62,9 +60,9 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from config import OUTPUT_DIR, SWC_DIR, SYNAPSE_TABLE_FTR, SYNAPSE_TABLE_RAW_FTR  # noqa: E402
 
-# The |phi| that matches SI = 0.1: the cutoff processing/phi_threshold.py recommends on the
-# delivered SI_comparisons.ftr (its plot, outputs/processing/phi_threshold/phi_threshold.svg, said 0.36 on
-# 29 Sep 2026). Rerun that script if the SI or the split changes; set it here with --phi-cutoff.
+# The |phi| that matches SI = 0.1 on SI_comparisons.ftr, as processing/phi_threshold.py finds it (plot:
+# outputs/processing/phi_threshold/phi_threshold.svg). If the SI or the split changes, rerun that script and
+# pass its value with --phi-cutoff.
 PHI_CUTOFF = 0.36
 SI_CUTOFF = 0.1
 TABLE = ["side_1_pre", "side_1_post", "side_2_pre", "side_2_post"]
@@ -396,7 +394,7 @@ def main():
     if args.expect_identical:
         identical = differ == 0 and sfc_differ == 0 and counts_differ == 0 and not len(only_a) and not len(only_b)
         lines += ["", "PASS: the runs agree" if identical else "FAIL: the runs differ"]
-    (args.out / "summary.txt").write_text("\n".join(lines) + "\n")
+    (args.out / "summary.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
     print(f"\nWritten to {args.out}")
     if args.expect_identical:

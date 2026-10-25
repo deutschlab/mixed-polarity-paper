@@ -5,8 +5,8 @@ post), left-merges it onto `nodesG`, the annotated cells that have an SI, and
 keeps the rows where neuron == root_id. A synapse-table cell that is not in
 `nodesG` (no annotation, or no SI after the dropna on SI) gets a missing root_id
 in that merge, which turns the column into float64; a float64 holds only every
-128th integer at the size of these IDs, so the IDs are rounded. Since 4 Oct the
-line after the filter sets root_id from neuron.
+128th integer at the size of these IDs, so the IDs are rounded. The line after the
+filter sets root_id from neuron, which makes it int64 again.
 
 This tool runs step 05's own lines for that part, taken from the file unchanged
 and found by their exact text (a reworded line is reported as a failure):
@@ -119,7 +119,7 @@ def main() -> None:
         for ok, text in results:
             say(("PASS  " if ok else "FAIL  ") + text)
         say(f"{sum(ok for ok, _ in results)} passed, {sum(not ok for ok, _ in results)} failed")
-        report_path.write_text("\n".join(out) + "\n")
+        report_path.write_text("\n".join(out) + "\n", encoding="utf-8")
         sys.exit(0 if results and all(ok for ok, _ in results) else 1)
 
     raw = args.script.read_bytes()
@@ -204,10 +204,10 @@ if __name__ == "__main__":
     # and writes its report to
     #   outputs/tools/check_step05_root_id/report.txt
     # The paths below are relative to the repository root, so run it from there.
-    # To test a copy of step 05 from before the 4 Oct fix (made with
-    #   git show 3cb03a6:processing/05_build_neuron_metadata_table.py > outputs/tools/check_step05_root_id/step05_before_fix.py)
-    # uncomment:
+    # To see the check fail, test a copy of step 05 without that line, for example commit 3cb03a6's
+    #   (git show 3cb03a6:processing/05_build_neuron_metadata_table.py > outputs/tools/check_step05_root_id/step05_without_reset.py)
+    # and uncomment:
     # sys.argv[1:] = [
-    #     "--script", "outputs/tools/check_step05_root_id/step05_before_fix.py",
+    #     "--script", "outputs/tools/check_step05_root_id/step05_without_reset.py",
     # ]
     main()

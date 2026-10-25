@@ -2,13 +2,10 @@
 # Reads the three tables written by figures/fig7/si_sim_baseline.py, si_sim_no_filopodia.py
 # and si_sim_sampleout.py; run those first.
 # Ported from the authors' original script Fig 7/filapodia_extraction/SI_sim/SI_comb_analysis.py.
-# Changes: paths via config.py, unused imports removed, and one crash fixed in the
-# "conditions on x-axis" cell: it looked up 'Sample-out' in LABELS, which holds only
-# 'Baseline' and 'No filopodia', and raised before drawing. That cell now picks its columns
-# by name. It only shows a figure; the saved 7J panel (sim_results.svg) is drawn earlier
-# and does not change.
-# Also added: svg.fonttype='none' and Arial (repository convention). The original saved SVGs drew text as
-# DejaVu Sans glyph paths, so text and spacing differ from his files; plotted values do not.
+# Paths come from config.py. The "conditions on x-axis" cell picks its columns by name; it only shows a
+# figure, and the saved 7J panel (sim_results.svg) is drawn earlier.
+# svg.fonttype='none' and Arial (repository convention): text in the saved SVGs is live Arial text, so text
+# and spacing differ from the authors' SVGs (drawn as DejaVu Sans paths); plotted values do not.
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -58,7 +55,7 @@ df=nodesGb.merge(nodesGf,on='neuron',how='left')
 df=df.merge(nodesGs,on='neuron',how='left')
 #%%
 nodesG=pd.read_feather(NEURON_TABLE_FTR)
-df=df.merge(nodesG[['neuron','super_class']])
+df=df.merge(nodesG[['neuron','super_class']],validate='m:1')
 #%%
 df=df[df['super_class'].isin(['central','optic','visual_projection','visual_centrifugal'])]
 

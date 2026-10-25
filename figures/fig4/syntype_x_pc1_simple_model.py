@@ -1,3 +1,6 @@
+# Random forest predicting a synapse's type from PC1 of its two cells, on PCA_TABLE_FTR, with at most 100 leaves
+# per tree. It does not draw the published 4D: that surface is drawn by syntype_x_pc1.py's model (the Fig 4B legend
+# says 4A's matrix and 4D's surface are the same model).
 import matplotlib as mpl
 mpl.rcParams['svg.fonttype'] = 'none'
 mpl.rcParams['font.family'] = 'Arial'
@@ -9,7 +12,6 @@ import navis
 import sys
 import matplotlib.colors as mcolors
 import matplotlib.cm as cm
-import pickle
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import NEURON_TABLE_FTR, SYNAPSE_TABLE_FTR, PCA_TABLE_FTR, OUTPUT_DIR, METHODS_DIR
@@ -20,14 +22,12 @@ import seaborn as sns
 #%%
 nodesG=pd.read_feather(NEURON_TABLE_FTR)
 #%%
-
 nodesG=nodesG[['neuron','super_class',
        'length_nm', 'area_nm', 'size_nm', 
        'out_synapses_count', 'in_synapses_count', 
         'out_partners',
        'in_partners', 'leafs', ]]
 #%%
-
 nodesG=nodesG[nodesG['super_class'].isin(['central','optic','visual_projection','visual_centrifugal'])]
 #%%
 

@@ -4,8 +4,8 @@ No script in this repository writes these tables (apart from NEURONS_NT_BWF_FTR,
 figures/fig7/fig7i_filopodia_fraction_x_nt.py writes), so a figure can only be trusted to come
 from the same data if the files themselves are the same. For each table in TABLES below this
 checks, against tools/fig7_tables_reference.json:
-  - the file is there (a table in NOT_YET_SUPPLIED is reported NOT SUPPLIED until someone provides it,
-    which is not a failure; every table was supplied to the maintainers by 18 Oct, and none is deposited);
+  - the file is there (a table listed in NOT_YET_SUPPLIED, none at present, is reported NOT SUPPLIED,
+    which is not a failure; no table here is deposited, so on a clean clone every one FAILs as missing);
   - its sha256 (for NEURONS_NT_BWF_FTR, which is regenerated, a hash of its content instead,
     since feather bytes can differ for the same table);
   - its columns and their types, and the number of rows;
@@ -14,10 +14,11 @@ checks, against tools/fig7_tables_reference.json:
   - the key columns hold no duplicate;
   - the cross-table counts made by cross_counts() below (for example how many rows of the bouton table with a
     postsynaptic terminal have no bouton in the bouton table) are unchanged.
-A table supplied for the first time has no reference: run --record to add it.
+A table supplied for the first time has no reference: run --record to measure it.
 
---record measures every table that is there and writes the reference (check the printed values
-before committing it). --selftest shows the checks can fail: it writes altered copies of the
+--record measures every table that is there and writes a new reference to
+outputs/tools/check_fig7_tables/reference_new.json (check the printed values, then copy it over
+tools/fig7_tables_reference.json). --selftest first requires the untouched tables to pass, then shows the checks can fail: it writes altered copies of the
 smaller tables to a temporary folder (a row dropped, one value changed, an ID column made float,
 an ID column that reads back as nullable Int64, a column dropped, a key duplicated, the rows
 reordered, the file missing) and requires each to FAIL through the check meant for it (a reason
@@ -204,6 +205,11 @@ def run_checks(paths: dict, reference: dict) -> tuple:
 def selftest(paths: dict, reference: dict) -> list:
     """Altered copies of the smaller tables; each must make the check FAIL."""
     lines, missed = [], 0
+    # the untouched tables must pass first, or a table that fails proves nothing about the check
+    base, base_failed = run_checks(paths, reference)
+    if base_failed:
+        return ["FAIL: the untouched tables do not pass (%d failed), so the altered copies were not tested" % base_failed] + base
+    lines.append("baseline: the untouched tables pass")
     nb = pd.read_feather(paths["NEURONS_NT_BWF_FTR"])
     ine = pd.read_feather(paths["BOUTON_INERTIA_FTR"])
     nd = pd.read_feather(paths["NEURON_DATA_FTR"])
@@ -235,7 +241,16 @@ def selftest(paths: dict, reference: dict) -> list:
             lines.append("%-7s %-38s %s" % ("caught" if caught else "MISSED", label, " | ".join(reasons)[:300]))
             if target.exists():
                 target.unlink()
-    lines.append("PASS: all %d altered tables caught, each by its own check" % len(cases) if not missed
+        # a rewrite with the same content must pass: the generated table is compared by content, not by bytes
+        target = Path(tmp) / "NEURONS_NT_BWF_FTR.ftr"
+        nb.to_feather(target)
+        report, failed = run_checks(dict(paths, NEURONS_NT_BWF_FTR=target), reference)
+        control_failed = failed > 0
+        lines.append("%-7s %-38s %s" % ("passes" if not failed else "FAILED", "same content rewritten (generated table)",
+                                       "" if not failed else " | ".join(x.strip() for x in report if "NEURONS_NT_BWF" in x)[:300]))
+    if control_failed:
+        lines.append("FAIL: the same-content rewrite failed, so the generated table is not compared by content")
+    lines.append("PASS: all %d altered tables caught, each by its own check" % len(cases) if not missed and not control_failed
                  else "FAIL: %d of %d altered tables not caught by their own check" % (missed, len(cases)))
     return lines
 
@@ -260,10 +275,12 @@ def main() -> None:
             ref = {"recorded": datetime.date.today().isoformat(),
                    "tables": {n: measure(n, p) for n, p in paths.items() if p.exists()},
                    "cross": cross_counts(paths)}
-            REFERENCE.write_text(json.dumps(ref, indent=1) + "\n", encoding="utf-8")
+            new_ref = OUT_DIR / "reference_new.json"
+            new_ref.write_text(json.dumps(ref, indent=1) + "\n", encoding="utf-8")
             lines = ["%s: %s" % (n, json.dumps(m)) for n, m in ref["tables"].items()]
             lines += ["cross: %s = %d" % kv for kv in ref["cross"].items()]
-            lines.append("RECORDED %d tables into %s; check these values before committing it" % (len(ref["tables"]), REFERENCE))
+            lines.append("RECORDED %d tables into %s; check these values, then copy it over %s"
+                         % (len(ref["tables"]), new_ref, REFERENCE))
             ok = True
         else:
             reference = json.loads(REFERENCE.read_text(encoding="utf-8"))
@@ -296,7 +313,7 @@ if __name__ == "__main__":
     #   data/derived/filopodia_filtered.ftr  (FILOPODIA_FILTERED_FTR)
     #   data/derived/t2.ftr  (SYNAPSES_NO_SELF_FTR)
     # It compares them with
-    #   tools/fig7_tables_reference.json  (recorded 18 Oct 2026)
+    #   tools/fig7_tables_reference.json  (its 'recorded' field gives the date)
     # and writes
     #   outputs/tools/check_fig7_tables/report.txt
     # To run the self-test instead, uncomment:

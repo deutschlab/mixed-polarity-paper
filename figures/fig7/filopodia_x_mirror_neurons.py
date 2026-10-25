@@ -1,11 +1,8 @@
 # Supp 7-S4 A (within- vs between-type SD of filopodia_fraction, the fraction of a neuron's MSBs with a postsynaptic terminal) and B (left vs right mirror types).
 # Ported from the authors' original script Fig 7/filapodia_extraction/filopodia X mirror neurons.py.
-# Changes: paths via config.py, repeated import cells merged into the preamble, and the
-# bouton-fraction table renamed df2 -> bwf_df, because the ANOVA cells below reuse df1/df2
-# as degrees of freedom and the later merge would otherwise receive an int. The unused load of
-# SYN_BOUTON_FTR is commented out (see the TODO below; the import is kept so it can be restored).
-# The original copies read "syn_bouton_filopodia(new).ftr" and "neurons_nt_bwf_frac(new).ftr";
-# the config.py constants name the files without "(new)".
+# Run figures/fig7/fig7i_filopodia_fraction_x_nt.py first: it writes NEURONS_NT_BWF_FTR, read below.
+# Paths come from config.py. The bouton-fraction table is bwf_df, because the ANOVA cells below use df1/df2
+# as degrees of freedom. SYN_BOUTON_FTR is imported but not loaded (see the TODO below).
 # The ANOVA cells (Welch ANOVA, Games-Howell over every primary type) take a long time and
 # only print; the two SVGs do not depend on them.
 import sys
@@ -42,6 +39,7 @@ _out_dir.mkdir(parents=True, exist_ok=True)
 #%%
 
 bwf_df=pd.read_feather(NEURONS_NT_BWF_FTR)
+assert bwf_df['neuron'].is_unique, 'NEURONS_NT_BWF_FTR has a neuron twice'
 #%%
 # Load data
 nodesG = pd.read_feather(NEURON_TABLE_FTR)
@@ -154,7 +152,7 @@ from statsmodels.stats.multicomp import pairwise_tukeyhsd
 import pingouin as pg   # pip install pingouin
 
 # Run setting, as in figures/fig2/si_x_primary_types.py. SLOW_STATS = True runs the two slow steps of the
-# cell-type statistics as originally written: a model fit with one column per cell type, used only for the
+# cell-type statistics: a model fit with one column per cell type, used only for the
 # sums of squares behind eta squared and omega squared, and a post-hoc test over every pair of cell types
 # (Games-Howell, or Tukey if Levene's test passes) that prints five pairs; for the 7,511 types of Supp 2-S2 D
 # they take 12 minutes and an estimated 4-5 days. With False, the sums of squares come from the group means

@@ -1,15 +1,15 @@
 # Build the raw synapse table: every Princeton synapse before any filtering, with its size and neuropil.
 # Step 08, figures/fig1/create_split_axon_dendrite_princeton.py and figures/split_methods/ read it as
-# SYNAPSE_TABLE_RAW_FTR; until now no script wrote it.
+# SYNAPSE_TABLE_RAW_FTR.
 #
 # Same recipe as the authors' original split-method script (not in this repository): read the Codex CSV, keep each
 # row's number as synapse_id (the same ids every other table uses), drop the three cleft-coordinate
 # columns, rebuild the full root ids, optionally drop self-synapses, rename the 11 columns by position.
 #
-# Two versions: without self-synapses (as v2 builds it) and with them. RAW_TABLE_KEEP_SELF_SYNAPSES in
+# Two versions: without self-synapses (the version steps 01 and 02a match) and with them. RAW_TABLE_KEEP_SELF_SYNAPSES in
 # config.py chooses which one the other scripts read; BUILD below chooses which ones this script writes.
-# Took 2 minutes here (1 Oct 2026), with 22 GB resident and about 40 GB peak memory footprint (macOS, 36 GB RAM);
-# each version is about 3.5 GB on disk (both: about 7 GB).
+# Runs in about 2 minutes, with about 40 GB peak memory (22 GB resident) on a 36 GB macOS machine; each version
+# is about 3.5 GB on disk (both: about 7 GB).
 from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -22,7 +22,7 @@ import pandas as pd
 BUILD = "both"  # "no_self", "with_self" or "both"
 assert BUILD in ("no_self", "with_self", "both"), BUILD
 
-#%% Read the Codex CSV and repair the root ids (as in v2)
+#%% Read the Codex CSV and repair the root ids
 allsynapses = pd.read_csv(PRINCETON_SYNAPSE_CSV)
 allsynapses = allsynapses.reset_index(drop=False)
 allsynapses = allsynapses.drop(columns=['ctr_x', 'ctr_y', 'ctr_z'])

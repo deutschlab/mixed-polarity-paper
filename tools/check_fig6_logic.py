@@ -295,7 +295,10 @@ def run(source: str, config: types.ModuleType, settings: list[tuple[str, str]], 
     printed = io.StringIO()
     try:
         with contextlib.redirect_stdout(printed):
-            exec(compile(source, str(path), "exec"), namespace)
+            try:
+                exec(compile(source, str(path), "exec"), namespace)
+            except SystemExit as stop:
+                raise RuntimeError(f"the script called sys.exit({stop.code})") from None
     finally:
         plt.close("all")
         if saved is None:
@@ -346,7 +349,7 @@ def main() -> None:
         for ok, text in results:
             say(("PASS  " if ok else "FAIL  ") + text)
         say(f"{sum(ok for ok, _ in results)} passed, {sum(not ok for ok, _ in results)} failed")
-        report_path.write_text("\n".join(out) + "\n")
+        report_path.write_text("\n".join(out) + "\n", encoding="utf-8")
         sys.exit(0 if results and all(ok for ok, _ in results) else 1)
 
     if not args.script.is_file():

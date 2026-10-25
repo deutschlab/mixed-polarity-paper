@@ -1009,7 +1009,7 @@ plt.show()
 nodesG[nodesG['neuron']==720575940644651208][['SI','primary_type']]
 
 #%% Pearson r of SI vs PC1 per super-class
-# SI here is the corrected score from SI_UPDATED_FTR (swapped in at the top of this script),
+# SI here is SI_updated.ftr's (self-synapses excluded), merged in at the top of this script,
 # and PC1 is this script's own PCA, not PCA_TABLE_FTR.
 from scipy.stats import pearsonr
 

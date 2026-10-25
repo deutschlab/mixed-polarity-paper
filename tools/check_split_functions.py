@@ -13,7 +13,8 @@ This tool takes step 08's code out of the file without running the file (its top
 loads the full synapse table) and runs step 08's own batch function,
 run_neuron_batch_pipeline, on navis neurons built from small trees. Only the loading and
 the SFC split are replaced: the skeleton and its synapses come from the test tree, and the
-published SFC split is a stand-in, so the SFC part is not tested here. Everything else is step 08's code. The
+SFC split is a stand-in that returns the whole neuron twice, labelled dendrite and axon, so the SFC part
+is not tested here. Everything else is step 08's code. The
 results are compared with a reference written separately (it finds the two sides by
 removing the node and walking the tree), for every candidate and for the summary step 08
 saves:
@@ -22,7 +23,8 @@ saves:
   - |phi| from step 08's absolute_phi against sqrt(chi^2 / n) from scipy,
   - that the MaxSI and MinFisherP nodes are among the reference's best (ties allowed, and
     counted in an INFO line, since step 08 breaks them by sort order),
-  - the side counts saved for both chosen nodes, and the axon side (including its tie and
+  - the side counts saved for both chosen nodes, and the MaxSI cut's axon side (step 08 stores none
+    for MinFisherP; including its tie and
     empty-side cases), and that the split and the axon neuron carry the counted synapses,
   - that neurons with no valid SI, no candidate or two roots fail,
   - random trees, a 20,000-node chain and re-rooted trees.
@@ -79,7 +81,7 @@ def load_step08(path, trees):
     try:
         tree, escaped = ast.parse(source), False
     except SyntaxError:
-        # Some original versions keep a Windows path with a bare \U in a dead string, which
+        # Some copies of step 08 keep a Windows path with a bare \U in a dead string, which
         # does not parse. Doubling every backslash leaves code without backslashes unchanged.
         tree, escaped = ast.parse(source.replace("\\", "\\\\")), True
     defs = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef)}
@@ -88,11 +90,17 @@ def load_step08(path, trees):
         sys.exit(f"{path}: functions not found: {missing}")
     if escaped and any("\\" in ast.unparse(defs[f]) for f in FUNCTIONS):
         sys.exit(f"{path} only parses with its backslashes doubled, which would change these functions.")
+    def stand_in_split(neuron, flow_thresh=1):
+        """The whole neuron twice, labelled dendrite and axon as navis labels its split."""
+        dendrite, axon = neuron.copy(), neuron.copy()
+        dendrite.compartment, axon.compartment = "dendrite", "axon"
+        return navis.NeuronList([dendrite, axon])
+
     namespace = {"np": np, "pd": pd, "navis": navis, "log": math.log,
                  "fisher_exact": fisher_exact, "multipletests": multipletests,
                  "upload_swc": lambda neuron_id: trees[neuron_id]["neuron"].copy(),
                  "heal_attach_princeton_non_process": lambda swc, synapses: swc,
-                 "get_split": lambda neuron, flow_thresh=1: navis.NeuronList([neuron, neuron])}
+                 "get_split": stand_in_split}
     free = set()
     for f in FUNCTIONS:  # names each function reads but neither binds itself nor gets from here
         body = list(ast.walk(defs[f]))
@@ -117,7 +125,7 @@ def run_step08(f, trees):
     with contextlib.redirect_stdout(io.StringIO()):  # step 08 prints a line per neuron
         summary, nodes, failures = f["run_neuron_batch_pipeline"](
             nodes_dataframe=pd.DataFrame({"neuron": ids}), synapses_dataframe=synapses,
-            neuron_id_col="neuron", flow_thresh=1, plot=False)
+            neuron_id_col="neuron", flow_thresh=1)
     return summary.set_index("neuron_id") if len(summary) else summary, nodes, failures
 
 
@@ -460,7 +468,7 @@ def main():
 
     summary = f"\n{sum(l.startswith('PASS') for l in lines)} passed, {failures} failed ({time.time() - start:.0f} s)"
     print(summary)
-    (args.out / "report.txt").write_text("\n".join(header + lines) + summary + "\n")
+    (args.out / "report.txt").write_text("\n".join(header + lines) + summary + "\n", encoding="utf-8")
     print(f"Report: {args.out / 'report.txt'}")
     sys.exit(1 if failures else 0)
 

@@ -1,6 +1,6 @@
 # Supp 7-S2 A: mean RMS against mean centroid distance of each neuron's boutons.
 # Ported from the authors' original script fig7S2a.py.
-# Changes: paths via config.py; figure saves switched on and placed before plt.show().
+# Paths come from config.py; every figure is saved before plt.show().
 # It plots every neuron of BOUTON_INERTIA_FTR, before any cell type is excluded; it reads CONSOLIDATED_CELL_TYPES_CSV but does not use it.
 import sys
 from pathlib import Path

@@ -1,8 +1,8 @@
 # Fig 7I: per-neuron fraction of boutons with a postsynaptic terminal, by neurotransmitter.
 # Ported from the authors' original script fig7i.py.
-# Changes: paths via config.py; figure saves switched on and placed before plt.show(); svg.fonttype='none' and Arial added (repository convention).
-# It writes NEURONS_NT_BWF_FTR, which figures/fig7/filopodia_x_mirror_neurons.py and figures/fig5/reciprocal_fraction_x_bwf.py read;
-# the original wrote neurons_nt_bwf_frac_filtered.ftr. Its neuron column is pandas' nullable Int64, as in the original.
+# Paths come from config.py; every figure is saved before plt.show(); svg.fonttype='none' and Arial (repository convention).
+# It writes NEURONS_NT_BWF_FTR, which figures/fig7/filopodia_x_mirror_neurons.py and figures/fig5/reciprocal_fraction_x_bwf.py read.
+# Its neuron column is pandas' nullable Int64.
 # Its neuron set is every bouton neuron with a neurotransmitter in NEURON_DATA_FTR, all super-classes, no SI filter.
 # Each neuron's fraction pools its axonal and dendritic boutons, with no minimum bouton count.
 import sys

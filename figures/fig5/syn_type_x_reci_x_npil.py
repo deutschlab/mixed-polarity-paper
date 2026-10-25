@@ -4,6 +4,10 @@ Created on Mon Dec 30 19:16:35 2024
 
 @author: user
 """
+# Fig 5I: AD, AA, DD and DA shares per neuropil, reciprocal and not, over synapses between intrinsic cells with
+# SI >= 0.1 at both ends (the synapse table's SI_pre and SI_post). The number over each bar is that neuropil's own
+# synapse total, in thousands. Shares are of the neuropil's synapses in both groups together (a bar's eight segments
+# sum to 100%); left and right neuropils are pooled; only synapses whose connection is in CONNECTIONS_TABLE_FTR count.
 
 
 import matplotlib.pyplot as plt

@@ -1,7 +1,7 @@
 # Split methods: the left/right SI plot (Supp 2-S2 A layout), redone with the MaxSI cut's SI.
 # Ported from the authors' original script Fig2/supp_fig_2/SI X primary_types mirror/max_SI X primary_types mirror.py.
-# Changes: paths via config.py and the repository preamble (which also sets editable Arial text in the SVGs);
-# nothing else.
+# Paths come from config.py, and the repository preamble sets editable Arial text in the SVGs. Otherwise the code
+# is the original's.
 # Reads MaxSI_SI from SI_COMPARISONS_FTR (the authors' table of the four cuts' scores; intrinsic neurons only).
 import sys
 from pathlib import Path
@@ -56,7 +56,7 @@ nodesG=nodesG.dropna(subset=['dend_correct','axon_correct','super_class','primar
 #%%
 nodesG.drop(columns=['SI'],inplace=True)
 #%%
-nodesG=nodesG.merge(df,how='left',left_on='neuron',right_on='neuron_id')
+nodesG=nodesG.merge(df,how='left',left_on='neuron',right_on='neuron_id',validate='1:1')
 #%%
 aa=nodesG.head()
 #%%

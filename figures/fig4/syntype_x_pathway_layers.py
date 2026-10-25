@@ -6,7 +6,7 @@
 # revised Fig 4E is plots 3-6 (the DD and AA lines).
 # Ported from the corresponding author's MATLAB script FlyWire_VisualOlfactoryPathway_LayerStats.m
 # (not included in this repository).
-# Changes:
+# Differences from the MATLAB script:
 #   - paths via config.py; the tables are written next to the figures (the MATLAB script wrote them
 #     into its data folder), and the MATLAB .fig copies of the figures are not made;
 #   - its input ex_table_npil_comp_pre_post_hiSI_PerTypeSummary.csv (one row per pre type, post type and
@@ -51,7 +51,7 @@ _out_dir.mkdir(parents=True, exist_ok=True)
 # stand-in from this repository's synapse and neuron tables (SYNAPSE_TABLE_FTR and NEURON_TABLE_FTR,
 # or SYNAPSE_TABLE_NONP_FTR and NEURON_TABLE_NONP_FTR): synapses counted per pre type, post type,
 # comp and npil, over cells with a type and SI >= 0.1 on both sides. A stand-in is not the panel:
-# on 16 Oct 2026 none of the three gave the revised panel's values.
+# none of the three gives the revised panel's values.
 DATA_SOURCE = 'csv'
 # With DATA_SOURCE = 'princeton' only: 'neuron_table' (NEURON_TABLE_FTR's SI) or 'SI_updated'.
 SI_SOURCE = 'neuron_table'

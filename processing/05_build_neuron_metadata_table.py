@@ -296,7 +296,7 @@ df['mean_in_synapses_per_partner']=df['mean_in_degree']/df['in_partners']
 df['mean_synapses_per_partner_ratio']=df['mean_in_synapses_per_partner']/df['mean_out_synapses_per_partner']
 #%%
 df=df[df['neuron']==df['root_id']]
-df['root_id']=df['neuron']  # equal on every row kept; the left merge above returned root_id as rounded floats
+df['root_id']=df['neuron']  # equal on every row kept; after the left merge root_id is float64 (NaN for cells without metadata), which rounds 18-digit IDs
 #%%
 NEURON_TABLE_FTR.parent.mkdir(parents=True, exist_ok=True)
 df.to_feather(NEURON_TABLE_PARTIAL_FTR)   # built on a copy; NEURON_TABLE_FTR is written once, at the end

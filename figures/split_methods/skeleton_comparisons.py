@@ -1,9 +1,9 @@
 # Split methods: draws, for chosen cells, the published (SFC) split next to the MaxSI split, to show how the
 # cut moves (one cell split in different ways).
 # Ported from the authors' original script ALT_SI_COMP/Skeleton_comparisons.py.
-# Changes: paths via config.py and the repository preamble; each split image is also saved (the original only
-# showed it); the repository preamble also sets editable Arial text in the SVGs; and the ONLY_CELLS_WITH_SKELETONS
-# option below ("auto" keeps the original selection exactly when all its skeletons are on disk, and otherwise replaces it).
+# Paths come from config.py, and the repository preamble sets editable Arial text in the SVGs. Each split image is
+# saved. The ONLY_CELLS_WITH_SKELETONS option below picks the cells ("auto" keeps the original selection when all
+# its skeletons are on disk, and otherwise replaces it).
 # The SFC SI here is the one in SI_COMPARISONS_FTR and SI_updated.ftr; the delivered neuron table's SI differs when
 # the cell has self-synapses (see RAW_TABLE_KEEP_SELF_SYNAPSES in config.py).
 # Reads SYNAPSE_TABLE_RAW_FTR (built by processing/build_raw_synapse_table.py; RAW_TABLE_KEEP_SELF_SYNAPSES
@@ -99,8 +99,8 @@ bins = [
 ]
 
 labels = [
-    "0-0.001","0.001-0.05",
-    "0.05-0.1",
+    "0-0.001","0.001-0.02",
+    "0.02-0.1",
     "0.1-0.2",
     "0.2+"
 ]
@@ -1172,8 +1172,7 @@ def find_neuron_id_column(
 
 
 #%% Figure helper
-# SAME STYLE AS OLD save_split_image()
-# BUT SHOW ONLY - DO NOT SAVE
+# Draws the split image and saves it
 
 def show_split_image(
     neuron_list,
@@ -1221,9 +1220,7 @@ def show_split_image(
     )
 
 
-    # SHOW ONLY
-    # NO savefig
-    # Port: the original script did not save the split images; this does, named after the title.
+    # save each split image, named after its title
     fig.savefig(_out_dir / (re.sub(r"[^A-Za-z0-9_.-]+", "_", str(title))[:120] + ".svg"), bbox_inches="tight")
     plt.show()
 
@@ -2172,7 +2169,7 @@ def run_neuron_batch_pipeline(
     )
 
 
-#%% Port option, not in the original script.
+#%% Cell selection when skeletons are missing
 # "auto" (default): the original selection if every cell in it has a skeleton in SWC_DIR. If even one is
 #   missing, the whole selection is replaced (printed): the first cells of the same sorted list that have a
 #   skeleton, so not cells near row X. False: always the original selection (a cell without a skeleton fails to

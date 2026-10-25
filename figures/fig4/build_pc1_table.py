@@ -40,7 +40,7 @@ nodesG=nodesG[nodesG['super_class'].isin(['central','optic','visual_projection',
 pcadf=pd.read_feather(PCA_TABLE_FTR)
 #%%
 
-nodesG=nodesG.merge(pcadf,on='neuron',how='left')
+nodesG=nodesG.merge(pcadf,on='neuron',how='left',validate='1:1')
 #%%
 
 

@@ -166,7 +166,8 @@ def run_figure(script: Path, out_dir: Path, dpi: float | None = 72,
     mistaken for this run's output.
     replacements: (old, new) pairs of exact source text; each old text must occur
     exactly once. Use it to skip a step that is too slow to run; a run changed this
-    way is not a full reproduction of the script.
+    way is not a full reproduction of the script, and its replacements are written to
+    out_dir/replacements.txt.
     """
     script = script.resolve()
     if out_dir.exists() and any(out_dir.iterdir()):
@@ -185,6 +186,9 @@ def run_figure(script: Path, out_dir: Path, dpi: float | None = 72,
 
     status = out_dir / "run_status.txt"
     status.write_text("started, not finished\n", encoding="utf-8")
+    if replacements:   # a run changed this way is not a full reproduction: say so next to its output
+        (out_dir / "replacements.txt").write_text(
+            "".join(f"replaced {old!r}\n    with {new!r}\n" for old, new in replacements), encoding="utf-8")
     with open(out_dir / "stdout.log", "w", encoding="utf-8") as out_log, \
             open(out_dir / "stderr.log", "w", encoding="utf-8") as err_log:
         stdout, stderr = sys.stdout, sys.stderr

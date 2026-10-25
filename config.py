@@ -92,7 +92,6 @@ SELF_SDI_FTR                  = RECIPROCITY_CALC_DIR / "self_SDI.ftr"
 RF_MODEL_PKL                  = RECIPROCITY_MODELS_DIR / "final_random_forest_model_princeton.pkl"
 PC1_TABLE_CSV                 = DERIVED_DATA_DIR / "PC1_table.csv"
 PC1_TABLE_PREDICTIONS_CSV     = DERIVED_DATA_DIR / "PC1_table_with_predictions.csv"
-FULL_INFO_FTR                 = DERIVED_DATA_DIR / "full_info.ftr"
 
 # --- fig2 additional data paths ---
 NEURON_TABLE_NONP_FTR         = DERIVED_DATA_DIR / "neuron_data_full_article.ftr"

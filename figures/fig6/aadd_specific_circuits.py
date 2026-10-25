@@ -7,7 +7,7 @@
 # projection, ALPN and central complex.
 # Ported from the corresponding author's MATLAB script FlyWire_AADD_specificCircuits.m (not
 # included in this repository).
-# Changes:
+# Differences from the MATLAB script:
 #   - paths via config.py; the inputs the MATLAB script read but never used afterwards (the
 #     sensory ranks, the FlyWire colour table, the dsx/fru and auditory lists, and
 #     connections_princeton783.csv) are not read;
@@ -93,7 +93,7 @@ assert nodes['root_id'].is_unique
 if DATA_SOURCE == 'princeton' and SI_SOURCE == 'SI_updated':
     si_upd = pd.read_feather(SI_UPDATED_FTR, columns=['root_id', 'SI'])
     si_upd['root_id'] = si_upd['root_id'].astype(np.int64)
-    nodes = nodes.drop(columns='SI').merge(si_upd, on='root_id', how='left')
+    nodes = nodes.drop(columns='SI').merge(si_upd, on='root_id', how='left', validate='1:1')
 T_types = nodes[['root_id', 'primary_type']].dropna().rename(columns={'root_id': 'cellID'})
 T_types = T_types[T_types['primary_type'].astype(str).str.strip() != '']   # MATLAB drops empty types too
 T_SI = nodes[['root_id', 'SI']].dropna().rename(columns={'root_id': 'cellID'})

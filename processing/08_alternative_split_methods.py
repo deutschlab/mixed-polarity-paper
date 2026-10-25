@@ -33,7 +33,6 @@ from methods_all import *
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import navis
 
 from math import log
@@ -43,7 +42,7 @@ from statsmodels.stats.multitest import multipletests
 
 #%%2 Settings
 
-#X = 5000
+
 FLOW_THRESHOLD = 1
 
 # Column in NEURON_TABLE_FTR that holds the neuron ID.
@@ -72,7 +71,7 @@ allsynapses = allsynapses[
 ].copy()
 
 
-#%%4 Original SI functions
+#%%4 SI functions (same formula as methods_all.SI_calc)
 
 def SI_calc(neuron_id_data):
 
@@ -150,7 +149,8 @@ def safe_SI_calc(
     side_2_post
 ):
     """
-    Calls the original SI_calc only when its denominators are defined.
+    Returns NaN when there are no synapses or Snorm is 0 (only pre or only post synapses);
+    otherwise SI_calc.
     """
 
     total_pre = side_1_pre + side_2_pre
@@ -667,15 +667,13 @@ def find_neuron_id_column(
     )
 
 
-#%%9 Run the random-neuron pipeline
 #%%9 Run neuron batch pipeline
 
 def run_neuron_batch_pipeline(
     nodes_dataframe,
     synapses_dataframe,
     neuron_id_col=None,
-    flow_thresh=1,
-    plot=True
+    flow_thresh=1
 ):
     """
     Process every neuron supplied in nodes_dataframe.
@@ -739,6 +737,10 @@ def run_neuron_batch_pipeline(
             swc = upload_swc(
                 neuron_id
             )
+            if swc is None:
+                raise FileNotFoundError(
+                    "No readable SWC file under SWC_DIR."
+                )
 
             neuron_synapses = synapses_dataframe.loc[
                 (synapses_dataframe["pre"] == neuron_id)
@@ -755,6 +757,8 @@ def run_neuron_batch_pipeline(
                 swc,
                 neuron_synapses
             )
+            if isinstance(neuron, str):
+                raise ValueError(neuron)   # 'heal or attach issue'
 
             total_pre = len(
                 neuron.presynapses
@@ -765,7 +769,7 @@ def run_neuron_batch_pipeline(
             )
 
             # -------------------------------------------------
-            # Original flow-based split
+            # Published SFC split
             # -------------------------------------------------
 
             flow_split = get_split(
@@ -773,13 +777,19 @@ def run_neuron_batch_pipeline(
                 flow_thresh=flow_thresh
             )
 
-            if len(flow_split) < 2:
+            if isinstance(flow_split, str):
+                raise ValueError(flow_split)   # 'split issue'
+
+            # the axon and the dendrite by their labels; steps 01 and 02a also reject a split without one of each
+            axons = [f for f in flow_split if f.compartment == "axon"]
+            dendrites = [f for f in flow_split if f.compartment == "dendrite"]
+            if len(axons) != 1 or len(dendrites) != 1:
                 raise ValueError(
-                    "get_split returned fewer than two fragments."
+                    "split_axon_dendrite did not give one axon and one dendrite: "
+                    f"{[f.compartment for f in flow_split]}"
                 )
-            #this needs to be fixed
-            original_dendrite = flow_split[0]
-            original_axon = flow_split[-1]
+            original_dendrite = dendrites[0]
+            original_axon = axons[0]
 
             original_ax_pre = len(
                 original_axon.presynapses
@@ -893,13 +903,6 @@ def run_neuron_batch_pipeline(
                 "dendrite_neuron"
             ]
 
-            split_colored = navis.NeuronList(
-                [
-                    dendrite_neuron,
-                    axon_neuron
-                ]
-            )
-
             # -------------------------------------------------
             # Save neuron-level summary
             # -------------------------------------------------
@@ -912,7 +915,7 @@ def run_neuron_batch_pipeline(
                 "total_post": total_post,
                 "total_synapses": total_pre + total_post,
 
-                # Original flow-based split
+                # Published SFC split
                 "original_SI": original_SI,
                 "original_IG": original_IG,
                 "navis_original_SI": navis_original_SI,
@@ -1106,13 +1109,8 @@ def run_neuron_batch_pipeline(
         
     )
 
-#%%10 Execute
-
-#%%10 Execute
-
 #%%10 Execute full-neuron analysis in batches
 
-from pathlib import Path
 import gc
 
 
@@ -1127,9 +1125,6 @@ all_neurons = (
     .reset_index(drop=True)
 )
 
-###test
-
-#all_neurons = all_neurons.iloc[:10].copy()
 # ---------------------------------------------------------
 # Batch settings
 # ---------------------------------------------------------
@@ -1242,9 +1237,7 @@ for batch_number in range(n_batches):
         synapses_dataframe=allsynapses,
 
         neuron_id_col=NEURON_ID_COL,
-        flow_thresh=FLOW_THRESHOLD,
-
-        plot=False
+        flow_thresh=FLOW_THRESHOLD
     )
 
 
@@ -1310,12 +1303,8 @@ for batch_number in range(n_batches):
 print("\nFinished all batches.")
 #%%
 
-X = 1      # first batch (batch numbers start at 1)
-Y = 236    # last batch will be X + Y
-
-START_BATCH = X
-END_BATCH = X + Y
-if END_BATCH != n_batches: raise SystemExit(f"batches {START_BATCH} to {END_BATCH} are combined, but the run made {n_batches}")
+START_BATCH = 1           # batch numbers start at 1
+END_BATCH = n_batches     # every batch the run above made
 batch_data_path = ALT_SPLIT_BATCH_DIR
 
 
@@ -1345,6 +1334,20 @@ for batch_id in range(START_BATCH, END_BATCH + 1):
         )
 
 if missing_batches: raise SystemExit(f"batch files missing, so their neurons would be left out: {missing_batches}")
+
+# the neurons that failed (no SWC, heal or attach, split, no valid node SI) are in the failures files;
+# every neuron of the run must be in one of the two
+failure_frames = [pd.read_feather(p) for p in
+                  (batch_data_path / f"failures_batch_{b:04d}.ftr" for b in range(START_BATCH, END_BATCH + 1))
+                  if p.exists()]
+failures_all = pd.concat(failure_frames, ignore_index=True) if failure_frames else pd.DataFrame(columns=["neuron_id", "error"])
+n_done = sum(len(f) for f in summary_frames)
+if n_done + len(failures_all) != len(all_neurons):
+    raise SystemExit(f"{n_done} neurons in the summaries and {len(failures_all)} in the failures, "
+                     f"but the run had {len(all_neurons)}")
+print(f"Neurons that failed: {len(failures_all)}")
+if len(failures_all):
+    print(failures_all["error"].str.split(":").str[0].value_counts().to_string())
 #%% 4. Combine selected batches
 
 if len(summary_frames) > 0:
@@ -1421,8 +1424,6 @@ summary_df["Fisher_Phi"] = summary_df.apply(
     axis=1
 )
 
-#%%
-aa=summary_df.head()
 #%% 8. Create comparison dataframe
 
 comparison_df = summary_df[

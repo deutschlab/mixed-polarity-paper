@@ -2,9 +2,9 @@
 # published one: a density of the SI difference per KC type, with a histogram over all KC types drawn on the
 # same axes (as in the original script), then 5 cells from each of five bands.
 # Ported from the authors' original script ALT_SI_COMP/Skeleton_comparisons_KC.py.
-# Changes: paths via config.py and the repository preamble, which also sets editable Arial text in the SVGs;
-# each split image is also saved; and the ONLY_CELLS_WITH_SKELETONS option ("auto" keeps the original selection exactly
-# when all 25 skeletons are on disk, and otherwise replaces it). MaxSI scores higher than SFC in
+# Paths come from config.py, and the repository preamble sets editable Arial text in the SVGs. Each split image is
+# saved. The ONLY_CELLS_WITH_SKELETONS option picks the cells ("auto" keeps the original selection when all 25
+# skeletons are on disk, and otherwise replaces it). MaxSI scores higher than SFC in
 # 5,173 of the 5,174 KCs in SI_COMPARISONS_FTR, so the SFC_SI < MaxSI_SI filter removes almost nothing.
 # Reads SYNAPSE_TABLE_RAW_FTR (see processing/build_raw_synapse_table.py) and the skeletons under SWC_DIR.
 import sys
@@ -1152,8 +1152,7 @@ def find_neuron_id_column(
 
 
 #%% Figure helper
-# SAME STYLE AS OLD save_split_image()
-# BUT SHOW ONLY - DO NOT SAVE
+# Draws the split image and saves it
 
 def show_split_image(
     neuron_list,
@@ -1201,9 +1200,7 @@ def show_split_image(
     )
 
 
-    # SHOW ONLY
-    # NO savefig
-    # Port: the original script did not save the split images; this does, named after the title.
+    # save each split image, named after its title
     fig.savefig(_out_dir / (re.sub(r"[^A-Za-z0-9_.-]+", "_", str(title))[:120] + ".svg"), bbox_inches="tight")
     plt.show()
 
@@ -2152,7 +2149,7 @@ def run_neuron_batch_pipeline(
     )
 
 
-#%% Port option, not in the original script.
+#%% Cell selection when skeletons are missing
 # "auto" (default): the original selection if every cell in it has a skeleton in SWC_DIR. If even one is
 #   missing, the whole selection is replaced (printed): up to 5 cells per band drawn, with the same seed,
 #   from the KCg-m cells that have a skeleton. False: always the original selection (a cell without a skeleton

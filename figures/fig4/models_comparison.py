@@ -61,7 +61,7 @@ import pandas as pd
 
 # Data
 x = ['per neuron', 'per primary_type', 'all features', 'pc1_x/pc1_y']
-y = [result_per_conneciton*100, 100*result_per_conneciton_primary_type, 79.353, 69.245]
+y = [result_per_conneciton*100, 100*result_per_conneciton_primary_type, 79.353, 69.245]  # the last two typed in (the Fig 3J and 4A runs)
 
 # Create DataFrame
 df = pd.DataFrame({'x': x, 'y': y})
@@ -110,9 +110,9 @@ print(f'  n primary-type pairs = {n_primary_type_pairs:,}')
 print(f'  accuracy = {result_per_conneciton_primary_type * 100:.1f}%')
 
 print(f'\nFull feature classifier:')
-print(f'  n held-out synapses = {n_all_features_test:,}')
-print(f'  accuracy = 79.4%')
+print(f'  n test rows (after balancing with replacement) = {n_all_features_test:,}')
+print(f'  accuracy = {y[2]:.1f}%')
 
 print(f'\nPC1_pre / PC1_post classifier:')
-print(f'  n held-out synapses = {n_pc1_test:,}')
-print(f'  accuracy = 69.2%')
+print(f'  n test rows (after balancing with replacement) = {n_pc1_test:,}')
+print(f'  accuracy = {y[3]:.1f}%')

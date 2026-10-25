@@ -1,7 +1,7 @@
 # Fig 7G: fraction of boutons with a postsynaptic terminal (left) and postsynaptic sites per bouton, among boutons with at least one (right), against SI.
 # Ported from the authors' original script fig7g.py.
-# Changes: paths via config.py; figure saves switched on and placed before plt.show().
-# The second plot had two commented-out saves under different names; the first is switched on, the second (after plt.show()) stays off.
+# Paths come from config.py; every figure is saved before plt.show().
+# Of the second plot's two saves, the one before plt.show() runs; the one after it is commented out.
 # The dashed lines at 0.24 and 0.75 are typed in; the 'All' lines use every super-class with no SI filter.
 # The axon and dendrite lines keep intrinsic boutons with SI >= 0.1 (left) or SI > 0.1 (right), binned in equal-count
 # SI bins over axon and dendrite boutons together; r and p are computed over boutons, not neurons.

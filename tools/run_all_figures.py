@@ -39,9 +39,9 @@ Usage:
     python tools/run_all_figures.py --out outputs/tools/run_all_figures/after --only fig4
     python tools/compare_runs.py outputs/tools/run_all_figures/before outputs/tools/run_all_figures/after
 
-On a 36 GB Mac most scripts took seconds and syntype_x_features.py about an hour;
-si_x_primary_types.py (6 to 10 hours, its Games-Howell tests) and
-reciprocal_fraction_model.py did not finish within 20 minutes.
+Most scripts take seconds and syntype_x_features.py about an hour (36 GB Mac). si_x_primary_types.py
+(6 to 10 hours, its Games-Howell tests) and reciprocal_fraction_model.py take longer than the
+20-minute default and time out unless --timeout is raised.
 """
 
 from __future__ import annotations

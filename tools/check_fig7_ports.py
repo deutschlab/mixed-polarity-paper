@@ -39,23 +39,23 @@ Comparisons for each pair:
      plt.show() that includes it), artist by artist and as SVG bytes;
   T  tables written: same columns, dtypes, rows, content and destination; no other write and no
      file left in the work folder.
-Numbers must agree to 1e-9 (relative and absolute) after rounding to 12 decimals, texts exactly.
+Numbers must agree within np.allclose(rtol=1e-9, atol=1e-9) after rounding to 12 decimals, texts exactly.
 
 Known, deliberate differences, applied to the original's run so the comparison is like for like:
   fig7S2b.py  the original stops on a KeyError (the cell-type table names its column root_id);
               the original's read of that table renames the column, as the port does in its code.
-A pair where both sides stop because t2.ftr or filopodia_filtered.ftr is missing (fig7e) is
+A pair where both sides stop because t2.ftr or filopodia_filtered.ftr is missing (at present only fig7e reads them) is
 reported NOT RUN, not FAIL; it is compared as soon as the files are there. A run in which no pair
 is compared fails, and so do an unknown --only name, a wrong --originals and a script that runs
 out of time; each still writes the report.
 
---mutants shows the check can fail: it copies the ports to a scratch folder, plants one bug at a
+--mutants shows the check can fail: it first requires the unchanged ports to pass, then copies the ports to a scratch folder, plants one bug at a
 time (MUTANTS below: a threshold, a reference line, the statistic, the order, a row dropped, a
 legend label, the axes swapped, an excluded type kept, a save removed, the font setting, the
 table destination, tick labels, colours, a save before the legend, the wrong figure saved, the
 layout, label rotation and size, the legend position, save options, extra reads and writes, and
-a hand edit) and requires each to FAIL with both scripts finished. PASS there means all 26 were
-caught.
+a hand edit) and requires each to FAIL with both scripts finished. PASS there means every mutant was
+caught. --only does not apply to it.
 
 What a PASS does not show: that the original is the right analysis, or that it reproduces the
 published panel (the originals ran on the authors' machine with their libraries; this compares
@@ -134,8 +134,9 @@ def audit(event, args):
     real = os.path.realpath(os.fsdecode(path))
     if "__pycache__" in real or real.startswith(CACHE) or real == os.path.realpath(RECORD):
         return
-    record["file_writes"].append(os.path.relpath(real, WORK) if real.startswith(WORK) else "OUTSIDE " + real)
-    if not real.startswith(WORK):
+    inside = os.path.commonpath([real, WORK]) == WORK
+    record["file_writes"].append(os.path.relpath(real, WORK) if inside else "OUTSIDE " + real)
+    if not inside:
         raise PermissionError("check_fig7_ports refused a write outside its work folder: " + real)
 if MODE == "port":
     import config
@@ -569,6 +570,16 @@ def run_mutants(originals: Path, inputs: list, ports: Path, out_dir: Path, timeo
     root = out_dir / "mutants"
     if root.exists():
         shutil.rmtree(root)
+    # the unchanged ports must pass first, or a mutant that fails proves nothing about the check
+    used = sorted({orig for _, orig, _, _, _ in MUTANTS})
+    base_lines, base_failed, base_compared, _ = check_pairs(originals, inputs, ports, used, root / "baseline", timeout)
+    base_static = mk.check(originals, ports, quiet=True)
+    if base_failed or base_static or base_compared != len(used):
+        return (["FAIL: the unchanged ports do not pass (%d of %d pairs failed%s), so the mutants were not run"
+                 % (base_failed, len(used), ("; check 0: " + "; ".join(base_static)) if base_static else
+                   ("; %d not compared" % (len(used) - base_compared) if base_compared != len(used) else ""))]
+                + base_lines)
+    lines.append("baseline: the unchanged ports pass (%d pairs compared, check 0 passed)" % base_compared)
     for name, orig, port_name, old, new in MUTANTS:
         d = root / name
         shutil.copytree(ports, d / "ports", ignore=shutil.ignore_patterns("__pycache__"))
@@ -616,6 +627,8 @@ def main() -> None:
         report.unlink()
     head = ["Figure 7 port check, %s" % datetime.datetime.now().isoformat(timespec="seconds")]
     try:
+        if args.mutants and args.only:
+            raise SystemExit("FAIL: --only does not apply to --mutants, which runs every mutant")
         unknown = sorted(set(args.only or []) - set(mk.PAIRS))
         if unknown:
             raise SystemExit("FAIL: --only names no original script: %s (they are %s)" % (unknown, ", ".join(mk.PAIRS)))
