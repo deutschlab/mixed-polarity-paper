@@ -260,7 +260,7 @@ for i, id_ in enumerate(lista):
         issues_in_comp = []
         all_SI = []
 
-        # (re-added) per-neuron non-success connectors DF
+        swcid = id_   # this neuron's id, for its file names on every path (the success path sets it from the skeleton)
 
 
         iter_start = time.time()
@@ -324,7 +324,7 @@ for i, id_ in enumerate(lista):
                     linker_neurons.append(n.id)
                 else:
                     issues_in_comp.append([n.id, 'issue1'])
-  
+                    with open(os.path.join(output_folder, f'issues_{swcid}.pkl'), 'wb') as f: pickle.dump(issues_in_comp, f)
 
                     continue
 
@@ -345,13 +345,13 @@ for i, id_ in enumerate(lista):
                     all_non_succsessfull_connectors = split.connectors
                     with open(os.path.join(output_folder, f'non_success_connectors_{swcid}.pkl'), 'wb') as f:
                         pickle.dump(all_non_succsessfull_connectors, f)
-
+                    with open(os.path.join(output_folder, f'issues_{swcid}.pkl'), 'wb') as f: pickle.dump(issues_in_comp, f)
                     continue
 
         else:
             issues_in_comp.append([n.id, 'issue3'])
+            with open(os.path.join(output_folder, f'issues_{swcid}.pkl'), 'wb') as f: pickle.dump(issues_in_comp, f)
             continue
-
         nid = n.id
 
         SI, IG = SI_calc(['', (len(axon_swc.presynapses), len(axon_swc.postsynapses)),
@@ -388,12 +388,12 @@ for i, id_ in enumerate(lista):
         with open(os.path.join(output_folder, f'linker_{swcid}.pkl'), 'wb') as f:
             pickle.dump(linker_neurons, f)
 
-        # save non-success connectors per neuron
+        # (a failed neuron writes only issues_<id>.pkl above, plus non_success_connectors_<id>.pkl for issue2)
 
 
     except Exception as e:
-        # swc1.id if available, otherwise fallback to id_
-        swcid = (swc1.id if 'swc1' in locals() else id_)
+        # this neuron's id from the loop (swc1 may be None, or left from the previous neuron)
+        swcid = id_
         issues_in_comp.append([swcid, 'issue3'])
         print(e)
         with open(os.path.join(output_folder, f'issues_{swcid}.pkl'), 'wb') as f:
