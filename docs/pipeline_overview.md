@@ -188,7 +188,7 @@ per-neuron PCA scores used in Figure 4 and one supporting script.
 | **Inputs** | `NEURON_TABLE_FTR` |
 | **Outputs** | `PCA_TABLE_FTR` (`neurons_pca_princeton.ftr`) |
 | **Key columns** | `neuron`, `PC1`, `PC2` |
-| **Downstream** | `figures/fig4/build_pc1_table.py`, `figures/fig4/syntype_x_pc1.py`, `figures/fig4/syntype_x_pc1_simple_model.py`, `figures/supporting/pc1_x_nt_sclass_pies.py` |
+| **Downstream** | `figures/fig4/build_pc1_table.py`, `figures/fig4/syntype_x_pc1.py`, `figures/fig4/syntype_x_pc1_simple_model.py`, `figures/fig4/ad_chains_x_pc1.py`, `figures/supporting/pc1_x_nt_sclass_pies.py` |
 
 ---
 

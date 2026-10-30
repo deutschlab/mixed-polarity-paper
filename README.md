@@ -288,7 +288,7 @@ methods/
   methods_all.py    shared functions, used by most scripts
   node_cut_si.py    the SI of every single-node cut, used by steps 08 and 09
 
-figures/            62 scripts: fig1/ 6, fig2/ 11, fig3/ 13, fig4/ 5, fig5/ 8, fig6/ 1, fig7/ 13, split_methods/ 4, supporting/ 1
+figures/            63 scripts: fig1/ 6, fig2/ 11, fig3/ 13, fig4/ 6, fig5/ 8, fig6/ 1, fig7/ 13, split_methods/ 4, supporting/ 1
 
 tools/
   run_figure.py            run a figure script with fixed, comparable output
