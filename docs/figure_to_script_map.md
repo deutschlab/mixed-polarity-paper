@@ -5,6 +5,7 @@ tables it requires, and the output directory where figures are saved.
 
 All figure scripts import `config.py` (paths) and `methods/methods_all.py` (utilities).
 Figures are saved under `outputs/` (`outputs/figN/` for the figure folders; the other folders and `processing/phi_threshold.py` use their own names, given below); a few scripts also write tables to `data/derived/` (shown as "writes" below). None of these are committed to this repository.
+With `SPLIT_METHOD = "maxsi"` in `config.py` (after step 09), every output path below starts with `outputs_maxsi/` instead of `outputs/`; `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SI_UPDATED_FTR` and the tables built from them are read from `data/derived_maxsi/` or `data/intermediate_maxsi/`, and the tables a script writes go there too. A script that reads a table with no MaxSI version (`MAXSI_NOT_AVAILABLE` in `config.py`) stops.
 
 ---
 
@@ -171,10 +172,10 @@ number in the text.
 
 | Purpose | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|
-| Supp 2-S2 D layout on the MaxSI cut's SI | `figures/split_methods/maxsi_x_primary_types.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SI_COMPARISONS_FTR` | `outputs/split_methods/maxsi_x_primary_types/` |
-| Supp 2-S2 A layout (left vs right) on the MaxSI cut's SI | `figures/split_methods/maxsi_x_primary_types_mirror.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SI_COMPARISONS_FTR`, `NEURON_ANNOTATIONS_CSV` | `outputs/split_methods/maxsi_x_primary_types_mirror/` |
+| Supp 2-S2 D layout on the MaxSI cut's SI | `figures/split_methods/maxsi_x_primary_types.py` | `NEURON_TABLE_SFC_FTR`, `SI_UPDATED_SFC_FTR` (the SFC cells and SI under either `SPLIT_METHOD`), `SI_COMPARISONS_FTR` | `outputs/split_methods/maxsi_x_primary_types/` |
+| Supp 2-S2 A layout (left vs right) on the MaxSI cut's SI | `figures/split_methods/maxsi_x_primary_types_mirror.py` | `NEURON_TABLE_SFC_FTR`, `SI_UPDATED_SFC_FTR` (the SFC cells and SI under either `SPLIT_METHOD`), `SI_COMPARISONS_FTR`, `NEURON_ANNOTATIONS_CSV` | `outputs/split_methods/maxsi_x_primary_types_mirror/` |
 | Example cells: SFC split next to the MaxSI split | `figures/split_methods/skeleton_comparisons.py` | `SI_COMPARISONS_FTR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` | `outputs/split_methods/skeleton_comparisons/` |
-| The same for Kenyon cells (KCg-m) | `figures/split_methods/skeleton_comparisons_kc.py` | `NEURON_TABLE_FTR`, `SI_COMPARISONS_FTR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` | `outputs/split_methods/skeleton_comparisons_kc/` |
+| The same for Kenyon cells (KCg-m) | `figures/split_methods/skeleton_comparisons_kc.py` | `NEURON_TABLE_SFC_FTR` (the SFC cells under either `SPLIT_METHOD`, like step 08), `SI_COMPARISONS_FTR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` | `outputs/split_methods/skeleton_comparisons_kc/` |
 | Text: "simple neurons (PC1 < 0.5), which are primarily optic neurons" | `figures/supporting/pc1_x_nt_sclass_pies.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_FTR` | `outputs/supporting/pc1_x_nt_sclass_pies/` |
 
 > Run `processing/build_raw_synapse_table.py` first: it writes `SYNAPSE_TABLE_RAW_FTR`. `SI_COMPARISONS_FTR` comes from step 08

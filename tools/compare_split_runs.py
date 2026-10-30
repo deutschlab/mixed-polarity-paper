@@ -39,7 +39,7 @@ same chosen node for every neuron and method, the same side counts in the node t
 and the same SFC SI.
     python tools/compare_split_runs.py RUN_A/batches RUN_B/batches --exact processed
 --exact needs the skeletons in SWC_DIR and the synapse table run B used (raw =
-SYNAPSE_TABLE_RAW_FTR, processed = SYNAPSE_TABLE_FTR); it checks that the rebuilt neurons
+SYNAPSE_TABLE_RAW_FTR, processed = SYNAPSE_TABLE_SFC_FTR, the published SFC table whatever SPLIT_METHOD says); it checks that the rebuilt neurons
 give run B's side counts before counting, and takes about 3 seconds per differing neuron. Output: summary.txt,
 per_neuron.csv and, when the neuron sets differ, only_in_A.csv / only_in_B.csv, in
 outputs/tools/compare_split_runs/ (or --out). Node tables are read one batch file at a time;
@@ -58,7 +58,7 @@ import pyarrow.ipc as pa_ipc
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
-from config import OUTPUT_DIR, SWC_DIR, SYNAPSE_TABLE_FTR, SYNAPSE_TABLE_RAW_FTR  # noqa: E402
+from config import OUTPUT_DIR, SWC_DIR, SYNAPSE_TABLE_SFC_FTR as SYNAPSE_TABLE_FTR, SYNAPSE_TABLE_RAW_FTR  # noqa: E402  (step 08 is always on the SFC tables)
 
 # The |phi| that matches SI = 0.1 on SI_comparisons.ftr, as processing/phi_threshold.py finds it (plot:
 # outputs/processing/phi_threshold/phi_threshold.svg). If the SI or the split changes, rerun that script and

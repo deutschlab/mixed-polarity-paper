@@ -59,8 +59,8 @@ import pyarrow.feather as feather
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from config import (NEURON_ANNOTATIONS_CSV, NEURON_TABLE_FTR, OUTPUT_DIR,  # noqa: E402
-                    SI_UPDATED_FTR, SYNAPSE_TABLE_FTR)
+from config import (NEURON_ANNOTATIONS_CSV, NEURON_TABLE_SFC_FTR as NEURON_TABLE_FTR, OUTPUT_DIR,  # noqa: E402
+                    SI_UPDATED_SFC_FTR as SI_UPDATED_FTR, SYNAPSE_TABLE_SFC_FTR as SYNAPSE_TABLE_FTR)   # step 05 writes the SFC tables
 
 STEP05 = REPO_ROOT / "processing" / "05_build_neuron_metadata_table.py"
 OUT_DIR = OUTPUT_DIR / "tools" / "check_step05_root_id"

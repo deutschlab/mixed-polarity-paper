@@ -66,6 +66,7 @@ from config import OUTPUT_DIR  # noqa: E402
 
 warnings.filterwarnings("ignore", category=pd.errors.SettingWithCopyWarning)
 STEP08 = REPO / "processing" / "08_alternative_split_methods.py"
+NODE_MODULE = REPO / "methods" / "node_cut_si.py"   # step 08 imports its node-level SI functions from here
 FUNCTIONS = ["SI_calc", "calc_s", "safe_SI_calc", "calculate_node_SI", "get_descendants_from_node",
              "split_neuron_by_si_node", "assign_axon_and_dendrite", "find_neuron_id_column",
              "run_neuron_batch_pipeline", "absolute_phi"]
@@ -85,6 +86,11 @@ def load_step08(path, trees):
         # does not parse. Doubling every backslash leaves code without backslashes unchanged.
         tree, escaped = ast.parse(source.replace("\\", "\\\\")), True
     defs = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef)}
+    # functions the step 08 file does not define itself come from methods/node_cut_si.py, which it imports
+    module = ast.parse(NODE_MODULE.read_text(encoding="utf-8"))
+    for n in module.body:
+        if isinstance(n, ast.FunctionDef) and n.name in FUNCTIONS and n.name not in defs:
+            defs[n.name] = n
     missing = [f for f in FUNCTIONS if f not in defs]
     if missing:
         sys.exit(f"{path}: functions not found: {missing}")
@@ -405,7 +411,9 @@ def main():
     (args.out / "report.txt").unlink(missing_ok=True)  # never leave an earlier run's PASS behind
 
     digest = hashlib.sha256(args.script.read_bytes()).hexdigest()[:16]
-    header = [f"Checked {datetime.now():%Y-%m-%d %H:%M}", f"Step 08 code: {args.script} (sha256 {digest})", ""]
+    module_digest = hashlib.sha256(NODE_MODULE.read_bytes()).hexdigest()[:16]
+    header = [f"Checked {datetime.now():%Y-%m-%d %H:%M}", f"Step 08 code: {args.script} (sha256 {digest})",
+              f"Functions it does not define, from: {NODE_MODULE} (sha256 {module_digest})", ""]
     print("\n".join(header))
     lines, failures = [], 0
 

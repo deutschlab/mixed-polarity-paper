@@ -29,7 +29,7 @@ split method, together with SI = 0.1, instead of picking a cutoff per method. Th
 confidence intervals resample whole cell types (primary_type), because neurons of
 the same type are not independent.
 
-Reads SI_COMPARISONS_FTR, SI_UPDATED_FTR and, from NEURON_TABLE_FTR, super_class,
+Reads SI_COMPARISONS_FTR, the SFC SI_updated.ftr and, from the SFC neuron table, super_class,
 primary_type and the axon and dendrite input and output counts (only to group
 neurons). Prints the results and saves one figure,
 OUTPUT_DIR / "processing" / "phi_threshold" / "phi_threshold.svg".
@@ -41,7 +41,8 @@ mpl.rcParams['font.family'] = 'Arial'
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from config import SI_COMPARISONS_FTR, SI_UPDATED_FTR, NEURON_TABLE_FTR, OUTPUT_DIR
+from config import (SI_COMPARISONS_FTR, SI_UPDATED_SFC_FTR as SI_UPDATED_FTR,   # SFC_SI is checked against the SFC SI
+                    NEURON_TABLE_SFC_FTR as NEURON_TABLE_FTR, OUTPUT_DIR)   # and the SFC cells, whatever SPLIT_METHOD says
 
 import matplotlib.pyplot as plt
 import numpy as np

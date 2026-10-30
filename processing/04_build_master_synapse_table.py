@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (
     SYNAPSE_NON_PROCESSED_FTR, PROCESSED_SWC_DIR,
-    PROCESSED_BIG_NEURONS_DIR, SYNAPSE_TABLE_FTR,
+    PROCESSED_BIG_NEURONS_DIR, SYNAPSE_TABLE_SFC_FTR as SYNAPSE_TABLE_FTR,   # the SFC table, whatever SPLIT_METHOD says
     DERIVED_DATA_DIR,
 )
 import networkx as nx

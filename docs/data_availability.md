@@ -96,6 +96,7 @@ and [generated_tables.md](generated_tables.md) for key column descriptions.
 | `reci_prop_princeton.ftr` | `data/derived/` | `figures/fig5/reciprocal_fraction.py` |
 | `full_reci_connections_article_filtered_princeton.ftr` | `data/derived/` | `06_build_connection_reciprocity_table.py` |
 | `SI_comparisons.ftr` | `data/derived/` | `08_alternative_split_methods.py` (optional) |
+| `synapses_783_article_princeton.ftr`, `neuron_data_full_article_princeton.ftr`, `SI_updated.ftr` (MaxSI versions) | `data/derived_maxsi/` | `09_maxsi_synapse_labels.py` (optional; see `docs/pipeline_overview.md`, Script 09) |
 | `synapses_783_article_princeton_raw.ftr`, `synapses_783_article_princeton_raw_with_self.ftr` | `data/derived/` | `processing/build_raw_synapse_table.py` (optional; needs the Codex CSV in its original 13-column order) |
 | `PC1_table.csv` | `data/derived/` | `figures/fig4/build_pc1_table.py` |
 | `neurons_nt_bwf_frac.ftr` | `data/derived/` | `figures/fig7/fig7i_filopodia_fraction_x_nt.py` (from the Fig 7 bouton tables, which are not deposited) |
@@ -103,10 +104,12 @@ and [generated_tables.md](generated_tables.md) for key column descriptions.
 | `SI_updated.ftr` | `data/derived/` | `05_build_neuron_metadata_table.py` |
 | `reciprocity_list_full_article_princeton.ftr`, `connections_by_syn_type_filtered_article_princeton.ftr`, `connections_by_syn_type_reciprocal_filtered_article_princeton.ftr` | `data/derived/` | `06_build_connection_reciprocity_table.py` |
 | Split-method batch files | `data/intermediate/alternative_to_SI/all_neurons_batches/` | `08_alternative_split_methods.py` (optional) |
+| MaxSI label batch files | `data/intermediate_maxsi/maxsi_labels/` | `09_maxsi_synapse_labels.py` (optional) |
+| The tables of steps 06 and 07 and of the table-writing figure scripts, built on the MaxSI split (same file names) | `data/derived_maxsi/`, `data/intermediate_maxsi/` | The same scripts, run with `SPLIT_METHOD = "maxsi"` after step 09 |
 | Four PKL files per skeleton subfolder | `data/intermediate/processed_swc_data/` | `01_extract_compartments_SI.py` |
 | Large-neuron PKL files | `data/intermediate/processed_big_neurons/` | `02a_large_neurons_pipeline.py` |
 | Connector feather files | `data/intermediate/connectors/` | `02b_merge_connectors.py`, `02a_large_neurons_pipeline.py`, `03_merge_synapses_connectors.py` |
-| Generated figure files | `outputs/figN/` | Figure scripts |
+| Generated figure files | `outputs/figN/` (`outputs_maxsi/figN/` with `SPLIT_METHOD = "maxsi"`) | Figure scripts |
 | `all_synapses_unprocess_larva_th0.9_SI_filt_issue_solved.ftr` | `data/larva/output/` | `processing/larva/larva_process.py` |
 | `SI_list_larva_th_0.9_linker_SI_filt_issue_solved` | `data/larva/results/` | `processing/larva/larva_process.py` |
 

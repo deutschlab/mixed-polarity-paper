@@ -6,7 +6,7 @@
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from config import METHODS_DIR, NEURON_ANNOTATIONS_CSV, NEURON_TABLE_FTR, OUTPUT_DIR, SI_COMPARISONS_FTR, SI_UPDATED_FTR
+from config import METHODS_DIR, NEURON_ANNOTATIONS_CSV, NEURON_TABLE_SFC_FTR as NEURON_TABLE_FTR, OUTPUT_DIR, SI_COMPARISONS_FTR, SI_UPDATED_SFC_FTR as SI_UPDATED_FTR   # the SFC cells and SI, the reference these compare MaxSI with
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
 

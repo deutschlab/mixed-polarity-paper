@@ -156,3 +156,65 @@ SYNAPSE_TABLE_RAW_FTR = (SYNAPSE_TABLE_RAW_WITH_SELF_FTR if RAW_TABLE_KEEP_SELF_
 
 # step 05 builds the neuron table here, then writes NEURON_TABLE_FTR and deletes this copy
 NEURON_TABLE_PARTIAL_FTR = NEURON_TABLE_FTR.with_name(NEURON_TABLE_FTR.stem + "_partial.ftr")
+
+# --- MaxSI split (processing/09_maxsi_synapse_labels.py) ---
+# Step 09 cuts every cell of NEURON_TABLE_SFC_FTR at its highest-SI node (as step 08 finds it), labels each
+# synapse end A or D, and writes three tables in the format of the SFC ones: the synapse and neuron tables below and
+# MAXSI_SI_UPDATED_FTR.
+# Every table built on the MaxSI split lives in a folder of its own: the published folder's name with "_maxsi" added
+# (data/derived/ -> data/derived_maxsi/, data/intermediate/ -> data/intermediate_maxsi/), under the same file name.
+# So no step run under MaxSI can write over a published table.
+def _maxsi_path(p):
+    rel = Path(p).relative_to(DATA_DIR)
+    return DATA_DIR / (rel.parts[0] + "_maxsi") / Path(*rel.parts[1:])
+
+
+MAXSI_LABEL_BATCH_DIR    = _maxsi_path(INTERMEDIATE_DIR / "maxsi_labels" / "batches")
+MAXSI_SUBSET_DIR         = _maxsi_path(INTERMEDIATE_DIR / "maxsi_labels" / "subset")   # step 09 with ONLY_LOCAL_SKELETONS: batches and the three tables, for checking only
+MAXSI_SYNAPSE_TABLE_FTR  = _maxsi_path(SYNAPSE_TABLE_FTR)
+MAXSI_NEURON_TABLE_FTR   = _maxsi_path(NEURON_TABLE_FTR)
+
+# Which split the scripts read: "sfc" (the published synapse flow centrality split, steps 01-05) or "maxsi" (step 09).
+# Steps 04 and 05 always write the SFC tables and SI_updated.ftr, and step 09 always reads them (the *_SFC_FTR names).
+# Under "maxsi", the two tables and every table built from them (by steps 06 and 07 and by the figure scripts that
+# write a table) point into the _maxsi folders, under the same file names. SI_UPDATED_FTR does too, and step 09
+# writes it there (MAXSI_SI_UPDATED_FTR, root_id and the MaxSI SI of every cell it labels). Steps 08 and
+# phi_threshold.py always read the SFC tables, since their output doesn't depend on the split. Raw tables, skeletons
+# and annotations stay where they are; the co-authors' tables are in MAXSI_NOT_AVAILABLE below.
+SPLIT_METHOD = "sfc"
+SYNAPSE_TABLE_SFC_FTR = SYNAPSE_TABLE_FTR   # the names set above
+NEURON_TABLE_SFC_FTR  = NEURON_TABLE_FTR
+SI_UPDATED_SFC_FTR    = SI_UPDATED_FTR      # step 05 writes it under this name, so the switch never moves its output
+MAXSI_SI_UPDATED_FTR  = _maxsi_path(SI_UPDATED_SFC_FTR)   # step 09; the same path as SI_UPDATED_FTR under "maxsi"
+MAXSI_SWITCHED = [
+    "SYNAPSE_TABLE_FTR", "NEURON_TABLE_FTR", "SI_UPDATED_FTR",
+    # step 06
+    "RECIPROCITY_LIST_FTR", "ALL_R_FULL_PKL", "SELF_SDI_FTR", "FULL_RECI_CONNECTIONS_FTR",
+    "CONNECTIONS_FILTERED_FTR", "CONNECTIONS_RECI_FILTERED_FTR", "CONNECTIONS_TABLE_FTR",
+    # step 07 (step 08 always reads the SFC cells, so its table doesn't switch)
+    "PCA_TABLE_FTR",
+    # tables figure scripts write
+    "PC1_TABLE_CSV", "PC1_TABLE_PREDICTIONS_CSV", "RECI_PROP_FTR", "NEURONS_NT_BWF_FTR",
+    "FILOPODIA_NODES_BASELINE_FTR", "FILOPODIA_NODES_NO_FILOPODIA_FTR", "FILOPODIA_NODES_SAMPLEOUT_FTR",
+    "RF_MODEL_PKL",
+]
+# Tables that exist only for the SFC split (or for Buhmann's synapses): Majd's Fig 7 tables (bouton, filopodia,
+# inertia, per-synapse bouton flags, t2), Dudi's 4E table and the Buhmann tables (Fig 6 and some supplementary
+# panels). There is no MaxSI version, so under "maxsi" they point into the _maxsi folders too, where nothing writes
+# them: a script that reads one stops, instead of drawing an SFC panel among the MaxSI ones. Don't copy the SFC
+# files there to make such a script run. (neuron_data.ftr stays: its scripts use only cell-type columns.)
+MAXSI_NOT_AVAILABLE = [
+    "BOUTON_TABLE_FTR", "BOUTON_FILOPODIA_TABLE_FTR", "FILOPODIA_FILTERED_FTR", "FILOPODIA_RECIPROCAL_FTR",
+    "BOUTON_INERTIA_FTR", "SYN_BOUTON_FTR", "SYN_BOUTON_NEW_FTR", "SYNAPSES_NO_SELF_FTR",
+    "PER_TYPE_SUMMARY_CSV", "NEURON_TABLE_NONP_FTR", "SYNAPSE_TABLE_NONP_FTR", "CONNECTIONS_TABLE_NONP_FTR",
+]
+if SPLIT_METHOD == "sfc":
+    pass
+elif SPLIT_METHOD == "maxsi":
+    for _name in MAXSI_SWITCHED + MAXSI_NOT_AVAILABLE:
+        globals()[_name] = _maxsi_path(globals()[_name])
+    del _name
+    OUTPUT_DIR = ROOT / "outputs_maxsi"   # figures and tool reports, apart from the published run's
+    RESULTS_DIR = FIGURES_DIR = OUTPUT_DIR   # the two aliases set above
+else:
+    raise ValueError(f'SPLIT_METHOD must be "sfc" or "maxsi", not {SPLIT_METHOD!r}')

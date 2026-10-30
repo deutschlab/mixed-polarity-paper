@@ -65,7 +65,7 @@ Options: --ids FILE takes neuron IDs from a text file, one integer per line, ins
 skeleton folder; --limit N (N >= 1) keeps the first N of the chosen neurons, in ascending
 ID order; --resume continues an interrupted run in the same --out (step 08 skips batches
 already written). --resume refuses if the neuron list, step 08, methods/methods_all.py,
-config.py, this tool, or the raw synapse table or neuron table (path, size, date) changed
+methods/node_cut_si.py, config.py, this tool, or the raw synapse table or neuron table (path, size, date) changed
 since the run started. It cannot tell whether a batch file was cut short when the run was
 stopped; if in doubt, delete the last batch's three files first. A run whose tables hold a
 neuron twice stops with a message, since that means two runs were mixed. Step 08 needs SYNAPSE_TABLE_RAW_FTR
@@ -91,6 +91,7 @@ import pyarrow.ipc as ipc  # noqa: E402
 
 STEP08 = REPO_ROOT / "processing" / "08_alternative_split_methods.py"
 INPUT_FILES = {"step 08": STEP08, "methods_all.py": REPO_ROOT / "methods" / "methods_all.py",
+               "node_cut_si.py": REPO_ROOT / "methods" / "node_cut_si.py",
                "config.py": REPO_ROOT / "config.py", "this tool": Path(__file__).resolve()}
 INTRINSIC = ["central", "optic", "visual_centrifugal", "visual_projection"]
 SCORE_COLUMNS = ["SFC_SI", "SFC_Phi", "MaxSI_SI", "MinFisherP_Phi", "MaxPhi"]

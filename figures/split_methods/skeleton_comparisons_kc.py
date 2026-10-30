@@ -10,7 +10,7 @@
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from config import METHODS_DIR, SWC_DIR, NEURON_TABLE_FTR, OUTPUT_DIR, SI_COMPARISONS_FTR, SYNAPSE_TABLE_RAW_FTR
+from config import METHODS_DIR, SWC_DIR, NEURON_TABLE_SFC_FTR as NEURON_TABLE_FTR, OUTPUT_DIR, SI_COMPARISONS_FTR, SYNAPSE_TABLE_RAW_FTR   # the SFC cells, like step 08
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
 

@@ -53,11 +53,15 @@ data/larva/*.csv
 !data/raw/Supplemental_file1_neuron_annotations.csv
 !data/raw/ranks/*.feather
 outputs/
+outputs_maxsi/
 
 # Data directories — no raw or generated data committed
 data/raw/swc/
 data/derived/
 data/intermediate/
+data/derived_maxsi/
+data/intermediate_maxsi/
+data/raw_maxsi/
 data/larva/output/
 data/larva/results/
 # larval raw inputs: keep only the placeholder files

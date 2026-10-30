@@ -1422,10 +1422,11 @@ def load_swc(directory):
 
 
 
-def check_batch_record(batch_dir, neuron_ids, batch_size):
-    """Step 08 reuses the batch files already in batch_dir. Record what they were made from (the neuron list, the
-    batch size, the synapse table and the self-synapse switch) and stop if a later run differs, rather than mix two
-    runs in one comparison table."""
+def check_batch_record(batch_dir, neuron_ids, batch_size, extra=None, setting_name="ALT_SPLIT_BATCH_DIR"):
+    """Steps 08 and 09 reuse the batch files already in batch_dir. Record what they were made from (the neuron list,
+    the batch size, the synapse table and the self-synapse switch, plus the entries of extra if given) and stop if a
+    later run differs, rather than mix two runs in one table. setting_name is the config setting that names
+    batch_dir, for the message."""
     import hashlib
     import json
     from pathlib import Path
@@ -1434,13 +1435,16 @@ def check_batch_record(batch_dir, neuron_ids, batch_size):
               "batch_size": int(batch_size), "synapse_table": SYNAPSE_TABLE_RAW_FTR.name,
               "synapse_table_bytes": SYNAPSE_TABLE_RAW_FTR.stat().st_size,
               "keep_self_synapses": bool(RAW_TABLE_KEEP_SELF_SYNAPSES)}
+    if extra is not None:
+        assert not set(extra) & set(record), f"extra would replace {sorted(set(extra) & set(record))}"
+        record.update(extra)
     record_file = Path(batch_dir) / "batch_run.json"
     if record_file.exists():
         if json.loads(record_file.read_text()) != record:
             raise SystemExit(f"The batches in {batch_dir} come from another run (see batch_run.json). "
-                             "Empty the folder, or point ALT_SPLIT_BATCH_DIR elsewhere.")
+                             f"Empty the folder, or point {setting_name} elsewhere.")
     elif any(Path(batch_dir).glob("*_batch_*.ftr")):
         raise SystemExit(f"{batch_dir} holds batches with no record of how they were made. "
-                         "Empty the folder, or point ALT_SPLIT_BATCH_DIR elsewhere.")
+                         f"Empty the folder, or point {setting_name} elsewhere.")
     else:
         record_file.write_text(json.dumps(record, indent=1))

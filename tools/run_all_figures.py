@@ -15,9 +15,10 @@ rest (--timeout and --long-timeout change them). A script that runs out of time 
 stopped together with any worker processes it started, and its run_status.txt says
 "timed out". What a script prints goes to <name>.console next to its folder, also when
 it times out. progress.txt gets one line per script (name, exit code, seconds, status)
-and a summary line at the end of each invocation; commit.txt gets the git commit and
-whether the working tree had uncommitted changes; inputs.txt lists the size and
-modification time of every file under data/raw and data/derived when the run started,
+and a summary line at the end of each invocation; commit.txt gets the git commit,
+whether the working tree had uncommitted changes and config.py's SPLIT_METHOD; inputs.txt
+lists the size and modification time of every file under data/raw, data/derived,
+data/derived_maxsi and data/intermediate_maxsi when the run started,
 so that a difference between two runs can be traced to changed input data.
 
 Running the command again with the same --out continues an interrupted run. Scripts
@@ -55,6 +56,9 @@ import time
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT))
+from config import (SPLIT_METHOD, RAW_DATA_DIR, DERIVED_DATA_DIR,  # noqa: E402  (recorded in commit.txt and inputs.txt)
+                    MAXSI_NEURON_TABLE_FTR, MAXSI_LABEL_BATCH_DIR)
 
 FIRST = ["figures/fig4/build_pc1_table.py", "figures/fig5/reciprocal_fraction.py",
          "figures/fig7/si_sim_baseline.py", "figures/fig7/si_sim_no_filopodia.py",
@@ -86,10 +90,11 @@ def record_run(out: Path) -> None:
     dirty = subprocess.run(["git", "status", "--porcelain"], cwd=REPO_ROOT, capture_output=True, text=True)
     with open(out / "commit.txt", "a", encoding="utf-8") as fh:
         fh.write(f"{stamp} {commit.stdout.strip() or 'no git commit'}"
-                 f"{' (uncommitted changes)' if dirty.stdout.strip() else ''}\n")
+                 f"{' (uncommitted changes)' if dirty.stdout.strip() else ''}; SPLIT_METHOD {SPLIT_METHOD}\n")
     with open(out / "inputs.txt", "a", encoding="utf-8") as fh:
         fh.write(f"# {stamp}\n")
-        for folder in (REPO_ROOT / "data" / "raw", REPO_ROOT / "data" / "derived"):
+        for folder in (RAW_DATA_DIR, DERIVED_DATA_DIR, MAXSI_NEURON_TABLE_FTR.parent,   # data/derived_maxsi
+                       MAXSI_LABEL_BATCH_DIR.parents[1]):                                    # data/intermediate_maxsi
             for path in sorted(p for p in folder.rglob("*") if p.is_file()) if folder.exists() else []:
                 info = path.stat()
                 fh.write(f"{path.relative_to(REPO_ROOT)}\t{info.st_size}\t"
