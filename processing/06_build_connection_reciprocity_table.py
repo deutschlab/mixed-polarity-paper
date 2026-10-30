@@ -57,7 +57,7 @@ reciprocal_edges_df = pd.DataFrame(
 )
 
 
-DERIVED_DATA_DIR.mkdir(parents=True, exist_ok=True)
+RECIPROCITY_LIST_FTR.parent.mkdir(parents=True, exist_ok=True)
 reciprocal_edges_df.to_feather(RECIPROCITY_LIST_FTR)
 #%%ר
 reci_df=pd.read_feather(RECIPROCITY_LIST_FTR)
@@ -242,7 +242,7 @@ final_df.columns=['Node A', 'Node B', 'node_A_pre_AA', 'node_A_pre_AD', 'node_A_
 
 #%%
 
-DERIVED_DATA_DIR.mkdir(parents=True, exist_ok=True)
+FULL_RECI_CONNECTIONS_FTR.parent.mkdir(parents=True, exist_ok=True)   # the four tables below share its folder
 final_df.to_feather(FULL_RECI_CONNECTIONS_FTR)
 #%%
 #%%
