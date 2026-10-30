@@ -71,7 +71,7 @@ flowchart TD
 **File:** `processing/01_extract_compartments_SI.py`
 
 Walks each neuron's SWC skeleton to classify synapses as axonal or dendritic, and computes the
-Segregation Index (SI) for every standard neuron. Works through the skeleton subfolders of `SWC_DIR` one at a time and saves four pickles per subfolder (`connectors.pkl`, `all_SI.pkl`, `issues.pkl`, `linker.pkl`), each covering every neuron in it. Synapses from a neuron to itself are dropped first, and synapses more than 10,000 nm from the nearest skeleton node are dropped when they are attached, so SI is computed on the axon and dendrite synapses that are left (linker synapses are not counted).
+Segregation Index (SI) for every standard neuron. Works through the skeleton subfolders of `SWC_DIR` one at a time and saves four pickles per subfolder (`connectors.pkl`, `all_SI.pkl`, `issues.pkl`, `linker.pkl`), each covering every neuron in it. Synapses from a neuron to itself are dropped first, and synapses more than 10,000 nm from the nearest skeleton node are dropped when they are attached, so SI is computed on the axon and dendrite synapses that are left (linker synapses are not counted). A subfolder counts as done once its `linker.pkl`, the last pickle written, exists, so a run that was stopped picks up where it left off and redoes a half-written subfolder. The synapse CSV is read in chunks, keeping only the columns the step uses; reading the full table peaked at a memory footprint of about 10 GB (measured once, macOS).
 
 | | |
 |--|--|

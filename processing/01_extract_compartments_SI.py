@@ -37,39 +37,40 @@ from methods_all import *
 #allsynapses=pd.read_feather(r'C:\Users\user\organised_work\data\connections\synapses')
 #allsynapses=pd.read_feather(r'C:\Users\user\organised_work\data\783\generated\preprocessing\synapses\flywire_synapses_783_sclass_filter_processed.feather')
 #%%
-allsynapses=pd.read_csv(PRINCETON_SYNAPSE_CSV)
-#%%
-allsynapses.columns
-#%%
-
-#%%
-allsynapses=allsynapses.reset_index(drop=False)
-#%%
-allsynapses=allsynapses.drop(columns=['ctr_x', 'ctr_y', 'ctr_z'])
-#%%
-allsynapses["pre_root_id_720575940"] = (
-    720575940 * 10**allsynapses["pre_root_id_720575940"].astype(str).str.len()
-    + allsynapses["pre_root_id_720575940"].astype(int)
-).astype(np.int64)
-
-#%%
-allsynapses["post_root_id_720575940"] = (
-    720575940 * 10**allsynapses["post_root_id_720575940"].astype(str).str.len()
-    + allsynapses["post_root_id_720575940"].astype(int)
-).astype(np.int64)
-#%%
-
-
+# Read only the columns this step uses (ctr_x/y/z and neuropil are never used here), in chunks.
+# In each chunk: rebuild the full root IDs, drop self-synapses, and keep coordinates and size as int32
+# (checked to fit). Each folder's synapses are cast back to int64 in the loop below, so the neurons get
+# the same values and dtypes as with a full read. The index is the CSV row number, which becomes synapse_id.
+# A blank or decimal value in these columns stops the read here, where a full read would have loaded it as float.
+syn_cols=['pre_x', 'pre_y', 'pre_z', 'post_x', 'post_y', 'post_z', 'size',
+          'pre_root_id_720575940', 'post_root_id_720575940']
+small_cols=['pre_x', 'pre_y', 'pre_z', 'post_x', 'post_y', 'post_z', 'size']
+chunks=[]
+for chunk in pd.read_csv(PRINCETON_SYNAPSE_CSV, usecols=syn_cols, dtype={c: np.int64 for c in syn_cols},
+                         chunksize=5_000_000):
+    # Full root ID = 720575940 * 10**(number of digits of the truncated id) + truncated id
+    for c in ['pre_root_id_720575940', 'post_root_id_720575940']:
+        v=chunk[c].to_numpy()
+        if (v<0).any():
+            raise ValueError(f'{c} has negative values')
+        n_digits=np.ones(len(v), dtype=np.int64)
+        for k in range(1, 19):
+            n_digits+=v>=10**k
+        chunk[c]=(720575940*10**n_digits+v).astype(np.int64)
+    chunk=chunk.rename(columns={'pre_root_id_720575940':'pre', 'post_root_id_720575940':'post'})
+    chunk=chunk[chunk['pre']!=chunk['post']]
+    for c in small_cols:
+        if chunk[c].min()<np.iinfo(np.int32).min or chunk[c].max()>np.iinfo(np.int32).max:
+            raise ValueError(f'{c} does not fit in int32')
+    chunk=chunk.astype({c: np.int32 for c in small_cols})
+    chunks.append(chunk)
+allsynapses=pd.concat(chunks)
+del chunks, chunk, v, n_digits
 #%%
 allsynapses.columns
 
 #%%
 #duplicates_df = allsynapses[allsynapses.duplicated(keep=False)]
-
-#%%
-allsynapses.columns=['synapse_id','pre_x', 'pre_y', 'pre_z', 'post_x',
-       'post_y', 'post_z', 'size', 'pre',
-       'post', 'neuropil']
 
 #%%
 def get_split(item,flow_thresh=1):
@@ -86,9 +87,6 @@ def heal_attach_princeton(item,allsynapses):
     except:
         return 'heal or attach issue'
 
-#%%
-
-allsynapses=allsynapses[allsynapses['pre']!=allsynapses['post']]
 #%%
 #allsynapses=allsynapses.drop_duplicates()???
 
@@ -107,7 +105,10 @@ output_base_dir.mkdir(parents=True, exist_ok=True)
 
 # Get the list of subdirectories in the input directory
 input_subfolders = {f.name for f in os.scandir(input_base_dir) if f.is_dir()}
-output_subfolders = {f.name for f in os.scandir(output_base_dir) if f.is_dir()}
+# A folder counts as done only when its last pickle (linker.pkl) is there; a folder left empty or
+# half-written by an interrupted run is processed again
+output_subfolders = {f.name for f in os.scandir(output_base_dir)
+                     if f.is_dir() and os.path.exists(os.path.join(f.path, 'linker.pkl'))}
 
 # Identify subfolders that are in the input but not in the output
 folders_to_process = input_subfolders - output_subfolders
@@ -122,7 +123,7 @@ start_time_global = time.time()
 
 
 # Loop through each subfolder
-for folder_name in folders_to_process:
+for folder_name in sorted(folders_to_process):
 
     issues_in_comp = []
     linker_neurons=[]
@@ -143,6 +144,9 @@ for folder_name in folders_to_process:
     swc_list_id=[np.int64(i.id) for i in swc_list]
 
     allsynapses2=allsynapses[(allsynapses['pre'].isin(swc_list_id))|(allsynapses['post'].isin(swc_list_id))]
+    # Back to the layout and dtypes of the full read: synapse_id (the CSV row number) first, every column int64
+    allsynapses2=allsynapses2.astype(np.int64)
+    allsynapses2.insert(0, 'synapse_id', allsynapses2.index.to_numpy(dtype=np.int64))
     
     swc_list_to_analyse = navis.NeuronList(swc_list[0:])  # Adjust slicing if needed
     healed_attached_neurons_list = heal_attach_princeton(swc_list_to_analyse,allsynapses2)  # Ensure this function is defined
@@ -258,8 +262,11 @@ for folder_name in folders_to_process:
         pickle.dump(all_SI, f)
     with open(os.path.join(output_folder, 'issues.pkl'), 'wb') as f:
         pickle.dump(issues_in_comp, f)
-    with open(os.path.join(output_folder, 'linker.pkl'), 'wb') as f:
+    # linker.pkl marks the folder as done, so it is written under a temporary name and then renamed:
+    # a run stopped while writing it leaves no linker.pkl, and the folder is redone
+    with open(os.path.join(output_folder, 'linker.pkl.tmp'), 'wb') as f:
         pickle.dump(linker_neurons, f)
+    os.replace(os.path.join(output_folder, 'linker.pkl.tmp'), os.path.join(output_folder, 'linker.pkl'))
 
 #%%
 end_time_c_g = time.time()

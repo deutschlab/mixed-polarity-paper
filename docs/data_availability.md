@@ -137,9 +137,9 @@ Building them would mean running steps 01 to 06 again on that table, with at lea
   synapses with a `cleft_score` of at least 30 (its `min_score` default), so the table needs a
   `cleft_score` column. The Princeton route applies no score cut.
 - Steps 01 and 02a each define their own `heal_attach_princeton` (line 81), which replaces the one
-  in `methods/methods_all.py`; the calls to change are at 01 line 148 and 02a line 273.
+  in `methods/methods_all.py`; the calls to change are at 01 line 152 and 02a line 273.
 - The Princeton route carries each synapse's `synapse_id` and `size` through steps 01, 02a, 02b and
-  03, partly by column position, and step 03 merges on `synapse_id`. `attach_synapses` keeps
+  03 (by column name in 01, partly by column position in the others), and step 03 merges on `synapse_id`. `attach_synapses` keeps
   neither column.
 - The root-ID repair and the column renaming by position in steps 01 and 02a are written for the
   Codex CSV.
