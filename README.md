@@ -94,6 +94,8 @@ Under `"maxsi"`, `SYNAPSE_TABLE_FTR`, `NEURON_TABLE_FTR` and `SI_UPDATED_FTR` po
 
 Some tables have no MaxSI version (`MAXSI_NOT_AVAILABLE`): the Fig 7 bouton, filopodia, inertia, per-synapse bouton and `t2.ftr` tables, the revised Fig 4E's per-type table and the Buhmann tables. They point into the `_maxsi` folders (the per-synapse bouton tables into `data/raw_maxsi/`), where nothing writes them. A script that reads one stops, rather than drawing an SFC panel among the MaxSI ones. Do not copy the SFC files there to make it run. So if a script stops on a missing file in a `_maxsi` folder, either the script that writes it (09, 06, 07 or a figure script) has not yet run under `"maxsi"`, or the table has no MaxSI version.
 
+`PIPELINE_RUN` in `config.py` chooses which run of the pipeline the scripts build and read: `"published"` (the default: the delivered tables in `data/derived/` and `data/intermediate/`, figures in `outputs/`) or `"rebuild"`, a fresh run from step 01 on every skeleton. Under `"rebuild"` every table a step or figure script writes, and every such table they read, lives in `data/derived_rebuild/` and `data/intermediate_rebuild/`, and figures go to `outputs_rebuild/`, so a fresh run cannot write over a published table. Inputs no script here builds stay where they are (`REBUILD_KEEPS_PUBLISHED`: `swc_data.ftr` and the two raw synapse tables, so do not run `build_raw_synapse_table.py` under `"rebuild"`). The co-authors' tables, made from the published tables, have no rebuilt version (`REBUILD_NOT_AVAILABLE`, the same list as `MAXSI_NOT_AVAILABLE`), so their scripts stop. `SPLIT_METHOD` applies on top: `"rebuild"` with `"maxsi"` uses `data/derived_rebuild_maxsi/` and `outputs_rebuild_maxsi/`. Leave it at `"published"` unless you are making a fresh run. To make one, set `PIPELINE_RUN = "rebuild"`; `data/derived/swc_data.ftr` and the raw synapse table (`SYNAPSE_TABLE_RAW_FTR`) must already exist, since no step of the run writes them. Then run 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07 (and 09 for MaxSI), then the figure scripts in the usual order.
+
 `phi_threshold.py` is also optional. It works out which Phi value matches the SI = 0.1 cutoff, using step 08's output plus the neuron table and `SI_updated.ftr` from step 05 (the SFC ones, under either `SPLIT_METHOD`). It prints the results and saves a plot to `outputs/processing/phi_threshold/phi_threshold.svg` (`outputs_maxsi/` under `"maxsi"`).
 
 The larval SI for Figure 2A comes from `processing/larva/larva_process.py`, which runs separately from these steps. As committed it gives no usable output (see above).
@@ -318,11 +320,14 @@ data/               mostly empty; the data goes here (see data/README.md)
   intermediate/     working files made by the pipeline
   derived_maxsi/    tables made on the MaxSI split (step 09, and SPLIT_METHOD = "maxsi")
   intermediate_maxsi/  working files made on the MaxSI split
+  derived_rebuild/  tables made by a fresh run (PIPELINE_RUN = "rebuild")
+  intermediate_rebuild/  working files made by a fresh run
   larva/            larval data, from the corresponding authors
 
 docs/               the reference documents listed above
 outputs/            figures made by the scripts (not included)
 outputs_maxsi/      figures made with SPLIT_METHOD = "maxsi" (not included)
+outputs_rebuild/    figures made with PIPELINE_RUN = "rebuild" (not included)
 
 MSB-and-Post-on-MSB-pipeline/   the two MSB pipelines, each with its own README and sample data
 ```

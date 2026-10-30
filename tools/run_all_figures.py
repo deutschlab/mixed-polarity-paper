@@ -16,9 +16,10 @@ stopped together with any worker processes it started, and its run_status.txt sa
 "timed out". What a script prints goes to <name>.console next to its folder, also when
 it times out. progress.txt gets one line per script (name, exit code, seconds, status)
 and a summary line at the end of each invocation; commit.txt gets the git commit,
-whether the working tree had uncommitted changes and config.py's SPLIT_METHOD; inputs.txt
-lists the size and modification time of every file under data/raw, data/derived,
-data/derived_maxsi and data/intermediate_maxsi when the run started,
+whether the working tree had uncommitted changes and config.py's SPLIT_METHOD and PIPELINE_RUN; inputs.txt
+lists the size and modification time of every file under data/raw, the active run's data/derived and its _maxsi
+folders (the _rebuild ones under PIPELINE_RUN = "rebuild", plus data/derived for the inputs it keeps) when the run
+started,
 so that a difference between two runs can be traced to changed input data.
 
 Running the command again with the same --out continues an interrupted run. Scripts
@@ -57,7 +58,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
-from config import (SPLIT_METHOD, RAW_DATA_DIR, DERIVED_DATA_DIR,  # noqa: E402  (recorded in commit.txt and inputs.txt)
+from config import (SPLIT_METHOD, PIPELINE_RUN, PUBLISHED_DERIVED_DIR, RAW_DATA_DIR, DERIVED_DATA_DIR,  # noqa: E402  (recorded in commit.txt and inputs.txt)
                     MAXSI_NEURON_TABLE_FTR, MAXSI_LABEL_BATCH_DIR)
 
 FIRST = ["figures/fig4/build_pc1_table.py", "figures/fig5/reciprocal_fraction.py",
@@ -90,11 +91,14 @@ def record_run(out: Path) -> None:
     dirty = subprocess.run(["git", "status", "--porcelain"], cwd=REPO_ROOT, capture_output=True, text=True)
     with open(out / "commit.txt", "a", encoding="utf-8") as fh:
         fh.write(f"{stamp} {commit.stdout.strip() or 'no git commit'}"
-                 f"{' (uncommitted changes)' if dirty.stdout.strip() else ''}; SPLIT_METHOD {SPLIT_METHOD}\n")
+                 f"{' (uncommitted changes)' if dirty.stdout.strip() else ''}; SPLIT_METHOD {SPLIT_METHOD}; PIPELINE_RUN {PIPELINE_RUN}\n")
     with open(out / "inputs.txt", "a", encoding="utf-8") as fh:
         fh.write(f"# {stamp}\n")
-        for folder in (RAW_DATA_DIR, DERIVED_DATA_DIR, MAXSI_NEURON_TABLE_FTR.parent,   # data/derived_maxsi
-                       MAXSI_LABEL_BATCH_DIR.parents[1]):                                    # data/intermediate_maxsi
+        folders = [RAW_DATA_DIR, DERIVED_DATA_DIR, MAXSI_NEURON_TABLE_FTR.parent,   # data/derived_maxsi
+                   MAXSI_LABEL_BATCH_DIR.parents[1]]                                    # data/intermediate_maxsi
+        if PUBLISHED_DERIVED_DIR != DERIVED_DATA_DIR:   # under "rebuild": the published inputs it keeps
+            folders.append(PUBLISHED_DERIVED_DIR)
+        for folder in folders:
             for path in sorted(p for p in folder.rglob("*") if p.is_file()) if folder.exists() else []:
                 info = path.stat()
                 fh.write(f"{path.relative_to(REPO_ROOT)}\t{info.st_size}\t"

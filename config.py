@@ -30,6 +30,25 @@ METHODS_DIR = ROOT / "methods"
 # Output figure directory
 OUTPUT_DIR = ROOT / "outputs"
 
+# Which run of the pipeline the scripts build and read: "published" (the tables as delivered, in data/derived and
+# data/intermediate, figures in outputs) or "rebuild" (a fresh run from step 01 on every skeleton). Under "rebuild",
+# every table a step or a figure script writes, and every table they read that one of them writes, lives in
+# data/derived_rebuild and data/intermediate_rebuild, figures in outputs_rebuild, so a fresh run can't write over a
+# published table. Inputs no script here builds stay where they are (REBUILD_KEEPS_PUBLISHED below); the co-authors'
+# tables, made from the published tables, have no rebuilt version, so their scripts stop (REBUILD_NOT_AVAILABLE;
+# neuron_data.ftr and the 4E olfactory table move too, and their only readers stop on the tables above anyway).
+# The split setting (SPLIT_METHOD, further down) applies on top: "rebuild" with "maxsi" gives data/derived_rebuild_maxsi.
+PIPELINE_RUN = "published"
+PUBLISHED_DERIVED_DIR = DERIVED_DATA_DIR
+if PIPELINE_RUN == "published":
+    pass
+elif PIPELINE_RUN == "rebuild":
+    DERIVED_DATA_DIR = ROOT / "data" / "derived_rebuild"
+    INTERMEDIATE_DIR = ROOT / "data" / "intermediate_rebuild"
+    OUTPUT_DIR = ROOT / "outputs_rebuild"
+else:
+    raise ValueError(f'PIPELINE_RUN must be "published" or "rebuild", not {PIPELINE_RUN!r}')
+
 # ── Key raw input files ──────────────────────────────────────────────────────
 PRINCETON_SYNAPSE_CSV  = RAW_DATA_DIR / "fafb_v783_princeton_synapse_table.csv"
 NEURON_ANNOTATIONS_CSV = RAW_DATA_DIR / "Supplemental_file1_neuron_annotations.csv"
@@ -154,6 +173,16 @@ SYNAPSE_TABLE_RAW_WITH_SELF_FTR  = DERIVED_DATA_DIR / "synapses_783_article_prin
 SYNAPSE_TABLE_RAW_FTR = (SYNAPSE_TABLE_RAW_WITH_SELF_FTR if RAW_TABLE_KEEP_SELF_SYNAPSES
                          else SYNAPSE_TABLE_RAW_NO_SELF_FTR)
 
+# Under PIPELINE_RUN = "rebuild": inputs that no step of the fresh run builds, read from where they are now:
+# swc_data.ftr (step 05 reads it; the only code that writes it is commented out) and the two raw synapse tables
+# (built from the Codex CSV by build_raw_synapse_table.py, whatever the run).
+REBUILD_KEEPS_PUBLISHED = ["SWC_DATA_FTR", "SYNAPSE_TABLE_RAW_NO_SELF_FTR", "SYNAPSE_TABLE_RAW_WITH_SELF_FTR",
+                           "SYNAPSE_TABLE_RAW_FTR"]
+if PIPELINE_RUN == "rebuild":
+    for _name in REBUILD_KEEPS_PUBLISHED:
+        globals()[_name] = PUBLISHED_DERIVED_DIR / Path(globals()[_name]).name
+    del _name
+
 # step 05 builds the neuron table here, then writes NEURON_TABLE_FTR and deletes this copy
 NEURON_TABLE_PARTIAL_FTR = NEURON_TABLE_FTR.with_name(NEURON_TABLE_FTR.stem + "_partial.ftr")
 
@@ -208,13 +237,24 @@ MAXSI_NOT_AVAILABLE = [
     "BOUTON_INERTIA_FTR", "SYN_BOUTON_FTR", "SYN_BOUTON_NEW_FTR", "SYNAPSES_NO_SELF_FTR",
     "PER_TYPE_SUMMARY_CSV", "NEURON_TABLE_NONP_FTR", "SYNAPSE_TABLE_NONP_FTR", "CONNECTIONS_TABLE_NONP_FTR",
 ]
+# Under PIPELINE_RUN = "rebuild" the same co-authors' tables have no rebuilt version either (they were made from the
+# published tables). Those in data/derived already point into data/derived_rebuild, where nothing writes them; the
+# two in data/raw are moved into data/raw_rebuild here. So their scripts stop rather than mix published and
+# rebuilt tables.
+REBUILD_NOT_AVAILABLE = MAXSI_NOT_AVAILABLE
+if PIPELINE_RUN == "rebuild":
+    for _name in REBUILD_NOT_AVAILABLE:
+        _p = Path(globals()[_name])
+        if _p.is_relative_to(RAW_DATA_DIR):
+            globals()[_name] = DATA_DIR / "raw_rebuild" / _p.relative_to(RAW_DATA_DIR)
+    del _name, _p
 if SPLIT_METHOD == "sfc":
     pass
 elif SPLIT_METHOD == "maxsi":
     for _name in MAXSI_SWITCHED + MAXSI_NOT_AVAILABLE:
         globals()[_name] = _maxsi_path(globals()[_name])
     del _name
-    OUTPUT_DIR = ROOT / "outputs_maxsi"   # figures and tool reports, apart from the published run's
+    OUTPUT_DIR = OUTPUT_DIR.with_name(OUTPUT_DIR.name + "_maxsi")   # outputs_maxsi (outputs_rebuild_maxsi under "rebuild")
     RESULTS_DIR = FIGURES_DIR = OUTPUT_DIR   # the two aliases set above
 else:
     raise ValueError(f'SPLIT_METHOD must be "sfc" or "maxsi", not {SPLIT_METHOD!r}')

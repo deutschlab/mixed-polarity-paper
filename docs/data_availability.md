@@ -106,6 +106,7 @@ and [generated_tables.md](generated_tables.md) for key column descriptions.
 | Split-method batch files | `data/intermediate/alternative_to_SI/all_neurons_batches/` | `08_alternative_split_methods.py` (optional) |
 | MaxSI label batch files | `data/intermediate_maxsi/maxsi_labels/` | `09_maxsi_synapse_labels.py` (optional) |
 | The tables of steps 06 and 07 and of the table-writing figure scripts, built on the MaxSI split (same file names) | `data/derived_maxsi/`, `data/intermediate_maxsi/` | The same scripts, run with `SPLIT_METHOD = "maxsi"` after step 09 |
+| Every table of a fresh run of the pipeline from step 01 (same file names), except `swc_data.ftr` and the raw synapse tables, which stay in `data/derived/` | `data/derived_rebuild/`, `data/intermediate_rebuild/` (and `_rebuild_maxsi` with `SPLIT_METHOD = "maxsi"`) | The same scripts, run with `PIPELINE_RUN = "rebuild"` in `config.py` |
 | Four PKL files per skeleton subfolder | `data/intermediate/processed_swc_data/` | `01_extract_compartments_SI.py` |
 | Large-neuron PKL files | `data/intermediate/processed_big_neurons/` | `02a_large_neurons_pipeline.py` |
 | Connector feather files | `data/intermediate/connectors/` | `02b_merge_connectors.py`, `02a_large_neurons_pipeline.py`, `03_merge_synapses_connectors.py` |

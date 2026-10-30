@@ -14,7 +14,10 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (PRINCETON_SYNAPSE_CSV, SYNAPSE_TABLE_RAW_NO_SELF_FTR,
-                    SYNAPSE_TABLE_RAW_WITH_SELF_FTR, DERIVED_DATA_DIR)
+                    SYNAPSE_TABLE_RAW_WITH_SELF_FTR, DERIVED_DATA_DIR, PIPELINE_RUN)
+if PIPELINE_RUN == "rebuild":   # the raw tables stay in data/derived under "rebuild" (REBUILD_KEEPS_PUBLISHED)
+    raise SystemExit('Under PIPELINE_RUN = "rebuild" the scripts read the published raw synapse tables; '
+                     'build them with PIPELINE_RUN = "published".')
 
 import numpy as np
 import pandas as pd

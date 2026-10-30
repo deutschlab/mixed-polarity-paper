@@ -6,6 +6,7 @@ tables it requires, and the output directory where figures are saved.
 All figure scripts import `config.py` (paths) and `methods/methods_all.py` (utilities).
 Figures are saved under `outputs/` (`outputs/figN/` for the figure folders; the other folders and `processing/phi_threshold.py` use their own names, given below); a few scripts also write tables to `data/derived/` (shown as "writes" below). None of these are committed to this repository.
 With `SPLIT_METHOD = "maxsi"` in `config.py` (after step 09), every output path below starts with `outputs_maxsi/` instead of `outputs/`; `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SI_UPDATED_FTR` and the tables built from them are read from `data/derived_maxsi/` or `data/intermediate_maxsi/`, and the tables a script writes go there too. A script that reads a table with no MaxSI version (`MAXSI_NOT_AVAILABLE` in `config.py`) stops.
+With `PIPELINE_RUN = "rebuild"` (a fresh run of the pipeline), the same applies with `outputs_rebuild/` and `data/derived_rebuild/` (`outputs_rebuild_maxsi/` and `data/derived_rebuild_maxsi/` with `"maxsi"`).
 
 ---
 

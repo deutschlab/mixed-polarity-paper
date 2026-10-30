@@ -4,7 +4,7 @@ This document describes the processing pipeline that converts raw connectome inp
 derived tables used by the figure scripts.
 
 **Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07 (08 is optional: the split-method comparison, run after `build_raw_synapse_table.py`, which builds its raw synapse table from the Codex CSV; `phi_threshold.py` is optional and runs after 08; 09 is optional: the MaxSI labels, run after 05 and `build_raw_synapse_table.py`). The larval step, `processing/larva/larva_process.py`, is separate and is needed only for Figure 2A.  
-**All paths are defined in:** `config.py`  
+**All paths are defined in:** `config.py`. With `PIPELINE_RUN = "rebuild"` every step reads and writes the `data/derived_rebuild/` and `data/intermediate_rebuild/` copies instead, for a fresh run that leaves the published tables untouched; `swc_data.ftr` and the raw synapse tables are read from `data/derived/` either way  
 **The numbered scripts import:** `methods/methods_all.py` via `METHODS_DIR`; 08 and 09 also import `methods/node_cut_si.py`
 
 ---

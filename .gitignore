@@ -54,6 +54,8 @@ data/larva/*.csv
 !data/raw/ranks/*.feather
 outputs/
 outputs_maxsi/
+outputs_rebuild/
+outputs_rebuild_maxsi/
 
 # Data directories — no raw or generated data committed
 data/raw/swc/
@@ -62,6 +64,12 @@ data/intermediate/
 data/derived_maxsi/
 data/intermediate_maxsi/
 data/raw_maxsi/
+data/derived_rebuild/
+data/intermediate_rebuild/
+data/raw_rebuild/
+data/derived_rebuild_maxsi/
+data/intermediate_rebuild_maxsi/
+data/raw_rebuild_maxsi/
 data/larva/output/
 data/larva/results/
 # larval raw inputs: keep only the placeholder files
