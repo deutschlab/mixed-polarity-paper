@@ -88,6 +88,10 @@ Segregation Index (SI) for every standard neuron. Works through the skeleton sub
 
 Applies the same compartment-labelling and SI logic as script 01, but for oversized neurons that
 require a separate memory/chunking strategy. Also writes big-neuron connector feather tables directly.
+It reads the synapse CSV in chunks and keeps only the synapses of its 186 cells; the read peaked at a
+memory footprint of about 10 GB (measured once, macOS). Processing each of the four largest cells (two
+CT1, two APL; loading, healing, attaching synapses and splitting) took 3.1 to 4.2 minutes, with resident
+memory up to 28.0 GB (one run, macOS).
 
 | | |
 |--|--|
