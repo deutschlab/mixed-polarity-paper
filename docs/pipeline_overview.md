@@ -172,6 +172,7 @@ whole table and several copies of it in memory at once.
 
 Aggregates per-synapse information to the per-neuron level and joins annotation tables to create
 the main neuron metadata table used by almost all figure scripts.
+It reads only the `pre`, `post` and `comp` columns of the synapse table, the only ones it uses.
 
 | | |
 |--|--|

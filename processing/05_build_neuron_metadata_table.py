@@ -195,7 +195,9 @@ df['root_id']=df['root_id'].astype(np.int64)
 nodesG=nodesG.merge(df,on='root_id',how='left')
 #%%
 #%%
-allsynapses=pd.read_feather(SYNAPSE_TABLE_FTR)
+# only the three columns used below; reading all 13 was estimated at about 37 GB on the full table (about 77 million
+# rows), and these three at about 12 GB (linear estimates from two slices)
+allsynapses=pd.read_feather(SYNAPSE_TABLE_FTR, columns=['pre','post','comp'])
 #%%
 
 
