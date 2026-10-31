@@ -83,7 +83,8 @@ COPIED = ["out_synapses_count", "in_synapses_count", "max_out_degree", "max_in_d
 
 def choose_cells():
     """The hub (most local partners), its two partners with the most synapses with it, then two more partners,
-    and the first cell of the neuron table, by ID, with no local skeleton."""
+    and the first cell of the neuron table, by ID, with no local skeleton. When every cell has one, the first cell
+    not among those five: its file is not copied to the check's own skeleton folder, so it has none there."""
     neurons = set(pd.read_feather(NEURON_TABLE_SFC_FTR, columns=["neuron"])["neuron"])
     files = {np.int64(p.stem): p for p in SWC_DIR.glob("*/*.swc") if p.stem.isdigit()}
     local = sorted(set(files) & neurons)
@@ -103,8 +104,10 @@ def choose_cells():
     # the two partners with the most synapses with the hub label; the two smallest skeletons of the rest fail
     order = sorted(with_hub.index, key=lambda c: (-with_hub[c], c))
     labelled, rest = order[:2], sorted(order[2:], key=lambda c: (files[c].stat().st_size, c))
-    no_skeleton = np.int64(min(neurons - set(files)))
-    return hub, [np.int64(c) for c in labelled + rest[:2]], no_skeleton, files
+    chosen = [np.int64(c) for c in labelled + rest[:2]]
+    without = neurons - set(files)
+    no_skeleton = np.int64(min(without if without else neurons - {hub, *chosen}))
+    return hub, chosen, no_skeleton, files
 
 
 def make_inputs(work, hub, mates, no_skeleton, files):

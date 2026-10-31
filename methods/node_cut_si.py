@@ -123,7 +123,7 @@ def safe_SI_calc(
 
 #%% Node-level SI calculation
 
-def calculate_node_SI(neuron):
+def calculate_node_SI(neuron, fisher=True):
     """
     Calculate SI for every node with:
         one parent
@@ -133,6 +133,10 @@ def calculate_node_SI(neuron):
 
     Synapses attached directly to the candidate node are excluded from
     that node's SI calculation.
+
+    fisher=False leaves fisher_odds_ratio, fisher_p and fisher_q empty (NaN)
+    instead of running a Fisher exact test at every node, which takes most of
+    the time. Step 09 uses only the SI and the side counts.
     """
 
     nodes = (
@@ -307,7 +311,7 @@ def calculate_node_SI(neuron):
         side_1_total = side_1_pre + side_1_post
         side_2_total = side_2_pre + side_2_post
 
-        if side_1_total == 0 or side_2_total == 0:
+        if not fisher or side_1_total == 0 or side_2_total == 0:
             fisher_odds_ratio = np.nan
             fisher_p = np.nan
         else:
@@ -396,14 +400,15 @@ def get_descendants_from_node(
 
     nodes = neuron.nodes[
         ["node_id", "parent_id"]
-    ].copy()
+    ]
 
-    children_map = (
-        nodes
-        .groupby("parent_id")["node_id"]
-        .apply(list)
-        .to_dict()
-    )
+    # parent ID -> its children's IDs, in one pass (groupby().apply(list) was most of the time)
+    children_map = {}
+    for node_id, parent_id in zip(
+        nodes["node_id"].tolist(),
+        nodes["parent_id"].tolist()
+    ):
+        children_map.setdefault(parent_id, []).append(node_id)
 
     descendants = set()
     stack = [start_node_id]

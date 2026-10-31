@@ -9,8 +9,9 @@ methods_all.heal_attach_princeton, made here so that an error keeps its own text
 the SI of every candidate cut as step 08 does (methods/node_cut_si.py), and cut at the node
 with the highest SI. When several nodes share the highest SI, the first in the node table's
 order is taken (pandas idxmax); the summary records how many nodes tie and how many
-different side counts they give, so the cells where this rule can change the labels are
-known, and also how many nodes are within numpy isclose of the highest SI (for information).
+different side counts they give, and also how many nodes are within numpy isclose of the
+highest SI (for information). Another tied node can change the labels even with the same
+side counts, by putting different synapses on each side.
 
 The MaxSI tables inherit the SFC tables' cells and synapse rows: only the cells of
 NEURON_TABLE_SFC_FTR are tried (a cell the SFC split failed on is never tried here), and
@@ -34,7 +35,9 @@ Writes per batch of 500 cells, to MAXSI_LABEL_BATCH_DIR:
 Each file is written under a temporary name and then renamed, the failures file last, and
 a batch is skipped if its three files exist. batch_run.json records the cell list, the
 batch size, the raw synapse table, the number of skeleton files under SWC_DIR with a hash
-of their sorted paths and sizes, and the navis version; the run stops if the folder holds batches
+of their sorted paths and sizes, the navis version, and a hash of the code that labels a
+cell (sections 3 to 6 of this script, methods/node_cut_si.py and methods/methods_all.py; not
+the settings); the run stops if the folder holds batches
 of a run where any of these differ. A MemoryError stops the run instead of being recorded
 as a failed cell.
 
@@ -171,7 +174,13 @@ local = {np.int64(name[:-4]) for name in swc_names if name[:-4].isdigit()}
 swc_fingerprint = "\n".join(f"{f}\t{(SWC_DIR / f).stat().st_size}" for f in swc_files)
 skeleton_record = {"swc_files": len(swc_files),
                    "swc_files_sha256": hashlib.sha256(swc_fingerprint.encode()).hexdigest(),
-                   "navis_version": navis.__version__}
+                   "navis_version": navis.__version__,
+                   # the code that labels a cell too, so that batches made by two versions of it are never mixed;
+                   # sections 3 to 6 of this script, not the settings, so that changing one (ACCEPT_FAILED_CELLS) keeps them
+                   "code_sha256": hashlib.sha256(
+                       Path(__file__).read_text(encoding="utf-8").split("\n#%%3 ")[1].split("\n#%%7 ")[0].encode()
+                       + (METHODS_DIR / "node_cut_si.py").read_bytes()
+                       + (METHODS_DIR / "methods_all.py").read_bytes()).hexdigest()}
 print(f"Skeleton files under {SWC_DIR}: {len(swc_files):,}; navis {navis.__version__}")
 
 neuron_table = pd.read_feather(NEURON_TABLE_SFC_FTR)
@@ -300,8 +309,8 @@ def maxsi_labels_one_cell(neuron_id, neuron_synapses):
     healed = navis.heal_skeleton(swc)
     neuron = attach_synapses_princeton(healed, neuron_synapses)
 
-    # the same object step 08 passes to calculate_node_SI (a NeuronList of one cell)
-    node_SI = calculate_node_SI(neuron)
+    # the same object step 08 passes to calculate_node_SI (a NeuronList of one cell); the Fisher test is not used here
+    node_SI = calculate_node_SI(neuron, fisher=False)
     if len(node_SI) == 0:
         raise ValueError("No valid node-level SI values.")
     valid_node_SI = node_SI.dropna(subset=["SI"])
@@ -332,7 +341,8 @@ def maxsi_labels_one_cell(neuron_id, neuron_synapses):
         "best_node_id": np.int64(best["node_id"]),
         "MaxSI_SI": float(best["SI"]),
         "n_tied_max_SI": len(tied),
-        # different side counts among the tied nodes: above 1, another tied node would cut elsewhere
+        # different side counts among the tied nodes: above 1, another tied node would cut elsewhere (at 1,
+        # it can still put different synapses on each side)
         "n_tied_max_SI_distinct_sides": len(tied[["side_1_pre", "side_1_post",
                                                  "side_2_pre", "side_2_post"]].drop_duplicates()),
         # for information only: nodes whose SI is within numpy isclose of the highest
@@ -501,6 +511,8 @@ if labels.duplicated(subset=["synapse_id", "side"]).any():
 ties = maxsi_summary["n_tied_max_SI_distinct_sides"]
 print(f"Cells whose highest SI is shared by nodes that cut elsewhere (the first node is taken): "
       f"{int((ties > 1).sum()):,}")
+print(f"Cells whose highest SI is shared by more than one node (another one can put different synapses on each "
+      f"side, even with the same counts): {int((maxsi_summary['n_tied_max_SI'] > 1).sum()):,}")
 print(f"Cells with more nodes within numpy isclose of the highest SI than exactly at it: "
       f"{int((maxsi_summary['n_close_max_SI'] > maxsi_summary['n_tied_max_SI']).sum()):,}")
 print(f"Labelled cells' synapse ends on the cut node, so unlabelled: "
