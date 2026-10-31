@@ -190,6 +190,11 @@ It reads only the `pre`, `post` and `comp` columns of the synapse table, the onl
 
 Takes the synapse table and neuron table, computes per-connection synapse-type counts, identifies
 reciprocal pairs, and produces the connection-level analysis table.
+It counts the synapse table with pyarrow (only `pre`, `post` and `comp`, only AA/AD/DA/DD), pivots the counts once
+into the per-pair table, and finds the reciprocal pairs with a join of each connection with its reverse. On two
+slices of the data it writes the same five tables as the earlier version, which used pandas `groupby` and
+`pivot_table` twice and a `networkx` graph and, measured on the slices, would have needed far more memory than a
+36 GB Mac has; on the full table it took about half a minute and peaked at about 21 GB.
 
 | | |
 |--|--|

@@ -21,40 +21,40 @@ nodesG=pd.read_feather(NEURON_TABLE_FTR)
 #%%
 aaa=nodesG[nodesG['root_id']!=nodesG['neuron']]
 #%%
-allsynapses=pd.read_feather(SYNAPSE_TABLE_FTR)
+# The synapse table (about 77 million rows) is counted with pyarrow: only the columns and the four types used here,
+# one count per (pre, post, comp). The pandas groupby, pivot_table and networkx graph this replaces held several
+# copies of it in memory.
+import pyarrow as pa
+import pyarrow.compute as pc
+import pyarrow.feather as feather
+syn=feather.read_table(SYNAPSE_TABLE_FTR, columns=['pre','post','comp'])
+syn=syn.filter(pc.is_in(syn['comp'], value_set=pa.array(['AD','DA','DD','AA'])))
+connections=(syn.group_by(['pre','post','comp']).aggregate([([], 'count_all')]).to_pandas()
+             .rename(columns={'count_all':'synapse_count'}))
+del syn
 #%%
-
-#%%
-allsynapses = allsynapses.query("comp == 'AD' or comp == 'DA' or comp == 'DD' or comp == 'AA'")
-
-#%%
-connections=allsynapses[['pre','post','comp']]
-#%%
-connections = allsynapses.groupby(['pre', 'post','comp']).size().reset_index(name='synapse_count')
-#%%
-connections_p=pd.pivot_table(connections,values='synapse_count',index=['pre','post'],columns='comp')
-
-#%%
-connections_p['synapse_count']=connections_p.T.sum()
-
+# One row per (pre, post) and one column per type, as pd.pivot_table makes it: rows and columns sorted, float values,
+# NaN where a pair has none of a type
+wide=connections.set_index(['pre','post','comp'])['synapse_count'].unstack('comp').sort_index().astype(float)
+del connections
+connections_p=wide.copy()
+connections_p['synapse_count']=connections_p.sum(axis=1)   # the row sum that connections_p.T.sum() gave
 connections_p=connections_p.reset_index()
 #%%
-#%%
-# Step 2: Create directed graph
-G = nx.DiGraph()
+# Reciprocal pairs: (A, B) with A < B where both A -> B and B -> A exist, sorted by (A, B), with the synapses of both
+# directions added; this is what the networkx loop gave
+assert (connections_p['pre'] != connections_p['post']).all()   # the old loop kept self pairs; this join would drop them
+forward=connections_p[['pre','post','synapse_count']]
+backward=forward.rename(columns={'pre':'post','post':'pre','synapse_count':'reverse_count'})
+pairs=forward.merge(backward, on=['pre','post'], how='inner')
+pairs=pairs[pairs['pre'] < pairs['post']].sort_values(['pre','post'])
+reciprocal_edges_df=pd.DataFrame({'Node A': pairs['pre'].to_numpy(), 'Node B': pairs['post'].to_numpy(),
+                                  'Synapse Count': (pairs['synapse_count'] + pairs['reverse_count']).to_numpy()})
+del forward, backward, pairs
+# (the blank lines below keep the commented-out block that follows at lines 69-171)
 
-G.add_edges_from(connections_p[['pre', 'post']].itertuples(index=False, name=None),weight='synapse_count')
 
-reciprocal_edges_dict = {}
-for u, v, count in connections_p[['pre','post','synapse_count']].itertuples(index=False, name=None):
-    if G.has_edge(v, u):  # Check if the reverse edge exists
-        edge_key = tuple(sorted((u, v)))  # Ensure (A, B) and (B, A) are treated as the same
-        reciprocal_edges_dict[edge_key] = reciprocal_edges_dict.get(edge_key, 0) + count
 
-reciprocal_edges_df = pd.DataFrame(
-    [(a, b, count) for (a, b), count in reciprocal_edges_dict.items()],
-    columns=['Node A', 'Node B', 'Synapse Count']
-)
 
 
 RECIPROCITY_LIST_FTR.parent.mkdir(parents=True, exist_ok=True)
@@ -246,13 +246,13 @@ FULL_RECI_CONNECTIONS_FTR.parent.mkdir(parents=True, exist_ok=True)   # the four
 final_df.to_feather(FULL_RECI_CONNECTIONS_FTR)
 #%%
 #%%
-connections_g = allsynapses.groupby(['pre', 'post','comp']).size().reset_index(name='synapse_count')
+# the same counts and pivot as above, not computed again
 #%%
 
 #%% five comnnection doesnt change synaptic type distribution
-connection_pivot=pd.pivot_table(connections_g,index=['pre','post'],values='synapse_count',columns='comp')
+connection_pivot=wide; del wide   # so a re-run of the cell above stops instead of adding sum_syn twice
 
-connection_pivot['sum_syn']=connection_pivot.T.sum()
+connection_pivot['sum_syn']=connection_pivot.sum(axis=1)   # the row sum that .T.sum() gave
 connection_pivot=connection_pivot.fillna(0)
 #%%
 connection_pivot.to_feather(CONNECTIONS_FILTERED_FTR)
