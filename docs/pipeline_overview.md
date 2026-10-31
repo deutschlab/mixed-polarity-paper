@@ -150,6 +150,12 @@ at about 35 GB in step 02a's test) and then the whole connector tables.
 
 Assigns final compartment labels (AA/AD/DA/DD, or one of five linker combinations such as AL) to every synapse in the merged table. This produces
 the primary analysis-ready synapse table used by nearly all figure scripts.
+It reads step 03's table piece by piece. Each piece loses the synapses missing either label, gets each end's SI by a
+lookup on the cell ID (each cell has one SI, so this is the earlier left merge), loses every row with an empty value,
+and gets `comp`; the pieces are written in order, under a temporary name renamed at the end. The null and duplicate
+counts it prints are computed over the whole table from only the columns they need. On step 03's output for the first
+2,000,000 rows of the CSV it writes the same table, and prints the same counts, as the earlier version, which held the
+whole table and several copies of it in memory at once.
 
 | | |
 |--|--|
