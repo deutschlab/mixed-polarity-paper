@@ -141,8 +141,8 @@ Building them would mean running steps 01 to 06 again on that table, with at lea
 - The Princeton route carries each synapse's `synapse_id` and `size` through steps 01, 02a, 02b and
   03 (by column name in 01, partly by column position in the others), and step 03 merges on `synapse_id`. `attach_synapses` keeps
   neither column.
-- The root-ID repair and the column renaming by position in steps 01 and 02a are written for the
-  Codex CSV.
+- The root-ID repair in steps 01 and 02a, step 01's column names and step 02a's column renaming by
+  position are written for the Codex CSV.
 
 Whether the Buhmann run differed in anything else is not recorded here.
 
