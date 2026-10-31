@@ -128,6 +128,13 @@ renamed at the end, so a run that stops part-way leaves the earlier files as the
 
 Joins the raw Princeton synapse detection table with the per-neuron connector tables (both standard
 and large-neuron batches) to produce a unified synapse table with connector associations.
+It reads the synapse CSV in chunks, treated as in step 02a, and keeps every synapse except those from a neuron to
+itself. Each chunk gets its pre label from the connector tables, a lookup on `synapse_id` (which appears once in
+them, so this is the earlier left join), and is written to `SYNAPSES_PRE_MERGE_FTR`; that file is then read back
+piece by piece to add the post label. Only the label and `synapse_id` columns of step 02b's tables are read. Both
+files are written under a temporary name and renamed at the end. On the first 2,000,000 rows of the CSV it writes
+the same tables, in the same order, as the earlier version, which read the whole CSV at once (the same read peaked
+at about 35 GB in step 02a's test) and then the whole connector tables.
 
 | | |
 |--|--|
