@@ -107,6 +107,12 @@ memory up to 28.0 GB (one run, macOS).
 
 Reads the `connectors.pkl` file of each script 01 output folder and aggregates them into combined
 pre- and post-synaptic connector feather tables for standard neurons. It takes nothing from 02a.
+It works through the folders one at a time in folder-name order, appending each folder's rows to the two files,
+so step 01's connectors are never all in memory at once (gathering them first would take far more than 32 GB:
+step 01 stores every column as Python objects). The rows now come in folder-name order; the earlier version,
+which gathered every folder first, took them in an order that changed from run to run. On 15 folders (two sets) it
+writes the same tables as that version, sorted by synapse_id. Both files are written under a temporary name and
+renamed at the end, so a run that stops part-way leaves the earlier files as they were.
 
 | | |
 |--|--|
