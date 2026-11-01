@@ -38,7 +38,7 @@ OUTPUT_DIR = ROOT / "outputs"
 # tables, made from the published tables, have no rebuilt version, so their scripts stop (REBUILD_NOT_AVAILABLE;
 # neuron_data.ftr and the 4E olfactory table move too, and their only readers stop on the tables above anyway).
 # The split setting (SPLIT_METHOD, further down) applies on top: "rebuild" with "maxsi" gives data/derived_rebuild_maxsi.
-PIPELINE_RUN = "rebuild"
+PIPELINE_RUN = "published"
 PUBLISHED_DERIVED_DIR = DERIVED_DATA_DIR
 if PIPELINE_RUN == "published":
     pass
@@ -210,7 +210,7 @@ MAXSI_NEURON_TABLE_FTR   = _maxsi_path(NEURON_TABLE_FTR)
 # writes it there (MAXSI_SI_UPDATED_FTR, root_id and the MaxSI SI of every cell it labels). Steps 08 and
 # phi_threshold.py always read the SFC tables, since their output doesn't depend on the split. Raw tables, skeletons
 # and annotations stay where they are; the co-authors' tables are in MAXSI_NOT_AVAILABLE below.
-SPLIT_METHOD = "maxsi"
+SPLIT_METHOD = "sfc"
 SYNAPSE_TABLE_SFC_FTR = SYNAPSE_TABLE_FTR   # the names set above
 NEURON_TABLE_SFC_FTR  = NEURON_TABLE_FTR
 SI_UPDATED_SFC_FTR    = SI_UPDATED_FTR      # step 05 writes it under this name, so the switch never moves its output
