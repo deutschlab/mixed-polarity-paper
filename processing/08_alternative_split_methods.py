@@ -13,9 +13,9 @@ it is kept and not overwritten.
 
 Needs SYNAPSE_TABLE_RAW_FTR (built by processing/build_raw_synapse_table.py) and the
 skeletons of every neuron under SWC_DIR. The batch range in the last section
-(X = 1, Y = 236: batches X to X + Y, that is 1 to 237) covers the 118,347
-intrinsic neurons of NEURON_TABLE_FTR in batches of 500; change it if that
-number changes. A batch is skipped if its files already exist; the run stops if
+(START_BATCH = 1 to END_BATCH = n_batches) covers every intrinsic neuron of
+the SFC neuron table in batches of 500 (118,377 in the rebuild, 237 batches);
+the range follows that table's size. A batch is skipped if its files already exist; the run stops if
 those files have no record or come from another run (batch_run.json), and, when
 combining, if a batch file is missing or the range does not end at the last batch.
 """
@@ -30,7 +30,7 @@ from config import (METHODS_DIR, NEURON_TABLE_SFC_FTR as NEURON_TABLE_FTR, SYNAP
 
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
-
+from flow_centrality import prepare_for_split   # the flow column without navis's dense matrix
 import numpy as np
 import pandas as pd
 import navis
@@ -59,16 +59,16 @@ if SI_COMPARISONS_FTR.exists():
 nodesG = pd.read_feather(NEURON_TABLE_FTR)
 nodesG=nodesG[nodesG['super_class'].isin(['central','optic','visual_centrifugal','visual_projection'])]
 
-allsynapses = pd.read_feather(SYNAPSE_TABLE_RAW_FTR)
-
-allsynapses = allsynapses[
-    [
+# The synapse columns step 08 uses, read straight from the file without a second copy. neuropil is left out: the
+# attach function adds it only when called with neuropils=True, which step 08 never does.
+allsynapses = pd.read_feather(
+    SYNAPSE_TABLE_RAW_FTR,
+    columns=[
         "synapse_id",
         "pre_x", "pre_y", "pre_z",
         "post_x", "post_y", "post_z",
-        "size", "pre", "post", "neuropil"
-    ]
-].copy()
+        "size", "pre", "post"
+    ])
 
 
 #%%4 SI functions and node-level SI (methods/node_cut_si.py)
@@ -374,7 +374,7 @@ def run_neuron_batch_pipeline(
             # -------------------------------------------------
 
             flow_split = get_split(
-                neuron,
+                prepare_for_split(neuron),
                 flow_thresh=flow_thresh
             )
 

@@ -65,11 +65,12 @@ Options: --ids FILE takes neuron IDs from a text file, one integer per line, ins
 skeleton folder; --limit N (N >= 1) keeps the first N of the chosen neurons, in ascending
 ID order; --resume continues an interrupted run in the same --out (step 08 skips batches
 already written). --resume refuses if the neuron list, step 08, methods/methods_all.py,
-methods/node_cut_si.py, config.py, this tool, or the raw synapse table or neuron table (path, size, date) changed
+methods/node_cut_si.py, methods/flow_centrality.py, config.py, this tool, or the raw synapse table or the SFC
+neuron table (path, size, date) changed
 since the run started. It cannot tell whether a batch file was cut short when the run was
 stopped; if in doubt, delete the last batch's three files first. A run whose tables hold a
 neuron twice stops with a message, since that means two runs were mixed. Step 08 needs SYNAPSE_TABLE_RAW_FTR
-(processing/build_raw_synapse_table.py) and the neuron table. Time and memory are given
+(processing/build_raw_synapse_table.py) and the SFC neuron table. Time and memory are given
 in the README.
 """
 import argparse
@@ -82,7 +83,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
-from config import NEURON_TABLE_FTR, SWC_DIR, SYNAPSE_TABLE_RAW_FTR  # noqa: E402
+from config import NEURON_TABLE_SFC_FTR as NEURON_TABLE_FTR, SWC_DIR, SYNAPSE_TABLE_RAW_FTR  # noqa: E402  the table step 08 reads, whatever SPLIT_METHOD says
 
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
@@ -92,6 +93,7 @@ import pyarrow.ipc as ipc  # noqa: E402
 STEP08 = REPO_ROOT / "processing" / "08_alternative_split_methods.py"
 INPUT_FILES = {"step 08": STEP08, "methods_all.py": REPO_ROOT / "methods" / "methods_all.py",
                "node_cut_si.py": REPO_ROOT / "methods" / "node_cut_si.py",
+               "flow_centrality.py": REPO_ROOT / "methods" / "flow_centrality.py",
                "config.py": REPO_ROOT / "config.py", "this tool": Path(__file__).resolve()}
 INTRINSIC = ["central", "optic", "visual_centrifugal", "visual_projection"]
 SCORE_COLUMNS = ["SFC_SI", "SFC_Phi", "MaxSI_SI", "MinFisherP_Phi", "MaxPhi"]
@@ -161,10 +163,10 @@ def patched_step08(out, ids_path):
          "sys.path.insert(0, str(Path(__file__).parent.parent))",
          f"sys.path.insert(0, {str(REPO_ROOT)!r})"),
         ("output paths",
-         "from config import (METHODS_DIR, NEURON_TABLE_FTR, SYNAPSE_TABLE_RAW_FTR,\n"
-         "                    ALT_SPLIT_BATCH_DIR, SI_COMPARISONS_FTR)",
-         "from config import (METHODS_DIR, NEURON_TABLE_FTR, SYNAPSE_TABLE_RAW_FTR,\n"
-         "                    ALT_SPLIT_BATCH_DIR, SI_COMPARISONS_FTR)\n"
+         "from config import (METHODS_DIR, NEURON_TABLE_SFC_FTR as NEURON_TABLE_FTR, SYNAPSE_TABLE_RAW_FTR,\n"
+         "                    ALT_SPLIT_BATCH_DIR, SI_COMPARISONS_FTR)   # the SFC cells, whatever SPLIT_METHOD says",
+         "from config import (METHODS_DIR, NEURON_TABLE_SFC_FTR as NEURON_TABLE_FTR, SYNAPSE_TABLE_RAW_FTR,\n"
+         "                    ALT_SPLIT_BATCH_DIR, SI_COMPARISONS_FTR)   # the SFC cells, whatever SPLIT_METHOD says\n"
          "# --- subset run (tools/check_split_methods_on_subset.py) ---\n"
          f"ALT_SPLIT_BATCH_DIR = Path({str(out / 'batches')!r})\n"
          f"SI_COMPARISONS_FTR = Path({str(out / 'SI_comparisons_subset.ftr')!r})\n"
@@ -174,11 +176,12 @@ def patched_step08(out, ids_path):
          "nodesG=nodesG[nodesG['super_class'].isin(['central','optic','visual_centrifugal','visual_projection'])]\n"
          "nodesG = nodesG[nodesG['neuron'].astype('int64').isin(_SUBSET_IDS)]  # subset run"),
         ("synapse read",
-         "allsynapses = pd.read_feather(SYNAPSE_TABLE_RAW_FTR)",
+         "allsynapses = pd.read_feather(\n    SYNAPSE_TABLE_RAW_FTR,\n    columns=",
          "import pyarrow.dataset as _ds  # subset run: read only the chosen neurons' synapses\n"
          "_dataset = _ds.dataset(str(SYNAPSE_TABLE_RAW_FTR), format='feather')\n"
-         "allsynapses = _dataset.to_table(filter=_ds.field('pre').isin(_SUBSET_IDS)\n"
-         "                                | _ds.field('post').isin(_SUBSET_IDS)).to_pandas()"),
+         "_subset_filter = _ds.field('pre').isin(_SUBSET_IDS) | _ds.field('post').isin(_SUBSET_IDS)\n"
+         "allsynapses = (lambda columns: _dataset.to_table(columns=columns, filter=_subset_filter).to_pandas())(\n"
+         "    columns="),
     ]
     for name, old, new in patches:
         n = src.count(old)
