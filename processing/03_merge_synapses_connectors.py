@@ -15,10 +15,10 @@ from config import (
     PRE_CONNECTORS_FTR, PRE_CONNECTORS_BIGN_FTR,
     POST_CONNECTORS_FTR, POST_CONNECTORS_BIGN_FTR,
     SYNAPSES_PRE_MERGE_FTR, SYNAPSE_NON_PROCESSED_FTR,
-    CONNECTORS_DIR, DERIVED_DATA_DIR,
+    CONNECTORS_DIR, DERIVED_DATA_DIR, refuse_published_run,
 )
 import networkx as nx
-
+refuse_published_run("Step 03")
 from sklearn.cluster import AgglomerativeClustering
 import random
 import networkx as nx
@@ -101,10 +101,10 @@ from config import (
     PRE_CONNECTORS_FTR, PRE_CONNECTORS_BIGN_FTR,
     POST_CONNECTORS_FTR, POST_CONNECTORS_BIGN_FTR,
     SYNAPSES_PRE_MERGE_FTR, SYNAPSE_NON_PROCESSED_FTR,
-    CONNECTORS_DIR, DERIVED_DATA_DIR,
+    CONNECTORS_DIR, DERIVED_DATA_DIR, refuse_published_run,
 )
 import networkx as nx
-
+refuse_published_run("Step 03")
 from sklearn.cluster import AgglomerativeClustering
 import random
 import networkx as nx

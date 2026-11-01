@@ -11,10 +11,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (
     SYNAPSE_NON_PROCESSED_FTR, PROCESSED_SWC_DIR,
     PROCESSED_BIG_NEURONS_DIR, SYNAPSE_TABLE_SFC_FTR as SYNAPSE_TABLE_FTR,   # the SFC table, whatever SPLIT_METHOD says
-    DERIVED_DATA_DIR,
+    DERIVED_DATA_DIR, refuse_published_run,
 )
 import networkx as nx
-
+refuse_published_run("Step 04")
 from sklearn.cluster import AgglomerativeClustering
 import random
 import networkx as nx

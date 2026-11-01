@@ -7,15 +7,15 @@ from config import (
     RECIPROCITY_LIST_FTR, ALL_R_FULL_PKL, SELF_SDI_FTR,
     FULL_RECI_CONNECTIONS_FTR, CONNECTIONS_FILTERED_FTR,
     CONNECTIONS_RECI_FILTERED_FTR, CONNECTIONS_TABLE_FTR,
-    DERIVED_DATA_DIR,
+    DERIVED_DATA_DIR, refuse_published_run,
 )
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
 import os
 import seaborn as sns
 import pickle
+refuse_published_run("Step 06")
 #%%  ---------------------shouldnt we do reci before keeping only AD/DD/AA/DA???!!!!!
-#%%
 #%%
 nodesG=pd.read_feather(NEURON_TABLE_FTR)
 #%%

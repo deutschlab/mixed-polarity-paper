@@ -20,10 +20,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (
     PROCESSED_SWC_DIR, CONNECTORS_DIR,
-    PRE_CONNECTORS_FTR, POST_CONNECTORS_FTR,
+    PRE_CONNECTORS_FTR, POST_CONNECTORS_FTR, refuse_published_run,
 )
 import networkx as nx
-
+refuse_published_run("Step 02b")
 from sklearn.cluster import AgglomerativeClustering
 import random
 import networkx as nx

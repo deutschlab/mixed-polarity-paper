@@ -12,8 +12,8 @@ import matplotlib.colors as mcolors
 import matplotlib.cm as cm
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from config import METHODS_DIR, NEURON_TABLE_FTR, PCA_TABLE_FTR
-
+from config import METHODS_DIR, NEURON_TABLE_FTR, PCA_TABLE_FTR, refuse_published_run
+refuse_published_run("Step 07")
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
 
