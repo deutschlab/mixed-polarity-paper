@@ -7,14 +7,14 @@ from config import (
     PROCESSED_SWC_DIR, PROCESSED_BIG_NEURONS_DIR,
     SI_UPDATED_SFC_FTR as SI_UPDATED_FTR, SWC_DATA_FTR, SYNAPSE_TABLE_SFC_FTR as SYNAPSE_TABLE_FTR,   # the SFC tables, whatever SPLIT_METHOD says
     NEURON_TABLE_SFC_FTR as NEURON_TABLE_FTR, NEURON_TABLE_PARTIAL_FTR, RANKS_DIR, NEURONS_CSV,
-    DERIVED_DATA_DIR,
+    DERIVED_DATA_DIR, refuse_published_run,
 )
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
 import os
 import seaborn as sns
 import pickle
-#%%
+refuse_published_run("Step 05")
 #%%
 nodesG=pd.read_csv(NEURON_ANNOTATIONS_CSV)
 #%%
@@ -308,54 +308,34 @@ nodesG=pd.read_feather(NEURON_TABLE_PARTIAL_FTR)
 import os
 import pandas as pd
 
-# Define the folder path
+# One rank file per input modality, each with its own cells in its own order. Each file's layer_mean is matched to
+# the neurons by that file's own root_id (stored as uint64, cast to int64 after a range check); the files list
+# different cells in different orders, so placing them side by side by row position would give every column except
+# allinputs' the values of other cells. The modality is the part of the file name between the last '-' before '-10000' and '-10000'; the eye- and
+# head-bristle files both give 'bristle' and are not kept.
 folder_path = RANKS_DIR
+rank_files = {}
+for file in sorted(f for f in os.listdir(folder_path) if f.endswith('.feather')):
+    extracted = os.path.splitext(file)[0].split('-10000')[0].split('-')[-1]
+    rank_files.setdefault(extracted, []).append(file)
 
-# List all .ftr files
-ftr_files = [f for f in os.listdir(folder_path) if f.endswith('.feather')]
-
-# Initialize list to store renamed DataFrames
-df_list = []
-
-for file in ftr_files:
-    # Extract part between last '-' before '-10000' and the next '-'
-    base_name = os.path.splitext(file)[0]
-    try:
-        prefix = base_name.split('-10000')[0]
-        extracted = prefix.split('-')[-1]  # Get the last segment before -10000
-    except IndexError:
-        extracted = 'unknown'
-
-    # Read file and rename columns
-    df = pd.read_feather(os.path.join(folder_path, file))
-    df.columns = [f"{extracted}_{col}" for col in df.columns]
-    df_list.append(df)
-
-# Concatenate all DataFrames along columns
-df_combined = pd.concat(df_list, axis=1)
-
-# Preview the result
-
-#%%
-df_combined=df_combined[['allinputs_root_id','allinputs_layer_mean', 
-       'allsensory_novisual_layer_mean',
-      'ascending_layer_mean',
-      'gustatory_layer_mean',
-       'hygrosensory_layer_mean',
-      
-       'mechanosensory_layer_mean',
-       'auditory_layer_mean',
-    'jo_layer_mean',
-       'peg_layer_mean', 'ocellar_layer_mean',
-      'olfactory_layer_mean', 
-   'thermosensory_layer_mean',
-       'visual_projection_layer_mean']]
-df_combined=df_combined.rename(columns={'allinputs_root_id':'neuron'})
-#%%
-#%%
-df_combined['neuron']=df_combined['neuron'].astype(np.int64)
-#%%
-nodesG2=nodesG.merge(df_combined,on='neuron',how='left')
+# The kept modalities, in the column order of the neuron table
+kept = ['allinputs', 'allsensory_novisual', 'ascending', 'gustatory', 'hygrosensory', 'mechanosensory',
+        'auditory', 'jo', 'peg', 'ocellar', 'olfactory', 'thermosensory', 'visual_projection']
+assert nodesG['neuron'].dtype == np.int64 and nodesG['neuron'].is_unique, 'neuron must be unique int64'
+assert not {f'{m}_layer_mean' for m in kept} & set(nodesG.columns), \
+    'the rank columns are already in the table: run step 05 from the top, not this cell again'
+nodesG2 = nodesG
+for extracted in kept:
+    assert len(rank_files.get(extracted, [])) == 1, f"expected one rank file for {extracted}: {rank_files.get(extracted)}"
+    ranks = pd.read_feather(os.path.join(folder_path, rank_files[extracted][0]), columns=['root_id', 'layer_mean'])
+    assert ranks['root_id'].max() <= np.iinfo(np.int64).max, f'{extracted}: a root_id is above the int64 range'
+    assert ranks['root_id'].is_unique, f'{extracted}: root_id repeats'
+    ranks = pd.DataFrame({'neuron': ranks['root_id'].astype(np.int64),
+                          f'{extracted}_layer_mean': ranks['layer_mean']})
+    nodesG2 = nodesG2.merge(ranks, on='neuron', how='left', validate='one_to_one')
+assert len(nodesG2) == len(nodesG) and (nodesG2['neuron'].to_numpy() == nodesG['neuron'].to_numpy()).all(), \
+    'the rank merges changed the rows'
 #%%
 nodesG2.to_feather(NEURON_TABLE_PARTIAL_FTR)
 #%%
