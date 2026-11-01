@@ -96,7 +96,7 @@ whether neurons within the same type use the same synapse-type pattern.
 > `NEURON_TABLE_FTR`, it draws the panel's bars exactly (the published figure also lists three neighbouring pairs of
 > neuropil labels in the opposite order: MB CA/BU, MB PED/FB and MB VL/AL). As committed, those lines replace that SI
 > with `SI_UPDATED_FTR`, which changes the cutoffs, the bars and their order. `fig3e_syntype_composition.py` instead
-> marks each end of a synapse mixed when that cell's older SI (`SI_pre`/`SI_post` in the synapse table) is below 0.1,
+> marks each end of a synapse mixed when that cell's SI computed with self-synapses kept (`SI_pre`/`SI_post` in the synapse table) is below 0.1,
 > and as committed it stops at line 40 (`KeyError: ['neuron']`) before any figure is saved.
 
 ---
@@ -117,10 +117,10 @@ multiple classification models.
 
 > `syntype_x_pc1_simple_model.py` saves a feature-importance plot, a confusion matrix and a decision surface
 > for a model on PC1, the same kinds of plot as Fig 4A and 4D. It reads the PCA table step 07 writes
-> (`PCA_TABLE_FTR`), like `syntype_x_pc1.py`. The authors' earlier copies of its plots were made from an older
-> PCA table that no longer exists, and a rerun differs from them (by up to 3.4 points in a cell of the
+> (`PCA_TABLE_FTR`), like `syntype_x_pc1.py`. The authors' delivered plots were made from a PCA table that is
+> not available, and a rerun differs from them (by up to 3.4 points in a cell of the
 > confusion matrix; accuracy 40.5% against 39.6%). That is more than the seed or the sign of PC1 changes, and fits
-> the different table, but the older table cannot be checked. A rerun can be checked against an independent rebuild of
+> a different table, but that table cannot be checked. A rerun can be checked against an independent rebuild of
 > the model with `tools/check_simple_pc1_model.py` (README, Tools). `syntype_x_pc1.py` draws a decision surface too, but its save line (586) is
 > commented out, so which script made the published Fig 4D is not settled. Fig 4 Supp 1 holds only skeleton
 > images of the Fig 4D neurons.
@@ -210,7 +210,7 @@ reads `NEURON_TABLE_FTR` and `SYNAPSE_TABLE_FTR` instead (and `SI_UPDATED_FTR` i
 
 > The script also saves, for each population, `<population>_SynapsesPerSameConnection.svg`, all three figures
 > of the olfactory and Kenyon-cell populations (not panels of the submitted paper), and `PopulationSummary.csv`.
-> With `DATA_SOURCE = 'princeton'` and the older SI (`SI_SOURCE = 'neuron_table'`), almost no Kenyon cell has
+> With `DATA_SOURCE = 'princeton'` and the SI computed with self-synapses kept (`SI_SOURCE = 'neuron_table'`), almost no Kenyon cell has
 > SI ≥ 0.1, so that population is skipped and writes no figures. `tools/check_fig6_logic.py` checks the script's
 > calculations on a made-up connectome, without the Buhmann tables (README, Tools).
 

@@ -44,7 +44,7 @@ under `data/raw/` and do not need to be downloaded separately.
 | File | Local path | Config variable | Description |
 |------|-----------|----------------|-------------|
 | `Supplemental_file1_neuron_annotations.csv` | `data/raw/Supplemental_file1_neuron_annotations.csv` | `NEURON_ANNOTATIONS_CSV` | Combined neuron annotation table. Columns: `root_id`, `super_class`, `top_nt`, `cell_type`. Supplementary annotation file from Dorkenwald et al. 2024 (see citation below). Required by `processing/05_build_neuron_metadata_table.py`, `figures/fig2/si_x_primary_types_mirror.py`, `figures/fig3/si_x_neuron_types.py`, `figures/fig7/filopodia_x_mirror_neurons.py` and `figures/split_methods/maxsi_x_primary_types_mirror.py`. |
-| Sensory layer rank feather files | `data/raw/ranks/` | `RANKS_DIR` | Per-neuron sensory layer rank feather files. Columns include `root_id`, `allinputs_layer_mean`, and per-modality layer means (visual, olfactory, mechanosensory, etc.). From Dorkenwald et al. 2024 (see citation below). Required by `processing/05_build_neuron_metadata_table.py`. |
+| Sensory layer rank feather files | `data/raw/ranks/` | `RANKS_DIR` | Per-neuron sensory layer rank feather files, one per input modality (15 files). Columns: `node`, `layer_mean`, `root_id` (uint64); step 05 names each kept file's `layer_mean` after its modality (`olfactory_layer_mean`, …). From Dorkenwald et al. 2024 (see citation below). Required by `processing/05_build_neuron_metadata_table.py`. |
 
 ## Author-provided manuscript inputs
 
@@ -136,8 +136,8 @@ Building them would mean running steps 01 to 06 again on that table, with at lea
   `methods/methods_all.py`). `heal_attach` goes through `attach_synapses`, which keeps only
   synapses with a `cleft_score` of at least 30 (its `min_score` default), so the table needs a
   `cleft_score` column. The Princeton route applies no score cut.
-- Steps 01 and 02a each define their own `heal_attach_princeton` (line 81), which replaces the one
-  in `methods/methods_all.py`; the calls to change are at 01 line 152 and 02a line 273.
+- Steps 01 and 02a each define their own `heal_attach_princeton` (01 line 105, 02a line 65), which replaces the one
+  in `methods/methods_all.py`; the calls to change are at 01 line 180 and 02a line 273.
 - The Princeton route carries each synapse's `synapse_id` and `size` through steps 01, 02a, 02b and
   03 (by column name in 01, partly by column position in the others), and step 03 merges on `synapse_id`. `attach_synapses` keeps
   neither column.

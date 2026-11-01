@@ -4,8 +4,8 @@ This document describes the processing pipeline that converts raw connectome inp
 derived tables used by the figure scripts.
 
 **Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07 (08 is optional: the split-method comparison, run after `build_raw_synapse_table.py`, which builds its raw synapse table from the Codex CSV; `phi_threshold.py` is optional and runs after 08; 09 is optional: the MaxSI labels, run after 05 and `build_raw_synapse_table.py`). The larval step, `processing/larva/larva_process.py`, is separate and is needed only for Figure 2A.  
-**All paths are defined in:** `config.py`. With `PIPELINE_RUN = "rebuild"` every step reads and writes the `data/derived_rebuild/` and `data/intermediate_rebuild/` copies instead, for a fresh run that leaves the published tables untouched; `swc_data.ftr` and the raw synapse tables are read from `data/derived/` either way  
-**The numbered scripts import:** `methods/methods_all.py` via `METHODS_DIR`; 08 and 09 also import `methods/node_cut_si.py`
+**All paths are defined in:** `config.py`. With `PIPELINE_RUN = "rebuild"` every step reads and writes the `data/derived_rebuild/` and `data/intermediate_rebuild/` copies instead, for a fresh run that leaves the published tables untouched (under `"published"`, steps 01 to 07 stop at the start rather than write over them); `swc_data.ftr` and the raw synapse tables are read from `data/derived/` either way  
+**The numbered scripts import:** `methods/methods_all.py` via `METHODS_DIR`; 08 and 09 also import `methods/node_cut_si.py`; 01, 02a and 08 also import `methods/flow_centrality.py`, which gives navis's axon-dendrite split its synapse flow centrality without the dense geodesic matrix navis builds when navis-fastcore is not installed (the same values, in a fraction of the memory; it stops on any navis other than 1.7.0 or with navis-fastcore installed)
 
 ---
 
@@ -71,13 +71,13 @@ flowchart TD
 **File:** `processing/01_extract_compartments_SI.py`
 
 Walks each neuron's SWC skeleton to classify synapses as axonal or dendritic, and computes the
-Segregation Index (SI) for every standard neuron. Works through the skeleton subfolders of `SWC_DIR` one at a time and saves four pickles per subfolder (`connectors.pkl`, `all_SI.pkl`, `issues.pkl`, `linker.pkl`), each covering every neuron in it. Synapses from a neuron to itself are dropped first, and synapses more than 10,000 nm from the nearest skeleton node are dropped when they are attached, so SI is computed on the axon and dendrite synapses that are left (linker synapses are not counted). A subfolder counts as done once its `linker.pkl`, the last pickle written, exists, so a run that was stopped picks up where it left off and redoes a half-written subfolder. The synapse CSV is read in chunks, keeping only the columns the step uses; reading the full table peaked at a memory footprint of about 10 GB (measured once, macOS).
+Segregation Index (SI) for every standard neuron. Works through the skeleton subfolders of `SWC_DIR` one at a time and saves four pickles per subfolder (`connectors.pkl`, `all_SI.pkl`, `issues.pkl`, `linker.pkl`), each covering every neuron in it. Synapses from a neuron to itself are dropped first, and synapses more than 10,000 nm from the nearest skeleton node are dropped when they are attached, so SI is computed on the axon and dendrite synapses that are left (linker synapses are not counted). A subfolder counts as done once its `linker.pkl`, the last pickle written, exists, so a run that was stopped picks up where it left off and redoes a half-written subfolder. Each pickle is written under a temporary name holding the process id and then renamed, `linker.pkl` last. The step can run as several copies at once: set `N_SHARDS` and `SHARD` at the top of the script, or the environment variables `STEP01_N_SHARDS` and `STEP01_SHARD`, which override them, and start one copy for each `SHARD` from 0 to `N_SHARDS - 1`. Copy `k` takes every `N_SHARDS`-th subfolder of the full sorted list, starting at `k` (never of the list still to do, so a restarted copy takes the same subfolders), and keeps only the CSV rows of its own subfolders' cells; the pickles are the same bytes as a single run's. Start each copy once, with the same `N_SHARDS` for all, and check afterwards that all 93 subfolders have their `linker.pkl`. The synapse CSV is read in chunks, keeping only the columns the step uses; reading the full table peaked at a memory footprint of about 10 GB (measured once, macOS).
 
 | | |
 |--|--|
 | **Inputs** | `PRINCETON_SYNAPSE_CSV`, `SWC_DIR` |
 | **Outputs** | Four PKL files per skeleton subfolder in `PROCESSED_SWC_DIR` (`data/intermediate/processed_swc_data/`) |
-| **Runtime** | Several hours (a serial loop over the skeleton subfolders): 10.8 hours for all 93 subfolders on a 36 GB Mac, with resident memory up to 22.4 GB, sampled once a minute (one run, macOS) |
+| **Runtime** | Several hours (a serial loop over the skeleton subfolders): 10.8 hours for all 93 subfolders on a 36 GB Mac, with resident memory up to 22.4 GB, sampled once a minute (one run, macOS, as a single copy, with navis's own flow centrality) |
 | **Downstream** | Scripts 02b, 04, 05 |
 
 ---
@@ -91,7 +91,8 @@ require a separate memory/chunking strategy. Also writes big-neuron connector fe
 It reads the synapse CSV in chunks and keeps only the synapses of its 186 cells; the read peaked at a
 memory footprint of about 10 GB (measured once, macOS). Processing each of the four largest cells (two
 CT1, two APL; loading, healing, attaching synapses and splitting) took 3.1 to 4.2 minutes, with resident
-memory up to 28.0 GB (one run, macOS).
+memory up to 28.0 GB (one run, macOS; a separate test run of those four cells, with navis's own flow
+centrality).
 
 | | |
 |--|--|
@@ -109,10 +110,10 @@ Reads the `connectors.pkl` file of each script 01 output folder and aggregates t
 pre- and post-synaptic connector feather tables for standard neurons. It takes nothing from 02a.
 It works through the folders one at a time in folder-name order, appending each folder's rows to the two files,
 so step 01's connectors are never all in memory at once (gathering them first would take far more than 32 GB:
-step 01 stores every column as Python objects). The rows now come in folder-name order; the earlier version,
-which gathered every folder first, took them in an order that changed from run to run. On 15 folders (two sets) it
-writes the same tables as that version, sorted by synapse_id. Both files are written under a temporary name and
-renamed at the end, so a run that stops part-way leaves the earlier files as they were.
+step 01 stores every column as Python objects). The rows come in folder-name order, so two runs give the same row order. On
+15 folders (two sets) the tables hold the same rows as tables built by gathering every folder at once, compared after
+sorting by synapse_id. Both files are written under a temporary name and renamed at the end, so a run that stops
+part-way leaves the files from any previous run as they were.
 
 | | |
 |--|--|
@@ -130,11 +131,11 @@ Joins the raw Princeton synapse detection table with the per-neuron connector ta
 and large-neuron batches) to produce a unified synapse table with connector associations.
 It reads the synapse CSV in chunks, treated as in step 02a, and keeps every synapse except those from a neuron to
 itself. Each chunk gets its pre label from the connector tables, a lookup on `synapse_id` (which appears once in
-them, so this is the earlier left join), and is written to `SYNAPSES_PRE_MERGE_FTR`; that file is then read back
+them, so this gives what a left join on `synapse_id` gives), and is written to `SYNAPSES_PRE_MERGE_FTR`; that file is then read back
 piece by piece to add the post label. Only the label and `synapse_id` columns of step 02b's tables are read. Both
 files are written under a temporary name and renamed at the end. On the first 2,000,000 rows of the CSV it writes
-the same tables, in the same order, as the earlier version, which read the whole CSV at once (the same read peaked
-at about 35 GB in step 02a's test) and then the whole connector tables.
+the same tables, in the same order, as reading the whole CSV and then the whole connector tables at once would (a
+whole-CSV read peaked at about 35 GB in step 02a's test).
 
 | | |
 |--|--|
@@ -151,11 +152,11 @@ at about 35 GB in step 02a's test) and then the whole connector tables.
 Assigns final compartment labels (AA/AD/DA/DD, or one of five linker combinations such as AL) to every synapse in the merged table. This produces
 the primary analysis-ready synapse table used by nearly all figure scripts.
 It reads step 03's table piece by piece. Each piece loses the synapses missing either label, gets each end's SI by a
-lookup on the cell ID (each cell has one SI, so this is the earlier left merge), loses every row with an empty value,
+lookup on the cell ID (each cell has one SI, so this gives what a left merge on the cell ID gives), loses every row with an empty value,
 and gets `comp`; the pieces are written in order, under a temporary name renamed at the end. The null and duplicate
 counts it prints are computed over the whole table from only the columns they need. On step 03's output for the first
-2,000,000 rows of the CSV it writes the same table, and prints the same counts, as the earlier version, which held the
-whole table and several copies of it in memory at once.
+2,000,000 rows of the CSV it writes the same table, and prints the same counts, as the same calculation done on the
+whole table at once, which holds it and several copies of it in memory.
 
 | | |
 |--|--|
@@ -192,9 +193,8 @@ Takes the synapse table and neuron table, computes per-connection synapse-type c
 reciprocal pairs, and produces the connection-level analysis table.
 It counts the synapse table with pyarrow (only `pre`, `post` and `comp`, only AA/AD/DA/DD), pivots the counts once
 into the per-pair table, and finds the reciprocal pairs with a join of each connection with its reverse. On two
-slices of the data it writes the same five tables as the earlier version, which used pandas `groupby` and
-`pivot_table` twice and a `networkx` graph and, measured on the slices, would have needed far more memory than a
-36 GB Mac has; on the full table it took about half a minute and peaked at about 21 GB.
+slices of the data it writes the same five tables as a calculation with pandas `groupby`, `pivot_table`
+twice and a `networkx` graph, which, measured on the slices, would need far more memory than a 36 GB Mac has; on the full table it took about half a minute and peaked at about 21 GB.
 
 | | |
 |--|--|
@@ -275,7 +275,7 @@ whose presynaptic fraction is above the whole cell's, counted without the cut no
 a cell whose two sides have the same fraction, or with a side that has no synapse, fails and gets
 no labels. The synapses on the cut node get no label. The raw synapse table must have no
 self-synapses (the script stops otherwise). Batches of 500, skipped when their files exist;
-each batch file is written under a temporary name and renamed, the failures file last.
+each batch file is written under a temporary name holding the process id and renamed, the failures file last. The labelling can run as several copies at once: set `N_SHARDS` and `SHARD` in the settings, or the environment variables `STEP09_N_SHARDS` and `STEP09_SHARD`, and start one copy for each `SHARD`. Copy `k` labels the batches whose number, counted from 0, modulo `N_SHARDS` is `k` (copy 0 takes batch files 0001, 0001 + `N_SHARDS`, …), reads only those cells' synapses, and stops once its batches are done; a last run with `N_SHARDS = 1` (and the environment variables unset, since they override the settings) then finds every batch saved and builds the three tables. The batch files are the same bytes as a single run's.
 `batch_run.json` records the cell list, the raw synapse table, the skeleton files (count and a hash of
 their paths and sizes) and the navis version, and a run with different ones is refused. It stops at the start if
 a skeleton file name is in two subfolders of `SWC_DIR`, and stops on a `MemoryError` instead of
