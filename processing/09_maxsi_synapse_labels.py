@@ -82,6 +82,11 @@ SWC_DIR (the first LIMIT of them, by ID) and writes everything to MAXSI_SUBSET_D
 checking. The subset synapse table keeps only the rows whose two ends are both cells of
 the run, so its counts, and pre_A ... post_L in the subset neuron table, are not the full
 cells' counts.
+
+N_SHARDS and SHARD (or STEP09_N_SHARDS and STEP09_SHARD in the environment) split the labelling
+over N copies run at once: copy k runs the batches whose number, counted from 0, leaves k when
+divided by N, reads only the synapses of their cells, and stops after its batches. A last run
+with N_SHARDS = 1 finds every batch done and writes the tables.
 """
 #%%1 Imports
 
@@ -99,6 +104,7 @@ from node_cut_si import calculate_node_SI, get_descendants_from_node
 
 import gc
 import hashlib
+import os
 import numpy as np
 import pandas as pd
 import pyarrow as pa
@@ -124,6 +130,19 @@ ACCEPT_CELLS_WITHOUT_SKELETON = False
 # The tables are written only if exactly this many cells failed (None: only if none failed).
 # Run once, read the count and the errors the run prints, then set it.
 ACCEPT_FAILED_CELLS = None
+
+# Shards: N copies of the labelling at once. N_SHARDS = 1 runs every batch and then writes the tables.
+# With N_SHARDS = N, the copy with SHARD = k (0 to N-1) runs the batches whose batch_number (from 0, section 6) leaves
+# k when divided by N, reads only the synapses of their cells, and stops after its batches. The batches are dealt
+# from the full list, so a copy that is restarted gets the same ones. Once every copy has finished, a run with
+# N_SHARDS = 1 finds every batch done and writes the tables. STEP09_N_SHARDS and STEP09_SHARD in the environment
+# override the two settings, to launch the copies from a shell.
+N_SHARDS = 1
+SHARD = 0
+N_SHARDS = int(os.environ.get("STEP09_N_SHARDS", N_SHARDS))
+SHARD = int(os.environ.get("STEP09_SHARD", SHARD))
+if not (N_SHARDS >= 1 and 0 <= SHARD < N_SHARDS):
+    raise SystemExit(f"SHARD must be 0 to N_SHARDS - 1 (N_SHARDS = {N_SHARDS}, SHARD = {SHARD})")
 
 SUBSET_RUN = ONLY_LOCAL_SKELETONS or LIMIT is not None
 if SUBSET_RUN:
@@ -202,8 +221,16 @@ print("Cells:", len(all_neurons))
 SYNAPSE_COLUMNS = ["synapse_id", "pre_x", "pre_y", "pre_z",
                    "post_x", "post_y", "post_z", "size", "pre", "post"]
 
-if SUBSET_RUN:
-    _ids = all_neurons.tolist()
+if N_SHARDS > 1:
+    # the cells of this copy's batches (batch_number % N_SHARDS == SHARD in section 6); every copy keeps the full
+    # cell list in all_neurons, for the batches and their record
+    shard_neurons = all_neurons[(np.arange(len(all_neurons)) // BATCH_SIZE) % N_SHARDS == SHARD]
+    if len(shard_neurons) == 0:
+        raise SystemExit(f"Shard {SHARD} of {N_SHARDS} has no batch: N_SHARDS is above the number of batches")
+    print(f"Shard {SHARD} of {N_SHARDS}: {len(shard_neurons):,} cells")
+
+if SUBSET_RUN or N_SHARDS > 1:
+    _ids = (all_neurons if N_SHARDS == 1 else shard_neurons).tolist()
     allsynapses = (ds.dataset(str(SYNAPSE_TABLE_RAW_FTR), format="feather")
                    .to_table(columns=SYNAPSE_COLUMNS,
                              filter=ds.field("pre").isin(_ids) | ds.field("post").isin(_ids))
@@ -374,13 +401,17 @@ FAILURE_SCHEMA = pa.schema([("neuron", pa.int64()), ("error", pa.string())])
 
 
 def write_whole(table, path):
-    """Write to path.tmp, then rename, so that a run stopped mid-write leaves no file under the real name."""
-    tmp = path.with_name(path.name + ".tmp")
+    """Write to a temporary name, then rename, so that a run stopped mid-write leaves no file under the real name.
+    The temporary name holds the process id, so two copies writing the same batch (the same bytes) never share it."""
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
     feather.write_feather(table, tmp)
     tmp.replace(path)
 
 
 for batch_number in range(n_batches):
+
+    if batch_number % N_SHARDS != SHARD:
+        continue   # another copy's batch
 
     batch_id = batch_number + 1
     start = batch_number * BATCH_SIZE
@@ -441,6 +472,9 @@ for batch_number in range(n_batches):
     del batch_synapses, label_frames, labels_df, summary_df, failures_df
     gc.collect()
 
+if N_SHARDS > 1:
+    raise SystemExit(f"Shard {SHARD} of {N_SHARDS}: its batches are done. Once every copy has finished, run with "
+                     "N_SHARDS = 1 to check the batches and write the tables.")
 print("\nFinished all batches.")
 
 del allsynapses
@@ -448,6 +482,13 @@ gc.collect()
 
 
 #%%7 Read the batches
+
+# Hand the memory Arrow keeps after the batch loop back before the tables are built (section 6 has already freed
+# the raw synapses; the del below only matters when the cells are run out of order).
+if "allsynapses" in globals():
+    del allsynapses
+gc.collect()
+pa.default_memory_pool().release_unused()
 
 def read_label_codes(path):
     """A labels batch with side as 0 (pre) / 1 (post) and label as 0 (A) / 1 (D), both int8."""
@@ -505,7 +546,16 @@ if done.duplicated().any():
 if set(done) != set(all_neurons):
     raise SystemExit(f"the batches hold {len(set(done) - set(all_neurons)):,} cells not in this run and miss "
                      f"{len(set(all_neurons) - set(done)):,} of its cells")
-if labels.duplicated(subset=["synapse_id", "side"]).any():
+# One label per synapse end. The same test as labels.duplicated(subset=["synapse_id", "side"]).any(), on one
+# integer per end (synapse_id * 2 + side, one to one since side is 0 or 1) sorted, which needs far less memory than
+# duplicated() on the roughly 154 million ends of a full run.
+if len(labels):
+    assert -2**62 < labels["synapse_id"].min() and labels["synapse_id"].max() < 2**62, "synapse_id out of range"
+end_keys = labels["synapse_id"].to_numpy() * 2 + labels["side"].to_numpy().astype(np.int64)
+end_keys.sort()
+two_labels = bool((end_keys[1:] == end_keys[:-1]).any())
+del end_keys
+if two_labels:
     raise SystemExit("a synapse end has two labels")
 
 ties = maxsi_summary["n_tied_max_SI_distinct_sides"]
@@ -541,27 +591,43 @@ if write_tables:
         syn_filter = ds.field("pre").isin(_ids) | ds.field("post").isin(_ids)
     else:
         syn_filter = None
-    syn_table = ds.dataset(str(SYNAPSE_TABLE_SFC_FTR), format="feather").to_table(filter=syn_filter)
-
-    keys = pd.DataFrame({"synapse_id": syn_table["synapse_id"].to_numpy(),
-                         "pre": syn_table["pre"].to_numpy(),
-                         "post": syn_table["post"].to_numpy()})
+    # Only the three key columns are read for the label merges; the whole table is read further down one record
+    # batch at a time, so that it is never in memory next to its filtered copy.
+    syn_dataset = ds.dataset(str(SYNAPSE_TABLE_SFC_FTR), format="feather")
+    key_table = syn_dataset.to_table(columns=["synapse_id", "pre", "post"], filter=syn_filter)
+    keys = pd.DataFrame({"synapse_id": key_table["synapse_id"].to_numpy(),
+                         "pre": key_table["pre"].to_numpy(),
+                         "post": key_table["post"].to_numpy()})
+    del key_table
     assert all(keys[c].dtype == np.int64 for c in keys), keys.dtypes
     assert not keys["synapse_id"].duplicated().any(), "synapse_id is not unique in the SFC synapse table"
     assert not (keys["pre"] == keys["post"]).any(), "the SFC synapse table holds self-synapses"
 
-    pre_labels = (labels.loc[labels["side"] == 0, ["synapse_id", "neuron", "label"]]
-                  .rename(columns={"neuron": "pre", "label": "pre_label"}))
-    post_labels = (labels.loc[labels["side"] == 1, ["synapse_id", "neuron", "label"]]
-                   .rename(columns={"neuron": "post", "label": "post_label"}))
-    n_pre_labels, n_post_labels = len(pre_labels), len(post_labels)
+    def label_of_end(side, cells):
+        """Each row's label at one end (0 = A, 1 = D, NaN if none): the label whose synapse_id is the row's and
+        whose cell is the row's cell at that end. What a left merge on (synapse_id, cell) gives, found by binary
+        search on the sorted labels instead (each synapse end has at most one label, checked in section 7)."""
+        on_side = labels["side"].to_numpy() == side
+        label_ids = labels["synapse_id"].to_numpy()[on_side]
+        order = np.argsort(label_ids, kind="stable")
+        label_ids = label_ids[order]
+        label_cells = labels["neuron"].to_numpy()[on_side][order]
+        label_values = labels["label"].to_numpy()[on_side][order]
+        del on_side, order
+        assert not (label_ids[1:] == label_ids[:-1]).any(), "a synapse end has two labels"
+        row_ids = keys["synapse_id"].to_numpy()
+        at = np.minimum(np.searchsorted(label_ids, row_ids), max(len(label_ids) - 1, 0))
+        found = (np.zeros(len(row_ids), dtype=bool) if len(label_ids) == 0
+                 else (label_ids[at] == row_ids) & (label_cells[at] == cells))
+        values = np.full(len(row_ids), np.nan)
+        values[found] = label_values[at[found]]
+        return values, len(label_ids)
+
+    keys["pre_label"], n_pre_labels = label_of_end(0, keys["pre"].to_numpy())
+    keys["post_label"], n_post_labels = label_of_end(1, keys["post"].to_numpy())
     del labels
     gc.collect()
-    keys = keys.merge(pre_labels, on=["synapse_id", "pre"], how="left", validate="one_to_one")
-    del pre_labels
-    keys = keys.merge(post_labels, on=["synapse_id", "post"], how="left", validate="one_to_one")
-    del post_labels
-    gc.collect()
+    pa.default_memory_pool().release_unused()
 
     no_pre, no_post = keys["pre_label"].isna(), keys["post_label"].isna()
     keep = ~(no_pre | no_post)
@@ -583,19 +649,46 @@ if write_tables:
     del kept, comp_index
     gc.collect()
 
-    out = syn_table.filter(pa.array(keep.to_numpy()))
-    for name, values in (("comp", comp),
-                         ("SI_pre", pa.array(si_pre, type=pa.float64())),
-                         ("SI_post", pa.array(si_post, type=pa.float64()))):
-        i = out.schema.get_field_index(name)
-        out = out.set_column(i, out.schema.field(name), values)
-    assert out.schema.equals(syn_table.schema, check_metadata=False), (out.schema, syn_table.schema)
+    # The table again, one record batch at a time, in the order of the key read above (checked batch by batch on
+    # synapse_id): each batch keeps its rows with both ends labelled and gets the new comp, SI_pre and SI_post.
+    # The batches keep the boundaries a whole-table read and filter would give them, and empty ones are left out
+    # as that write leaves them out, so the file written is the same (checked byte for byte on the full run and on
+    # small subset tables).
+    keep_mask = keep.to_numpy()
+    synapse_ids = keys["synapse_id"].to_numpy()
+    key_pre, key_post = keys["pre"].to_numpy(), keys["post"].to_numpy()
+    new_columns = {"comp": comp,
+                   "SI_pre": pa.array(si_pre, type=pa.float64()),
+                   "SI_post": pa.array(si_post, type=pa.float64())}
+    out_batches, row, kept_row = [], 0, 0
+    for batch in syn_dataset.to_batches(filter=syn_filter):
+        n = batch.num_rows
+        if not (np.array_equal(batch.column("synapse_id").to_numpy(), synapse_ids[row:row + n])
+                and np.array_equal(batch.column("pre").to_numpy(), key_pre[row:row + n])
+                and np.array_equal(batch.column("post").to_numpy(), key_post[row:row + n])):
+            raise SystemExit(f"{SYNAPSE_TABLE_SFC_FTR.name}: a record batch is not in the order of the key read "
+                             f"(rows {row:,} on). No table written.")
+        part = batch.filter(pa.array(keep_mask[row:row + n]))
+        k = part.num_rows
+        for name, values in new_columns.items():
+            i = part.schema.get_field_index(name)
+            part = part.set_column(i, part.schema.field(name), values.slice(kept_row, k))
+        if k:   # an empty batch is left out, as a whole-table filter and write leave it out
+            out_batches.append(part)
+        row += n
+        kept_row += k
+    if row != len(keys) or kept_row != int(keep.sum()):
+        raise SystemExit(f"read {row:,} rows of {SYNAPSE_TABLE_SFC_FTR.name} batch by batch against {len(keys):,} "
+                         f"in the key read, and kept {kept_row:,} against {int(keep.sum()):,}. No table written.")
+    out = pa.Table.from_batches(out_batches, schema=syn_dataset.schema)
+    del out_batches, keep_mask, synapse_ids, key_pre, key_post, new_columns
+    assert out.schema.equals(syn_dataset.schema, check_metadata=False), (out.schema, syn_dataset.schema)
     out = out.replace_schema_metadata(None)   # the pandas metadata holds the old row count of the index
 
     synapse_table_out.parent.mkdir(parents=True, exist_ok=True)
     write_whole(out, synapse_table_out)
     print(f"Wrote {synapse_table_out} ({out.num_rows:,} rows)")
-    del syn_table, out, keys, comp, si_pre, si_post
+    del syn_dataset, out, keys, comp, si_pre, si_post
 
 if "labels" in globals():
     del labels
