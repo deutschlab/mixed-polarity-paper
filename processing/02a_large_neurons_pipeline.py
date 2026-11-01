@@ -28,7 +28,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (
     METHODS_DIR, PRINCETON_SYNAPSE_CSV,
     PROCESSED_BIG_NEURONS_DIR, CONNECTORS_DIR,
-    PRE_CONNECTORS_BIGN_FTR, POST_CONNECTORS_BIGN_FTR,
+    PRE_CONNECTORS_BIGN_FTR, POST_CONNECTORS_BIGN_FTR, refuse_published_run,
 )
 import networkx as nx
 from sklearn.cluster import AgglomerativeClustering
@@ -39,7 +39,7 @@ import matplotlib.cm as cm
 import pickle
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
-#%%
+refuse_published_run("Step 02a")
 #allsynapses=pd.read_feather(r'C:\Users\user\organised_work\data\connections\synapses')
 #allsynapses=pd.read_feather(r'C:\Users\user\organised_work\data\783\generated\preprocessing\synapses\flywire_synapses_783_sclass_filter_processed.feather')
 #%%
@@ -54,11 +54,11 @@ from methods_all import *
 
 
 
-
+from flow_centrality import prepare_for_split   # the flow column without navis's dense matrix
 #%%
 def get_split(item,flow_thresh=1):
     try:    
-        split=navis.split_axon_dendrite(item, metric='synapse_flow_centrality',reroot_soma=True,flow_thresh=flow_thresh)
+        split=navis.split_axon_dendrite(prepare_for_split(item), metric='synapse_flow_centrality',reroot_soma=True,flow_thresh=flow_thresh)
         return split
     except:
         return 'split issue'
