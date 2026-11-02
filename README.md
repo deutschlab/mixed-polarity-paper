@@ -49,27 +49,27 @@ pip install -r requirements.txt
 
 On macOS with pip, `xgboost` also needs `brew install libomp`. Conda takes care of this.
 
-**Running it on your own machine.** The full pipeline has been run on one machine, a 36 GB Mac (macOS, Python 3.12.4, the pinned packages). It hasn't been tried on Linux or Windows. This is how much memory and time each step took there (one run each; resident memory is the most the step held in RAM):
+**Running it on your own machine.** The full pipeline has been run on one machine, a Mac with 36 GB of memory and 14 cores (Apple M4 Max; macOS, Python 3.12.4, the pinned packages). It hasn't been tried on Linux or Windows. This is how much memory and time each step took there in one full run (resident memory is the most the step held in RAM; steps 01 and 09 ran as 5 copies at once):
 
 | Step | Resident memory | Time |
 |---|---|---|
-| 01 | at least 22.4 GB (sampled once a minute) | 10.8 hours |
-| 02a | 27.0 GB | 54 minutes |
-| 02b | 3.4 GB | 57 seconds |
-| 03 | 15.6 GB | 85 seconds |
-| 04 | 17.8 GB | 46 seconds |
-| 05 | 14.7 GB | 59 seconds |
-| 06 | 20.7 GB | 28 seconds |
-| 07 | 0.5 GB | 2 seconds |
-| 09 | at most 20.2 GB to label the cells; 24.7 GB to build its tables | 2.3 hours for a full run; 67 seconds to build the tables from saved batches |
+| 01 | 6.2 to 6.7 GB per copy; at least 17.7 GB for the 5 together (sampled once a minute), at most 32.3 GB (the sum of the copies' peaks) | about 2 hours (each copy 1.8 to 1.9 hours) |
+| 02a | 12.9 GB | 27 minutes |
+| 02b | 3.4 GB | 58 seconds |
+| 03 | 14.0 GB | 86 seconds |
+| 04 | 17.7 GB | 41 seconds |
+| 05 | 14.7 GB | 56 seconds |
+| 06 | 20.6 GB on the SFC tables, 18.5 GB on the MaxSI ones | 28 to 29 seconds on each |
+| 07 | 0.5 GB | 2 seconds on each split |
+| 09 | 5.5 to 6.3 GB per labelling copy; at least 14.7 GB for the 5 together (sampled once a minute), at most 29.6 GB (the sum of the copies' peaks); 22.2 GB to build its tables | about 30 minutes to label the cells (each copy 28 to 29 minutes); 67.5 seconds to build the tables from the saved batches |
 
 Step 08 and `build_raw_synapse_table.py` have their own paragraphs below.
 
-macOS compresses memory when it runs short, and resident memory leaves out compressed and swapped pages, so the peak memory footprints, which do count them, were higher: 225.5 GB for 02a, at most 45.9 GB for step 09's labelling and 30.3 GB for building its tables. Plan on 32 GB of memory plus swap. On Linux or Windows, set up swap, or expect steps 01, 02a and 09 to be stopped for lack of memory. With 16 GB, only 02b and 07 fit comfortably.
+macOS compresses memory when it runs short, and resident memory leaves out compressed and swapped pages, so the peak memory footprints, which do count them, can be higher: 19.1 GB for step 03 and 30.3 GB for building step 09's tables; each step 01 copy peaked at 7.9 to 8.3 GB and each step 09 labelling copy at 6.6 to 7.1 GB. Plan on 32 GB of memory plus swap. On Linux or Windows, set up swap. Whatever the number of copies, step 09's table building (30.3 GB footprint), step 06 (20.6 GB resident), step 03 (19.1 GB footprint) and step 04 (17.7 GB resident) each run as one process, so they set a floor on memory whatever the number of copies; no machine smaller than 36 GB has been tried. Step 01 as 5 copies also held more than 16 GB. On a smaller machine run steps 01 and 09 as fewer copies, but each copy then reads a larger share of the synapses and holds more memory; only 5 copies have been measured (6.2 to 6.7 GB resident, 7.9 to 8.3 GB footprint per copy). Run no more copies than cores.
 
-The numbers for 01 and 02a were measured with navis's own flow centrality. Steps 01, 02a and 08 use `methods/flow_centrality.py` instead, which gives the same values with far less memory: splitting an 80,071-node cell takes about 1.0 GB for the whole process, against 9.1 GB with navis's own calculation. The step totals with it haven't been measured, and both steps read through the whole synapse CSV first.
+Steps 01, 02a and 08 use `methods/flow_centrality.py`, which gives navis's flow centrality values with far less memory: splitting an 80,071-node cell takes about 1.0 GB for the whole process, against 9.1 GB with navis's own calculation. Steps 01 and 02a read through the whole synapse CSV first.
 
-Steps 01 and 09 can run as several copies at once to use more cores (see `docs/pipeline_overview.md`). In tests each copy held about 4 to 6.5 GB: step 01 with one folder per copy, or while reading the CSV for a quarter or an eighth of the folders, and step 09 while reading its synapses. Processing a full share of folders hasn't been measured. Steps 01, 08 and 09 pick up where they left off if stopped; the others start again from the beginning.
+Steps 01 and 09 can run as several copies at once to use more cores (see `docs/pipeline_overview.md`). The times in the table are for 5 copies. Together they used 9.3 CPU-hours for step 01 and 2.3 for step 09; one copy has not been timed. With 5 copies, the running times of steps 01 to 07 and 09 add up to about 3 hours. Steps 01, 08 and 09 pick up where they left off if stopped; the others start again from the beginning.
 
 The raw inputs take about 43 GB, the raw synapse tables in `data/derived/` (made by `build_raw_synapse_table.py`) about 7 GB, and one full run's tables, SFC and MaxSI together, under 40 GB more.
 
@@ -114,7 +114,7 @@ Step 08 is optional. It compares the published axon/dendrite split with two sing
 
 Step 09 is optional. It cuts every cell at its highest-SI node (the MaxSI cut, found as in step 08) and labels each synapse end axon or dendrite. It writes three tables to `data/derived_maxsi/`, with the published file names and format: the synapse table, the neuron table and `SI_updated.ftr`, all on the MaxSI SI. It needs the step 04 and 05 tables, the raw synapse table without self-synapses (`RAW_TABLE_KEEP_SELF_SYNAPSES = False`, the default; it stops otherwise) and the skeletons of every cell, not only the intrinsic ones step 08 uses. The MaxSI tables hold only cells and synapse rows of the SFC tables. The MaxSI neuron table recounts only the compartment columns and keeps the SFC table's cell properties (synapse and partner counts, degrees and their ratios). Step 09 writes no table if a cell has no usable skeleton (unless `ACCEPT_CELLS_WITHOUT_SKELETON = True`), or if the number of failed cells is not `ACCEPT_FAILED_CELLS` (by default none may fail). Run it once, read the count and errors it prints, then set these two.
 
-Step 09 doesn't run the Fisher test that `calculate_node_SI` can run at every node, since it doesn't use it (`fisher=False`). On three samples (the first 60 cells by ID, 300 cells spread over the ID range and the 10 largest skeletons) the batch files and tables are byte-identical to those of a run with the Fisher test. Timed once each on macOS, 300 cells spread over the ID range took 24 s and the 10 largest skeletons, CT1 and APL among them, 34 s. A full run on all 138,341 cells took 2.3 hours (one run, macOS). To build the three tables from the saved batches, step 09 reads only three columns of the SFC synapse table to match the labels, then the rest one record batch at a time; this took 67 seconds and held at most 24.7 GB (peak memory footprint 30.3 GB, one run, macOS). The labelling can also run as several copies at once (see `docs/pipeline_overview.md`). Step 09 does not handle cells over 80,000 skeleton nodes separately, as steps 01 and 02a do. Running out of memory stops the whole run; the saved batches are kept and skipped on the next run.
+Step 09 doesn't run the Fisher test that `calculate_node_SI` can run at every node, since it doesn't use it (`fisher=False`). On three samples (the first 60 cells by ID, 300 cells spread over the ID range and the 10 largest skeletons) the batch files and tables are byte-identical to those of a run with the Fisher test. Timed once each on macOS, 300 cells spread over the ID range took 24 s and the 10 largest skeletons, CT1 and APL among them, 34 s. Labelling all 138,341 cells as 5 copies at once took about 30 minutes (one run, macOS). To build the three tables from the saved batches, step 09 reads only three columns of the SFC synapse table to match the labels, then the rest one record batch at a time; this took 67.5 seconds and held at most 22.2 GB (peak memory footprint 30.3 GB, one run, macOS). How to run the copies is in `docs/pipeline_overview.md`. Step 09 does not handle cells over 80,000 skeleton nodes separately, as steps 01 and 02a do. Running out of memory stops the whole run; the saved batches are kept and skipped on the next run.
 
 `SPLIT_METHOD` in `config.py` chooses the split the scripts read: `"sfc"` (the published split, the default) or `"maxsi"`. Leave it at `"sfc"` until step 09 has written its three tables.
 

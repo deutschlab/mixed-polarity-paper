@@ -77,7 +77,7 @@ Segregation Index (SI) for every standard neuron. Works through the skeleton sub
 |--|--|
 | **Inputs** | `PRINCETON_SYNAPSE_CSV`, `SWC_DIR` |
 | **Outputs** | Four PKL files per skeleton subfolder in `PROCESSED_SWC_DIR` (`data/intermediate/processed_swc_data/`) |
-| **Runtime** | Several hours (a serial loop over the skeleton subfolders): 10.8 hours for all 93 subfolders on a 36 GB Mac, with resident memory up to 22.4 GB, sampled once a minute (one run, macOS, as a single copy, with navis's own flow centrality) |
+| **Runtime** | About 2 hours for all 93 subfolders on a 36 GB Mac as 5 copies at once (each copy 1.8 to 1.9 hours and 6.2 to 6.7 GB resident; at least 17.7 GB for the 5 together, sampled once a minute; one run, macOS). One copy has not been timed |
 | **Downstream** | Scripts 02b, 04, 05 |
 
 ---
@@ -90,9 +90,8 @@ Applies the same compartment-labelling and SI logic as script 01, but for oversi
 require a separate memory/chunking strategy. Also writes big-neuron connector feather tables directly.
 It reads the synapse CSV in chunks and keeps only the synapses of its 186 cells; the read peaked at a
 memory footprint of about 10 GB (measured once, macOS). Processing each of the four largest cells (two
-CT1, two APL; loading, healing, attaching synapses and splitting) took 3.1 to 4.2 minutes, with resident
-memory up to 28.0 GB (one run, macOS; a separate test run of those four cells, with navis's own flow
-centrality).
+CT1, two APL; loading, healing, attaching synapses and splitting) took 3.1 to 4.2 minutes (one run, macOS; a separate test run of those four cells, with navis's own flow
+centrality). The whole step held at most 12.9 GB resident (one run, macOS; see the README).
 
 | | |
 |--|--|
