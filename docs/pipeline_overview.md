@@ -1,11 +1,10 @@
 # Pipeline Overview
 
-This document describes the processing pipeline that converts raw connectome inputs into the
-derived tables used by the figure scripts.
+The processing steps that turn the raw connectome inputs into the derived tables the figure scripts read.
 
-**Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07 (08 is optional: the split-method comparison, run after `build_raw_synapse_table.py`, which builds its raw synapse table from the Codex CSV; `phi_threshold.py` is optional and runs after 08; 09 is optional: the MaxSI, MinFisherP or MaxPhi labels, run after 05 and `build_raw_synapse_table.py`). The larval step, `processing/larva/larva_process.py`, is separate and is needed only for Figure 2A.  
-**All paths are defined in:** `config.py`. With `PIPELINE_RUN = "rebuild"` every step reads and writes the `data/derived_rebuild/` and `data/intermediate_rebuild/` copies instead, for a fresh run that leaves the published tables untouched (under `"published"`, steps 01 to 07 stop at the start rather than write over them); `swc_data.ftr` and the raw synapse tables are read from `data/derived/` either way  
-**The numbered scripts import:** `methods/methods_all.py` via `METHODS_DIR`; 08 and 09 also import `methods/node_cut_si.py`; 01, 02a and 08 also import `methods/flow_centrality.py`, which gives navis's axon-dendrite split its synapse flow centrality without the dense geodesic matrix navis builds when navis-fastcore is not installed (the same values, in a fraction of the memory; it stops on any navis other than 1.7.0 or with navis-fastcore installed)
+- **Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07. Optional: `build_raw_synapse_table.py` (the raw synapse table, from the Codex CSV) → 08 (split-method comparison) → `phi_threshold.py`; and 09 (MaxSI, MinFisherP or MaxPhi labels), after 05 and `build_raw_synapse_table.py`. The larval step, `processing/larva/larva_process.py`, runs separately, for Figure 2A only.
+- **Paths:** all in `config.py`; `PIPELINE_RUN` and `SPLIT_METHOD` choose the folders ([Settings](#settings-split_method-and-pipeline_run)).
+- **Shared code:** the numbered scripts import `methods/methods_all.py` via `METHODS_DIR`; 08 and 09 also `methods/node_cut_si.py`; 01, 02a and 08 also `methods/flow_centrality.py`, which gives navis's synapse flow centrality without the dense geodesic matrix navis builds when navis-fastcore is not installed (the same values, in a fraction of the memory).
 
 ---
 
@@ -63,38 +62,39 @@ flowchart TD
     S09 -.->|maxsi| S07
 ```
 
-
 ---
 
 ## Running the pipeline
 
-The README gives the run commands, the settings and the memory and time of each step. This section holds the detail.
-
-The work is split into steps mostly to keep memory use down, since the synapse table and all the skeletons don't fit in memory together.
+The README gives the run commands, the settings and each step's memory and time. The steps are split mostly to save memory: the synapse table and all the skeletons don't fit in memory together.
 
 ### Running on your own machine
 
-The full pipeline has been run on one machine, a Mac with 36 GB of memory and 14 cores (Apple M4 Max; macOS, Python 3.12.4, the pinned packages). It hasn't been tried on Linux or Windows. The memory and time of each step there are in the table in the README's [Setup](../README.md#setup) section.
+The full pipeline has been run on one machine, a Mac with 36 GB of memory and 14 cores (Apple M4 Max; macOS, Python 3.12.4, the pinned packages); not on Linux or Windows. Each step's memory and time are in the README's [Setup](../README.md#setup) table.
 
-macOS compresses memory when it runs short, and resident memory leaves out compressed and swapped pages, so the peak memory footprints, which do count them, can be higher: 19.1 GB for step 03 and 30.3 GB for building step 09's tables; each step 01 copy peaked at 7.9 to 8.3 GB and each step 09 labelling copy at 6.6 to 7.1 GB. Plan on 32 GB of memory plus swap. On Linux or Windows, set up swap. Whatever the number of copies, step 09's table building (30.3 GB footprint), step 06 (20.6 GB resident), step 03 (19.1 GB footprint) and step 04 (17.7 GB resident) each run as one process, so they set a floor on memory whatever the number of copies; no machine smaller than 36 GB has been tried. Step 01 as 5 copies also held more than 16 GB. On a smaller machine run steps 01 and 09 as fewer copies, but each copy then reads a larger share of the synapses and holds more memory; only 5 copies have been measured (6.2 to 6.7 GB resident, 7.9 to 8.3 GB footprint per copy). Run no more copies than cores.
-
-Steps 01, 02a and 08 use `methods/flow_centrality.py`, which gives navis's flow centrality values with far less memory: splitting an 80,071-node cell takes about 1.0 GB for the whole process, against 9.1 GB with navis's own calculation. Steps 01 and 02a read through the whole synapse CSV first.
-
-Steps 01 and 09 can run as several copies at once to use more cores (see Script 01 and Script 09 below). The times in the README's table are for 5 copies. Together they used 9.3 CPU-hours for step 01 and 2.3 for step 09; one copy has not been timed. With 5 copies, the running times of steps 01 to 07 and 09 add up to about 3 hours. Steps 01, 08 and 09 pick up where they left off if stopped; the others start again from the beginning.
-
-navis has to be 1.7.0, without navis-fastcore. With anything else, steps 01, 02a and 08 stop with an ImportError when they import `methods/flow_centrality.py`: 02a and 08 straight away, 01 after it has read the synapse CSV. navis-fastcore and other navis versions compute the flow centrality differently, which could move the split. Install from `requirements.txt` or `environment.yml` and don't add navis-fastcore.
-
-On another machine the tables should hold the same values, though not always the same bytes. A few steps read files in the order the file system lists them (02a when it gathers its per-cell files, 04 and 05 when they read the per-folder pickles), so rows can come out in a different order, and a different processor can change the last digits of some floating-point values. To compare tables, sort them by `synapse_id` (synapse tables) or `root_id` (neuron tables) and compare floating-point columns with a small tolerance, not checksums.
+- Memory: plan on 32 GB of memory plus swap (on Linux or Windows, set up swap). Resident memory leaves out pages macOS compresses or swaps, and the peak memory footprint counts them, so it can be higher. Four steps always run as one process, so they set a floor: step 09's table building (30.3 GB footprint), step 06 (20.6 GB resident), step 03 (19.1 GB footprint) and step 04 (17.7 GB resident). No machine smaller than 36 GB has been tried.
+- Copies: steps 01 and 09 can run as several copies at once (see Script 01 and Script 09 below). Only 5 copies have been measured, per copy: step 01 6.2 to 6.7 GB resident and 7.9 to 8.3 GB footprint, step 09 labelling 6.6 to 7.1 GB footprint. The 5 step 01 copies together held at least 17.7 GB (sampled once a minute). Fewer copies suit a smaller machine, but each copy then reads a larger share of the synapses and holds more memory. Run no more copies than cores.
+- Time: the README's times are for 5 copies, which together used 9.3 CPU-hours for step 01 and 2.3 for step 09. A single-copy run has not been timed. With 5 copies, the running times of steps 01 to 07 and 09 add up to about 3 hours. If stopped, steps 01, 08 and 09 pick up where they left off; the others start again.
+- navis: it has to be 1.7.0, without navis-fastcore (install from `requirements.txt` or `environment.yml`): anything else computes the flow centrality differently, which could move the split, so steps 01, 02a and 08 then stop with an ImportError when they import `methods/flow_centrality.py` (02a and 08 straight away, 01 after reading the synapse CSV). That module splits an 80,071-node cell in about 1.0 GB for the whole process, against 9.1 GB with navis's own calculation. Steps 01 and 02a read through the whole synapse CSV first.
+- Other machines: the tables should hold the same values, though not always the same bytes. 02a (its per-cell files), 04 and 05 (the per-folder pickles) read files in the order the file system lists them, so rows can come out in a different order, and a different processor can change the last digits of some floating-point values. Compare tables sorted by `synapse_id` (synapse tables) or `root_id` (neuron tables), floating-point columns with a small tolerance, not by checksums.
 
 ### Settings: SPLIT_METHOD and PIPELINE_RUN
 
-`SPLIT_METHOD` in `config.py` chooses the split the scripts read: `"sfc"` (the published split, the default), `"maxsi"`, `"minfisherp"` or `"maxphi"`. Leave it at `"sfc"` until step 09 has written that method's three tables. What follows describes `"maxsi"`; `"minfisherp"` and `"maxphi"` work the same way with their own folders (`data/derived_minfisherp/`, `outputs_minfisherp/`, and so on).
+**`SPLIT_METHOD`** in `config.py` chooses the split the scripts read: `"sfc"` (the published split, the default), `"maxsi"`, `"minfisherp"` or `"maxphi"`. Leave it at `"sfc"` until step 09 has written that method's three tables. Under `"maxsi"` (the others alike, in their own folders: `data/derived_minfisherp/`, `outputs_minfisherp/`, and so on):
 
-Under `"maxsi"`, `SYNAPSE_TABLE_FTR`, `NEURON_TABLE_FTR` and `SI_UPDATED_FTR` point to step 09's tables. The tables built from them by steps 06 and 07 and by the figure scripts that write tables (`MAXSI_SWITCHED`) are read from and written to `data/derived_maxsi/` and `data/intermediate_maxsi/`, under the same file names. Figures and tool reports go to `outputs_maxsi/`. So nothing built on the MaxSI split is written into the published folders. Steps 01 to 05 always write the SFC tables, and step 08 and `phi_threshold.py` always read them, so their results do not depend on the setting (step 08 never overwrites an existing `SI_comparisons.ftr`). After switching, run steps 06 and 07 again, then the figure scripts, the ones that write tables first (see the README's [Figures](../README.md#figures) section).
+- `SYNAPSE_TABLE_FTR`, `NEURON_TABLE_FTR` and `SI_UPDATED_FTR` point to step 09's tables.
+- Tables built from them by steps 06, 07 and the table-writing figure scripts (`MAXSI_SWITCHED`) live in `data/derived_maxsi/` and `data/intermediate_maxsi/`, under the same file names; figures and tool reports go to `outputs_maxsi/`. Nothing built on the MaxSI split reaches the published folders.
+- Steps 01 to 05 always write the SFC tables, and step 08 and `phi_threshold.py` always read them (step 08 never overwrites an existing `SI_comparisons.ftr`).
+- Tables with no MaxSI version (`MAXSI_NOT_AVAILABLE`: the Fig 7 bouton, filopodia, inertia, per-synapse bouton and `t2.ftr` tables, the revised Fig 4E's per-type table and the Buhmann tables) point into `_maxsi` folders that nothing writes (the per-synapse bouton tables into `data/raw_maxsi/`), so a script that reads one stops rather than draw an SFC panel among the MaxSI ones; do not copy the SFC files there. A missing file in a `_maxsi` folder means its writer (09, 06, 07 or a figure script) has not yet run under `"maxsi"`, or the table has no MaxSI version.
+- After switching, rerun steps 06 and 07, then the figure scripts, table-writing ones first (README, [Figures](../README.md#figures)).
 
-Some tables have no MaxSI version (`MAXSI_NOT_AVAILABLE`): the Fig 7 bouton, filopodia, inertia, per-synapse bouton and `t2.ftr` tables, the revised Fig 4E's per-type table and the Buhmann tables. They point into the `_maxsi` folders (the per-synapse bouton tables into `data/raw_maxsi/`), where nothing writes them. A script that reads one stops, rather than drawing an SFC panel among the MaxSI ones. Do not copy the SFC files there to make it run. So if a script stops on a missing file in a `_maxsi` folder, either the script that writes it (09, 06, 07 or a figure script) has not yet run under `"maxsi"`, or the table has no MaxSI version.
+**`PIPELINE_RUN`** in `config.py` chooses which run the scripts build and read: `"published"` (the default: the delivered tables in `data/derived/` and `data/intermediate/`, figures in `outputs/`) or `"rebuild"`, a fresh run from step 01 on every skeleton.
 
-`PIPELINE_RUN` in `config.py` chooses which run of the pipeline the scripts build and read: `"published"` (the default: the delivered tables in `data/derived/` and `data/intermediate/`, figures in `outputs/`) or `"rebuild"`, a fresh run from step 01 on every skeleton. Under `"rebuild"` every table a step or figure script writes, and every such table they read, lives in `data/derived_rebuild/` and `data/intermediate_rebuild/`, and figures go to `outputs_rebuild/`, so a fresh run cannot write over a published table. Inputs no script here builds stay where they are (`REBUILD_KEEPS_PUBLISHED`: `swc_data.ftr` and the two raw synapse tables, so do not run `build_raw_synapse_table.py` under `"rebuild"`). The co-authors' tables, made from the published tables, have no rebuilt version (`REBUILD_NOT_AVAILABLE`, the same list as `MAXSI_NOT_AVAILABLE`), so their scripts stop. `SPLIT_METHOD` applies on top: `"rebuild"` with `"maxsi"` uses `data/derived_rebuild_maxsi/` and `outputs_rebuild_maxsi/` (likewise `_rebuild_minfisherp`, `_rebuild_maxphi`). Leave it at `"published"` unless you are making a fresh run. Under `"published"`, steps 01 to 07 stop at the start (`refuse_published_run` in `config.py`), since their outputs there are the published tables. To make a fresh run, set `PIPELINE_RUN = "rebuild"`; `data/derived/swc_data.ftr` and the raw synapse table (`SYNAPSE_TABLE_RAW_FTR`) must already exist, since no step of the run writes them. Then run 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07 with `SPLIT_METHOD = "sfc"`. For a split made by step 09, run 01 → … → 05, then 09 with that method, then set `SPLIT_METHOD` to the same method and run 06 → 07, then the figure scripts in the usual order.
+- Under `"published"`, steps 01 to 07 stop at the start (`refuse_published_run` in `config.py`), since their outputs there are the published tables.
+- Under `"rebuild"`, every table a step or figure script writes or reads lives in `data/derived_rebuild/` and `data/intermediate_rebuild/`, and figures go to `outputs_rebuild/`, so a fresh run cannot write over a published table. Inputs no script here builds stay in `data/derived/` (`REBUILD_KEEPS_PUBLISHED`: `swc_data.ftr` and the two raw synapse tables), so do not run `build_raw_synapse_table.py` under `"rebuild"`. The co-authors' tables have no rebuilt version (`REBUILD_NOT_AVAILABLE`, the same list as `MAXSI_NOT_AVAILABLE`), so their scripts stop.
+- `SPLIT_METHOD` applies on top: `"rebuild"` with `"maxsi"` uses `data/derived_rebuild_maxsi/` and `outputs_rebuild_maxsi/` (likewise `_rebuild_minfisherp`, `_rebuild_maxphi`).
+
+**A fresh run.** Set `PIPELINE_RUN = "rebuild"` and keep it while you run the steps and draw that run's figures (under `"published"` the figure scripts read the delivered tables). `data/derived/swc_data.ftr` must already exist, since no script here writes it; the raw synapse table (`SYNAPSE_TABLE_RAW_FTR`, made by `build_raw_synapse_table.py`) is needed only by steps 08 and 09 and three figure scripts. Run 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07 with `SPLIT_METHOD = "sfc"`. For a step 09 split, run 01 → … → 05, then 09 with that method, set `SPLIT_METHOD` to it, run 06 → 07, then the figure scripts in the usual order.
 
 ---
 
@@ -102,8 +102,11 @@ Some tables have no MaxSI version (`MAXSI_NOT_AVAILABLE`): the Fig 7 bouton, fil
 
 **File:** `processing/01_extract_compartments_SI.py`
 
-Walks each neuron's SWC skeleton to classify synapses as axonal or dendritic, and computes the
-Segregation Index (SI) for every standard neuron. Works through the skeleton subfolders of `SWC_DIR` one at a time and saves four pickles per subfolder (`connectors.pkl`, `all_SI.pkl`, `issues.pkl`, `linker.pkl`), each covering every neuron in it. Synapses from a neuron to itself are dropped first, and synapses more than 10,000 nm from the nearest skeleton node are dropped when they are attached, so SI is computed on the axon and dendrite synapses that are left (linker synapses are not counted). A subfolder counts as done once its `linker.pkl`, the last pickle written, exists, so a run that was stopped picks up where it left off and redoes a half-written subfolder. Each pickle is written under a temporary name holding the process id and then renamed, `linker.pkl` last. The step can run as several copies at once: set `N_SHARDS` and `SHARD` at the top of the script, or the environment variables `STEP01_N_SHARDS` and `STEP01_SHARD`, which override them, and start one copy for each `SHARD` from 0 to `N_SHARDS - 1`. Copy `k` takes every `N_SHARDS`-th subfolder of the full sorted list, starting at `k` (never of the list still to do, so a restarted copy takes the same subfolders), and keeps only the CSV rows of its own subfolders' cells; the pickles are the same bytes as a single run's. Start each copy once, with the same `N_SHARDS` for all, and check afterwards that all 93 subfolders have their `linker.pkl`. The synapse CSV is read in chunks, keeping only the columns the step uses; reading the full table peaked at a memory footprint of about 10 GB (measured once, macOS). Step 01 skips neurons with more than 80,000 skeleton nodes; step 02a processes them. Run step 02b only after step 01 has finished every subfolder.
+Labels each synapse axonal or dendritic along the neuron's SWC skeleton and computes the Segregation Index (SI) of every standard neuron. It skips neurons with more than 80,000 skeleton nodes; step 02a processes the large neurons from its own list of IDs. Run step 02b only after step 01 has finished every subfolder.
+
+- Synapses: synapses from a neuron to itself are dropped first, and synapses more than 10,000 nm from the nearest skeleton node when attached; SI is computed on the axon and dendrite synapses left (linker synapses are not counted). The CSV is read in chunks, only the columns used; the full read peaked at a memory footprint of about 10 GB (measured once, macOS).
+- Output: four pickles per skeleton subfolder of `SWC_DIR`: `connectors.pkl`, `all_SI.pkl`, `issues.pkl`, `linker.pkl`, each written under a temporary name and renamed, `linker.pkl` last. A subfolder with its `linker.pkl` is done; a stopped run resumes and redoes a half-written one.
+- Copies: set `N_SHARDS` and `SHARD` at the top of the script, or the environment variables `STEP01_N_SHARDS` and `STEP01_SHARD`, which override them. Start one copy per `SHARD` from 0 to `N_SHARDS - 1`, each once, all with the same `N_SHARDS`. Copy `k` takes every `N_SHARDS`-th subfolder of the full sorted list from `k` (so a restart takes the same ones) and reads only its cells' CSV rows; the pickles are byte-identical to a single run's. Afterwards check that all 93 subfolders have their `linker.pkl`, before running step 02b.
 
 | | |
 |--|--|
@@ -118,13 +121,7 @@ Segregation Index (SI) for every standard neuron. Works through the skeleton sub
 
 **File:** `processing/02a_large_neurons_pipeline.py`
 
-Applies the same compartment-labelling and SI logic as script 01, but for oversized neurons that
-require a separate memory/chunking strategy. Also writes big-neuron connector feather tables directly.
-It works from a list of 186 neuron IDs written into the script, not from step 01's size check (182 of them got an SI).
-It reads the synapse CSV in chunks and keeps only the synapses of its 186 cells; the read peaked at a
-memory footprint of about 10 GB (measured once, macOS). Processing each of the four largest cells (two
-CT1, two APL; loading, healing, attaching synapses and splitting) took 3.1 to 4.2 minutes (one run, macOS; a separate test run of those four cells, with navis's own flow
-centrality). The whole step held at most 12.9 GB resident (one run, macOS; see the README).
+Step 01's compartment labelling and SI for the oversized neurons, with its own memory/chunking strategy; it also writes their connector feather tables. It works from a list of 186 neuron IDs written into the script, not from step 01's size check (182 of them got an SI), and keeps only their synapses while reading the CSV in chunks (peak memory footprint about 10 GB, measured once, macOS). Each of the four largest cells (two CT1, two APL) took 3.1 to 4.2 minutes to load, heal, attach synapses and split (one run, macOS; a separate test run of those four cells, with navis's own flow centrality). The whole step held at most 12.9 GB resident (one run, macOS; see the README).
 
 | | |
 |--|--|
@@ -138,14 +135,7 @@ centrality). The whole step held at most 12.9 GB resident (one run, macOS; see t
 
 **File:** `processing/02b_merge_connectors.py`
 
-Reads the `connectors.pkl` file of each script 01 output folder and aggregates them into combined
-pre- and post-synaptic connector feather tables for standard neurons. It takes nothing from 02a.
-It works through the folders one at a time in folder-name order, appending each folder's rows to the two files,
-so step 01's connectors are never all in memory at once (gathering them first would take far more than 32 GB:
-step 01 stores every column as Python objects). The rows come in folder-name order, so two runs give the same row order. On
-15 folders (two sets) the tables hold the same rows as tables built by gathering every folder at once, compared after
-sorting by synapse_id. Both files are written under a temporary name and renamed at the end, so a run that stops
-part-way leaves the files from any previous run as they were.
+Collects each step 01 folder's `connectors.pkl` into pre- and post-synaptic connector feather tables for the standard neurons (nothing from 02a). It appends one folder at a time in folder-name order, so the row order is the same on every run and memory stays low (gathering all folders first would take far more than 32 GB). On 15 folders (two sets) the rows equal those of gathering every folder at once, sorted by synapse_id. Both files are renamed into place at the end, so a stopped run leaves earlier files intact.
 
 | | |
 |--|--|
@@ -159,15 +149,7 @@ part-way leaves the files from any previous run as they were.
 
 **File:** `processing/03_merge_synapses_connectors.py`
 
-Joins the raw Princeton synapse detection table with the per-neuron connector tables (both standard
-and large-neuron batches) to produce a unified synapse table with connector associations.
-It reads the synapse CSV in chunks, treated as in step 02a, and keeps every synapse except those from a neuron to
-itself. Each chunk gets its pre label from the connector tables, a lookup on `synapse_id` (which appears once in
-them, so this gives what a left join on `synapse_id` gives), and is written to `SYNAPSES_PRE_MERGE_FTR`; that file is then read back
-piece by piece to add the post label. Only the label and `synapse_id` columns of step 02b's tables are read. Both
-files are written under a temporary name and renamed at the end. On the first 2,000,000 rows of the CSV it writes
-the same tables, in the same order, as reading the whole CSV and then the whole connector tables at once would (a
-whole-CSV read peaked at about 35 GB in step 02a's test).
+Joins the raw Princeton synapse table with the connector tables (standard and large-neuron), adding to each synapse end the compartment label of its connector row (an end with no connector row gets none; step 04 drops those synapses). It reads the CSV in chunks, as step 02a does, dropping only synapses from a neuron to itself. Each chunk gets its pre label by `synapse_id` and is written to `SYNAPSES_PRE_MERGE_FTR`, which is read back piece by piece to add the post label; both files are renamed into place at the end. On the first 2,000,000 rows of the CSV it writes the same tables, in the same order, as a whole-table run (a whole-CSV read peaked at about 35 GB in step 02a's test).
 
 | | |
 |--|--|
@@ -181,14 +163,7 @@ whole-CSV read peaked at about 35 GB in step 02a's test).
 
 **File:** `processing/04_build_master_synapse_table.py`
 
-Assigns final compartment labels (AA/AD/DA/DD, or one of five linker combinations such as AL) to every synapse in the merged table. This produces
-the primary analysis-ready synapse table used by nearly all figure scripts.
-It reads step 03's table piece by piece. Each piece loses the synapses missing either label, gets each end's SI by a
-lookup on the cell ID (each cell has one SI, so this gives what a left merge on the cell ID gives), loses every row with an empty value,
-and gets `comp`; the pieces are written in order, under a temporary name renamed at the end. The null and duplicate
-counts it prints are computed over the whole table from only the columns they need. On step 03's output for the first
-2,000,000 rows of the CSV it writes the same table, and prints the same counts, as the same calculation done on the
-whole table at once, which holds it and several copies of it in memory.
+Gives every synapse its final compartment label (AA/AD/DA/DD, or one of five linker combinations such as AL), making the synapse table nearly all figure scripts read. Piece by piece, it drops the synapses missing either label, adds each end's SI by cell ID, drops every row with an empty value and adds `comp`. On step 03's output for the first 2,000,000 rows of the CSV, the table and its printed null and duplicate counts match a whole-table run, which holds the table several times over in memory.
 
 | | |
 |--|--|
@@ -203,17 +178,15 @@ whole table at once, which holds it and several copies of it in memory.
 
 **File:** `processing/05_build_neuron_metadata_table.py`
 
-Aggregates per-synapse information to the per-neuron level and joins annotation tables to create
-the main neuron metadata table used by almost all figure scripts.
-It reads only the `pre`, `post` and `comp` columns of the synapse table, the only ones it uses.
+Aggregates the synapses per neuron and joins the annotation tables into the neuron metadata table almost all figure scripts read. It reads only the `pre`, `post` and `comp` columns of the synapse table.
 
 | | |
 |--|--|
 | **Inputs** | `NEURON_ANNOTATIONS_CSV`, `CELL_STATS_CSV`, `NEURONS_CSV`, `SYNAPSE_TABLE_SFC_FTR`, the SI and linker PKLs from `PROCESSED_SWC_DIR` (per folder) and `PROCESSED_BIG_NEURONS_DIR` (per neuron), `RANKS_DIR`, `SWC_DATA_FTR` (not generated by any script; see `docs/data_availability.md`) |
-| **Outputs** | `SI_UPDATED_SFC_FTR`, `NEURON_TABLE_SFC_FTR` (`neuron_data_full_article_princeton.ftr`), under either `SPLIT_METHOD` (`SI_UPDATED_FTR` and `NEURON_TABLE_FTR` are the same files under `"sfc"`). The table is built in passes on a working copy, `NEURON_TABLE_PARTIAL_FTR`, and written once at the end, when the copy is deleted |
+| **Outputs** | `SI_UPDATED_SFC_FTR`, `NEURON_TABLE_SFC_FTR` (`neuron_data_full_article_princeton.ftr`), under either `SPLIT_METHOD` (`SI_UPDATED_FTR` and `NEURON_TABLE_FTR` are the same files under `"sfc"`). The table is built in passes on a working copy, `NEURON_TABLE_PARTIAL_FTR`, which is deleted when the table is written at the end |
 | **Key columns** | `root_id`, `super_class`, `primary_type`, `nt_type`, `SI`, `cable_length`, synapse counts, morphological features, sensory rank columns |
 | **Downstream** | Scripts 06, 07, 08, 09, `phi_threshold.py`; virtually all figure scripts |
-| **Note** | The left merge at line 261 keeps every synapse-table cell; those that are not among the annotated cells with an SI get an empty `root_id`, which makes that column float64, and at the size of these IDs a float64 rounds them (it holds only every 128th integer there). Line 298 drops those rows and line 299 sets `root_id` from `neuron`, so the table stores exact int64 IDs, as the delivered table does. Without line 299 the column would hold the rounded float values (no other column would differ); a neuron table written without that line has rounded `root_id` values and should be rebuilt. `tools/check_step05_root_id.py` runs these lines on the real IDs and checks the result. |
+| **Note** | The left merge at line 263 gives synapse-table cells that are not annotated cells with an SI an empty `root_id`, making the column float64, which rounds IDs this large (it holds only every 128th integer there). Line 300 drops those rows and line 301 resets `root_id` from `neuron`, so the table holds exact int64 IDs, like the delivered one. A neuron table written without line 301 has rounded `root_id` values (no other column differs) and should be rebuilt; `tools/check_step05_root_id.py` checks these lines on the real IDs. |
 
 ---
 
@@ -221,12 +194,7 @@ It reads only the `pre`, `post` and `comp` columns of the synapse table, the onl
 
 **File:** `processing/06_build_connection_reciprocity_table.py`
 
-Takes the synapse table and neuron table, computes per-connection synapse-type counts, identifies
-reciprocal pairs, and produces the connection-level analysis table.
-It counts the synapse table with pyarrow (only `pre`, `post` and `comp`, only AA/AD/DA/DD), pivots the counts once
-into the per-pair table, and finds the reciprocal pairs with a join of each connection with its reverse. On two
-slices of the data it writes the same five tables as a calculation with pandas `groupby`, `pivot_table`
-twice and a `networkx` graph, which, measured on the slices, would need far more memory than a 36 GB Mac has; on the full table it took about half a minute and peaked at about 21 GB.
+Counts the synapse types of each connection and finds the reciprocal pairs, with pyarrow (only `pre`, `post` and `comp`, only AA/AD/DA/DD). On two slices of the data it writes the same five tables as pandas `groupby`, `pivot_table` twice and a `networkx` graph, which, measured on the slices, would need far more memory than a 36 GB Mac has. On the full table it took about half a minute and peaked at about 21 GB.
 
 | | |
 |--|--|
@@ -241,8 +209,7 @@ twice and a `networkx` graph, which, measured on the slices, would need far more
 
 **File:** `processing/07_pca_morphology.py`
 
-Runs PCA on per-neuron morphological feature vectors from the neuron metadata table. Produces
-per-neuron PCA scores used in Figure 4 and one supporting script.
+Runs PCA on the per-neuron morphological features of the neuron metadata table; the scores are used in Figure 4 and one supporting script.
 
 | | |
 |--|--|
@@ -257,15 +224,14 @@ per-neuron PCA scores used in Figure 4 and one supporting script.
 
 **File:** `processing/larva/larva_process.py`
 
-Attaches the larval synapses to the larval skeletons, splits each neuron into axon and dendrite and
-computes SI, for the larval curve in Figure 2A. Independent of scripts 01–09.
+Attaches the larval synapses to the larval skeletons, splits each neuron into axon and dendrite and computes SI, for the larval curve in Figure 2A. Independent of scripts 01–09.
 
 | | |
 |--|--|
 | **Inputs** | `LARVA_SWC_DIR`, `LARVA_SYNAPSE_TABLE_CSV`, `LARVA_NEURON_LIST_CSV` (the larval raw files, from the corresponding authors) |
 | **Outputs** | `LARVA_SI_FTR`, `LARVA_SYNAPSES_FTR`, and intermediate connector tables in `LARVA_DATA_DIR` |
 | **Downstream** | `figures/fig2/fig2a_si_cdf_adult_larva.py` |
-| **Note** | As committed it produces no usable output: it calls `attach_synapses_larva2` (line 101), which is not defined in this repository; the bare `except` in `heal_attach`, which is called once on the whole neuron list (line 147), turns that error into a text string, so no neuron is split and the SI output is empty |
+| **Note** | As committed it produces no usable output. It calls `attach_synapses_larva2` (line 101), which is not defined in this repository, and the bare `except` in `heal_attach` (called once on the whole neuron list, line 147) turns that error into a text string, so no neuron is split and the SI output is empty |
 
 ---
 
@@ -273,21 +239,15 @@ computes SI, for the larval curve in Figure 2A. Independent of scripts 01–09.
 
 **File:** `processing/08_alternative_split_methods.py`
 
-Compares the published SFC axon/dendrite split with two single-node cuts: the node whose cut
-gives the highest SI (MaxSI), and the node with the lowest Fisher p-value (MinFisherP). A
-candidate node is any non-root node with exactly one child; the synapses on that node are left
-out of its score. The functions that score the candidate nodes are in `methods/node_cut_si.py`, shared with step 09. Runs over the intrinsic neurons in batches of 500 and skips batches whose
-output files already exist. An existing `SI_comparisons.ftr` is never overwritten. `MaxSI_SI` can be lower than
-`SFC_SI` (2,433 of 118,347 neurons in the authors' `SI_comparisons.ftr`): the SFC score leaves linker synapses out, while a
-single cut places every synapse except those on the cut node on one side, and only nodes with one child can be cut.
+Compares the published SFC axon/dendrite split with two single-node cuts: the node whose cut gives the highest SI (MaxSI) and the node with the lowest Fisher p-value (MinFisherP). Candidates are non-root nodes with exactly one child, scored without their own synapses by `methods/node_cut_si.py` (shared with step 09). It runs over the intrinsic neurons in batches of 500, skipping batches already saved, and never overwrites an existing `SI_comparisons.ftr`. `MaxSI_SI` can be lower than `SFC_SI` (2,433 of 118,347 neurons in the authors' `SI_comparisons.ftr`): the SFC score leaves linker synapses out, while a single cut puts every synapse but the cut node's on a side, and only one-child nodes can be cut.
 
 | | |
 |--|--|
 | **Inputs** | `NEURON_TABLE_SFC_FTR` (the SFC cells under either `SPLIT_METHOD`, so the output does not depend on it), `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` |
-| **Outputs** | Per batch in `ALT_SPLIT_BATCH_DIR`: `summary_batch_NNNN.ftr`, `nodes_batch_NNNN.ftr`, `failures_batch_NNNN.ftr`, and `batch_run.json`, a record of what the batches were made from (a rerun that differs, batch files with no record, a missing batch, or summaries and failures that together do not cover every neuron of the run stop the script; a neuron whose split has not one axon and one dendrite is a failure); combined `SI_COMPARISONS_FTR` (`SI_comparisons.ftr`), written only if that file does not already exist |
+| **Outputs** | Per batch in `ALT_SPLIT_BATCH_DIR`: `summary_batch_NNNN.ftr`, `nodes_batch_NNNN.ftr`, `failures_batch_NNNN.ftr`, and `batch_run.json`, a record of what the batches were made from. It stops on a differing rerun, batch files with no record, a missing batch (also when combining), or summaries and failures that miss a neuron of the run (a split without one axon and one dendrite is a failure). Combined: `SI_COMPARISONS_FTR` (`SI_comparisons.ftr`) |
 | **Key columns** | `neuron_id`, `SFC_SI`, `SFC_Phi`, `MaxSI_SI`, `MinFisherP_Phi` |
 | **Downstream** | `processing/phi_threshold.py` |
-| **Note** | `SYNAPSE_TABLE_RAW_FTR` (`synapses_783_article_princeton_raw.ftr`) is built by `processing/build_raw_synapse_table.py` from the Codex CSV (run it first); that file must have `size` and `neuropil` columns, so the synapse table from step 04 can't be used in its place; `SWC_DIR` must hold the skeletons of every intrinsic neuron, so the script cannot be run from the downloads alone. Unlike scripts 01 and 02a, it does not drop synapses from a neuron to itself, so its `SFC_SI` matches the SI that script 05 writes (`SI_updated.ftr`) only if the raw table has none: the default version (`RAW_TABLE_KEEP_SELF_SYNAPSES = False`) has none. When combining, a missing batch file stops the combine step. To run it on some neurons only, for example those whose skeletons you have, use `tools/check_split_methods_on_subset.py` ([docs/tools.md](tools.md#checking-the-split-methods)); `tools/check_split_functions.py` checks step 08's split code on made-up neurons, and `tools/compare_split_runs.py` compares the cuts of two runs |
+| **Note** | `SYNAPSE_TABLE_RAW_FTR` (`synapses_783_article_princeton_raw.ftr`) is built by `processing/build_raw_synapse_table.py` from the Codex CSV (run it first); it needs `size` and `neuropil` columns, so step 04's table can't replace it. `SWC_DIR` must hold every intrinsic neuron's skeleton, so the downloads alone are not enough. Unlike scripts 01 and 02a, it does not drop synapses from a neuron to itself, so its `SFC_SI` matches the SI step 05 writes (`SI_updated.ftr`) only if the raw table has none, as the default version (`RAW_TABLE_KEEP_SELF_SYNAPSES = False`) has none. For some neurons only (for example those whose skeletons you have), use `tools/check_split_methods_on_subset.py` ([docs/tools.md](tools.md#checking-the-split-methods)); `tools/check_split_functions.py` checks step 08's split code on made-up neurons, and `tools/compare_split_runs.py` compares the cuts of two runs |
 
 ---
 
@@ -295,9 +255,9 @@ single cut places every synapse except those on the cut node on one side, and on
 
 **File:** `processing/09_maxsi_synapse_labels.py`
 
-Labels every synapse end A or D under the MaxSI, MinFisherP or MaxPhi split, so that the figure
-scripts can read that split in place of the published SFC split. The setting `METHOD` (or the
-environment variable `STEP09_METHOD`, which overrides it) picks the cut rule and the folders:
+Labels every synapse end A or D under the MaxSI, MinFisherP or MaxPhi split, for the figure scripts to read in place of the published SFC split. It needs every cell's skeleton, not only the intrinsic ones step 08 uses. Below, MaxSI names stand for the chosen method's.
+
+**Methods.** The setting `METHOD` (or the environment variable `STEP09_METHOD`, which overrides it) picks the cut rule and the folders:
 
 | `METHOD` | Cut node | Summary columns | Folders |
 |--|--|--|--|
@@ -305,40 +265,47 @@ environment variable `STEP09_METHOD`, which overrides it) picks the cut rule and
 | `"minfisherp"` | lowest two-sided Fisher exact p of the side counts (nodes with no p left out; p = 0 ties included) | `MinFisherP_SI`, `fisher_p`, `n_tied_min_fisher_p`, `n_tied_min_fisher_p_distinct_sides` | `MINFISHERP_*` (`_minfisherp`) |
 | `"maxphi"` | highest \|phi\| of the side counts, phi = (ad − bc) / √((a+b)(c+d)(a+c)(b+d)), a, b = side 1 pre, post and c, d = side 2 pre, post (nodes where the root is 0 left out) | `MaxPhi_SI`, `Phi`, `n_tied_max_Phi`, `n_tied_max_Phi_distinct_sides` | `MAXPHI_*` (`_maxphi`) |
 
-MinFisherP runs the Fisher test at every node, so it is slower than the other two. A cell's SI is
-the SI of the chosen cut. MinFisherP chooses without regard to the SI, so its cut can have an empty
-SI (when every synapse off the cut node is of one kind). Such a cut leaves both sides with the same
-presynaptic fraction, so the cell fails and is dropped; the run prints the count of labelled cells
-with an empty SI, which is therefore 0. Below, the MaxSI names stand for the chosen method's. The tables inherit the SFC tables' cells and
-synapse rows: a cell the SFC split failed on is never tried. For every cell of `NEURON_TABLE_SFC_FTR`
-(every super-class), it heals the skeleton (`navis.heal_skeleton`) and attaches the synapses (`attach_synapses_princeton`, which keeps `synapse_id`). These are the two calls inside `methods_all.heal_attach_princeton`; step 09 makes them itself, so a failed cell records the real error message. It scores every candidate cut with
-step 08's own code (`methods/node_cut_si.py`) and cuts at the node the method chooses; on a tie
-it takes the first node in the node table's order (pandas `idxmax`, or `idxmin` for MinFisherP), and the summary records how many
-nodes tie and how many different side counts they give (for MaxSI also how many are within numpy isclose of the highest SI). Side 1 is the cut node's
-child and its descendants, side 2 the rest of the cell without the cut node. The axon is the side
-whose presynaptic fraction is above the whole cell's, counted without the cut node's synapses;
-a cell whose two sides have the same fraction, or with a side that has no synapse, fails and gets
-no labels. The synapses on the cut node get no label. The raw synapse table must have no
-self-synapses (the script stops otherwise). Batches of 500, skipped when their files exist;
-each batch file is written under a temporary name holding the process id and renamed, the failures file last. The labelling can run as several copies at once: set `N_SHARDS` and `SHARD` in the settings, or the environment variables `STEP09_N_SHARDS` and `STEP09_SHARD`, and start one copy for each `SHARD`. Copy `k` labels the batches whose number, counted from 0, modulo `N_SHARDS` is `k` (copy 0 takes batch files 0001, 0001 + `N_SHARDS`, …), reads only those cells' synapses, and stops once its batches are done; a last run with `N_SHARDS = 1` (and `STEP09_N_SHARDS` and `STEP09_SHARD` unset, since they override the settings; keep `STEP09_METHOD` set to the same method as the copies) then finds every batch saved and builds the three tables. The failed-cell count differs between methods, so set `ACCEPT_FAILED_CELLS` (or the environment variable `STEP09_ACCEPT_FAILED_CELLS`) for each method's run. The batch files are the same bytes as a single run's.
-`batch_run.json` records the method, the cell list, the raw synapse table, the skeleton files (count and a hash of
-their paths and sizes) and the navis version, and a run with different ones is refused. It stops at the start if
-a skeleton file name is in two subfolders of `SWC_DIR`, and stops on a `MemoryError` instead of
-recording it as a failed cell. Before writing a table it prints the failure count and errors, then stops if: a cell failed for want of a
-usable skeleton (unless `ACCEPT_CELLS_WITHOUT_SKELETON = True`); the number of failed cells is not
-`ACCEPT_FAILED_CELLS` (None: no cell may fail); no cell was labelled; the batches do not hold every cell
-exactly once; or only some of its three tables exist.
+A cell's SI is that of the chosen cut. Ties go to the first node in node-table order (pandas `idxmax`; `idxmin` for MinFisherP), and the summary counts the tied nodes and their distinct side counts (for MaxSI also the nodes within numpy isclose of the highest SI). Step 08 breaks ties by a sort, so for MinFisherP the two can differ when several nodes tie at the lowest p. Step 08 computes phi only for the SFC and MinFisherP cuts.
 
-**Running step 09.** The `"maxphi"` cut uses the highest |phi|; step 08 computes this phi only for the SFC and MinFisherP cuts. On a tie step 09 takes the first node in the node table's order. Step 08 breaks ties by a sort instead, so for MinFisherP the two can choose different nodes when several nodes tie at the lowest p. Each method's batches and tables go to folders of their own, so runs of different methods never collide, and a rerun with the same method skips the batches already saved. It writes three tables to `data/derived_maxsi/` (`data/derived_minfisherp/`, `data/derived_maxphi/`), with the published file names and format: the synapse table, the neuron table and `SI_updated.ftr`, all on the SI of each cell's chosen cut. Its batches go to `data/intermediate_maxsi/maxsi_labels/` (`intermediate_minfisherp/minfisherp_labels/`, `intermediate_maxphi/maxphi_labels/`), and `batch_run.json` records the method, so batches of two methods are never mixed. It needs the skeletons of every cell, not only the intrinsic ones step 08 uses. Before the first full run of a method, run it once, read the count and errors it prints, then set `ACCEPT_CELLS_WITHOUT_SKELETON` and `ACCEPT_FAILED_CELLS`.
+**How a cell is cut.**
 
-**Cost and memory.** Under `"maxsi"` and `"maxphi"` step 09 doesn't run the Fisher test that `calculate_node_SI` can run at every node, since they don't use it (`fisher=False`). Running the Fisher test under MaxSI changes no output: on three samples (the first 60 cells by ID, 300 cells spread over the ID range and the 10 largest skeletons) the batch files and tables are byte-identical. MinFisherP runs the test at every node and is much slower: a whole run of step 09 on the first 300 cells by ID (`LIMIT = 300`) took 269 s, against 20 s for MaxSI and 20 s for MaxPhi (one run each, macOS). The times below are for MaxSI; a full MinFisherP run has not been timed. Timed once each on macOS, 300 cells spread over the ID range took 24 s and the 10 largest skeletons, CT1 and APL among them, 34 s. Labelling all 138,341 cells as 5 copies at once took about 30 minutes (one run, macOS). To build the three tables from the saved batches, step 09 reads only three columns of the SFC synapse table to match the labels, then the rest one record batch at a time; this took 67.5 seconds and held at most 22.2 GB (peak memory footprint 30.3 GB, one run, macOS). Step 09 does not handle cells over 80,000 skeleton nodes separately, as steps 01 and 02a do. Running out of memory stops the whole run; the saved batches are kept and skipped on the next run.
+- Every cell of `NEURON_TABLE_SFC_FTR` (every super-class) is tried, so the tables keep the SFC tables' cells and synapse rows; cells the SFC split failed on are never tried.
+- It heals the skeleton (`navis.heal_skeleton`) and attaches the synapses (`attach_synapses_princeton`, which keeps `synapse_id`) itself, with the same two calls `methods_all.heal_attach_princeton` makes, so a failed cell records the real error.
+- Candidate cuts are scored with step 08's code (`methods/node_cut_si.py`). Side 1 is the cut node's child and descendants, side 2 the rest without the cut node. The axon is the side whose presynaptic fraction exceeds the whole cell's (cut node's synapses excluded; they get no label).
+- A cell fails, unlabelled, if both sides have the same fraction or a side has no synapse. A MinFisherP cut ignores the SI and can have an empty SI (every synapse off the cut node of one kind), but then both fractions are equal and the cell fails, so the printed count of labelled cells with an empty SI is 0.
+- Cells over 80,000 skeleton nodes are not handled separately, unlike in steps 01 and 02a.
+
+**Running.**
+
+- Before a method's first full run, run it once, read the printed failure count and errors, then set `ACCEPT_CELLS_WITHOUT_SKELETON` and `ACCEPT_FAILED_CELLS` (or `STEP09_ACCEPT_FAILED_CELLS`) for that method; failure counts differ by method.
+- Batches of 500 are renamed into place when written, the failures file last, and skipped once saved, so a rerun with the same method, or after running out of memory (which stops the whole run), resumes.
+- `batch_run.json` records the method, cell list, raw synapse table, skeleton files (count and a hash of their paths and sizes) and navis version, and refuses a run with different ones. Methods have separate folders and never mix.
+- It stops at the start if a skeleton file name is in two subfolders of `SWC_DIR` or the raw synapse table has self-synapses, and on a `MemoryError` rather than record a failed cell.
+- Before writing tables it prints the failures, then stops if: a cell lacked a usable skeleton (unless `ACCEPT_CELLS_WITHOUT_SKELETON = True`); the number of failed cells is not `ACCEPT_FAILED_CELLS` (None: no cell may fail); no cell was labelled; the batches do not hold every cell exactly once; or only some of its three tables exist.
+
+**Running as copies.**
+
+1. Set `N_SHARDS` and `SHARD` in the settings, or the environment variables `STEP09_N_SHARDS` and `STEP09_SHARD`, and start one copy for each `SHARD`, each once, all with the same `N_SHARDS`. Copy `k` labels the batches whose number, counted from 0, modulo `N_SHARDS` is `k` (copy 0 takes batch files 0001, 0001 + `N_SHARDS`, …), reading only those cells' synapses, and stops once its batches are done; batch files are byte-identical to a single run's.
+2. Once every copy has finished, a last run with `N_SHARDS = 1` builds the three tables from the saved batches (started earlier, it labels the batches still missing itself, in one process). Unset `STEP09_N_SHARDS` and `STEP09_SHARD` for it (they override the settings) and keep `STEP09_METHOD` as in the copies.
+
+**Outputs.** Three tables in `data/derived_maxsi/` (`data/derived_minfisherp/`, `data/derived_maxphi/`), with the published file names and format: the synapse table, the neuron table and `SI_updated.ftr`, all on the SI of each cell's chosen cut. Batches go to `data/intermediate_maxsi/maxsi_labels/` (`intermediate_minfisherp/minfisherp_labels/`, `intermediate_maxphi/maxphi_labels/`).
+
+**Cost and memory.** MaxSI and MaxPhi skip the Fisher test that `calculate_node_SI` can run at every node (`fisher=False`); running it under MaxSI changes no output (byte-identical batch files and tables on three samples: the first 60 cells by ID, 300 cells spread over the ID range and the 10 largest skeletons). MinFisherP runs it at every node and is much slower; a full MinFisherP run has not been timed. Table building reads three columns of the SFC synapse table to match labels, then the rest one record batch at a time.
+
+| Run | Time and memory |
+|--|--|
+| Whole step 09 on the first 300 cells by ID (`LIMIT = 300`) | 269 s MinFisherP, 20 s MaxSI, 20 s MaxPhi (one run each, macOS) |
+| MaxSI, 300 cells spread over the ID range | 24 s (timed once, macOS) |
+| MaxSI, the 10 largest skeletons (CT1 and APL among them) | 34 s (timed once, macOS) |
+| MaxSI labelling of all 138,341 cells, 5 copies at once | about 30 minutes (one run, macOS) |
+| Building the three tables from the saved batches | 67.5 seconds; held at most 22.2 GB (peak memory footprint 30.3 GB, one run, macOS) |
 
 | | |
 |--|--|
 | **Inputs** | `NEURON_TABLE_SFC_FTR`, `SYNAPSE_TABLE_SFC_FTR`, `SYNAPSE_TABLE_RAW_FTR` (without self-synapses; the script stops otherwise), the skeletons of every cell of the neuron table in `SWC_DIR` |
-| **Outputs** | Per batch in `MAXSI_LABEL_BATCH_DIR`: `labels_batch_NNNN.ftr` (`synapse_id`, `neuron`, `side`, `label`), `summary_batch_NNNN.ftr` (one row per cell: `best_node_id`, `MaxSI_SI`, `n_tied_max_SI`, `n_tied_max_SI_distinct_sides`, `n_close_max_SI`, side counts, `axon_side`), `failures_batch_NNNN.ftr`, `batch_run.json`. Combined: `MAXSI_SYNAPSE_TABLE_FTR` (the SFC synapse table's columns and dtypes; `comp` from the MaxSI labels, `SI_pre`/`SI_post` = `MaxSI_SI`; rows with an unlabelled end are left out and counted in the log), `MAXSI_NEURON_TABLE_FTR` (the SFC neuron table's columns, and its rows less the cells that failed, which are dropped and counted in the log as step 05 drops cells with no SI; `SI` = `MaxSI_SI`; `pre_A` to `post_L`, `axon_correct`, `dend_correct` counted from the MaxSI synapse table with step 05's code; `linker` = 0; every other column is copied from the SFC table, including the synapse, degree and partner counts and the ratio columns that step 07 and the figures use as cell features) and `MAXSI_SI_UPDATED_FTR` (`root_id`, `SI` = `MaxSI_SI`, in the format of `SI_updated.ftr`). The log also counts labelled ends that have no row in the SFC synapse table, ends lost to the cut node and to an unlabelled partner, and kept cells whose `axon_correct` or `dend_correct` is empty here but not in the SFC table. The three tables are written together, and none is overwritten if they exist |
-| **Downstream** | With `SPLIT_METHOD = "maxsi"` in `config.py`, every script that reads `SYNAPSE_TABLE_FTR`, `NEURON_TABLE_FTR` or `SI_UPDATED_FTR` reads these three tables instead (`"minfisherp"` and `"maxphi"` the other methods' tables). See [Settings](#settings-split_method-and-pipeline_run) above for what else moves, what stops and the run order |
-| **Note** | `ONLY_LOCAL_SKELETONS = True` or a `LIMIT` runs only the cells whose skeleton is under `SWC_DIR` and writes everything to `MAXSI_SUBSET_DIR` (`MINFISHERP_SUBSET_DIR`, `MAXPHI_SUBSET_DIR`), for checking; the synapse table holds only the rows whose two ends are both chosen cells, so the neuron table's `pre_A` to `post_L` are not the full cells' counts. `tools/check_step09_failures.py` runs step 09 on five local cells with planted failures. The labels have no `L`, so `pre_L` and `post_L` are 0. Cost and memory: see **Cost and memory** above |
+| **Outputs** | Per batch in `MAXSI_LABEL_BATCH_DIR`: `labels_batch_NNNN.ftr` (`synapse_id`, `neuron`, `side`, `label`), `summary_batch_NNNN.ftr` (one row per cell: `best_node_id`, the summary columns above, side counts, `axon_side`), `failures_batch_NNNN.ftr`, `batch_run.json`.<br>Combined, written together, none overwritten if they exist:<br>`MAXSI_SYNAPSE_TABLE_FTR`: the SFC synapse table's columns and dtypes; `comp` from the MaxSI labels; `SI_pre`/`SI_post` = `MaxSI_SI`; rows with an unlabelled end left out and logged.<br>`MAXSI_NEURON_TABLE_FTR`: the SFC neuron table's columns and rows, less failed cells (dropped and logged, as step 05 drops cells with no SI); `SI` = `MaxSI_SI`; `pre_A` to `post_L`, `axon_correct`, `dend_correct` recounted from the MaxSI synapse table with step 05's code; `linker` = 0; all else copied from the SFC table, including the synapse, degree and partner counts and ratio columns that step 07 and the figures use as cell features.<br>`MAXSI_SI_UPDATED_FTR`: `root_id`, `SI` = `MaxSI_SI`, in the format of `SI_updated.ftr`.<br>The log also counts labelled ends with no SFC synapse-table row, ends lost to the cut node or an unlabelled partner, and kept cells whose `axon_correct` or `dend_correct` is empty here but not in the SFC table |
+| **Downstream** | With `SPLIT_METHOD = "maxsi"` in `config.py`, scripts that read `SYNAPSE_TABLE_FTR`, `NEURON_TABLE_FTR` or `SI_UPDATED_FTR` read these tables instead (`"minfisherp"` and `"maxphi"` likewise). See [Settings](#settings-split_method-and-pipeline_run) for what else moves, what stops and the run order |
+| **Note** | `ONLY_LOCAL_SKELETONS = True` or a `LIMIT` runs only cells with a skeleton under `SWC_DIR`, writing everything to `MAXSI_SUBSET_DIR` (`MINFISHERP_SUBSET_DIR`, `MAXPHI_SUBSET_DIR`), for checking; its synapse table keeps only rows with both ends chosen, so `pre_A` to `post_L` are not full-cell counts. The labels have no `L`, so `pre_L` and `post_L` are 0. `tools/check_step09_failures.py` runs step 09 on five local cells with planted failures |
 
 ---
 
@@ -346,9 +313,7 @@ exactly once; or only some of its three tables exist.
 
 **File:** `processing/build_raw_synapse_table.py`
 
-Builds the synapse table before any filtering from the Codex CSV: row number as `synapse_id`, the
-`ctr_*` columns dropped, full root ids rebuilt, and the columns renamed by position (the script first
-checks the CSV's column order). `BUILD` at the top chooses which versions to write.
+Builds the unfiltered synapse table from the Codex CSV: row number as `synapse_id`, the `ctr_*` columns dropped, full root ids rebuilt, and the columns renamed by position after a check of the CSV's column order. `BUILD` at the top chooses which versions to write.
 
 | | |
 |--|--|
@@ -363,16 +328,12 @@ checks the CSV's column order). `BUILD` at the top chooses which versions to wri
 
 **File:** `processing/phi_threshold.py`
 
-Finds the Phi value that matches the SI = 0.1 cutoff, so that split methods scored with Phi
-can use a matching cutoff. It uses the SFC split, where `SI_comparisons.ftr` gives each neuron
-both an SI and a Phi, and keeps only the intrinsic neurons (the four super-classes the figures
-use). It finds the cutoff in three ways: the typical Phi of neurons with SI within 0.005 of 0.1,
-the Phi value that calls the same share of neurons mixed, and the Phi cutoff that agrees with
-SI < 0.1 for the most neurons. The recommended cutoff is the median of the three, rounded to two
-decimals, and is reported with the range of the three. The script also prints the share of
-neurons each method calls mixed, checks the match within super-classes and by input/output
-balance and synapse count, and gives 95% intervals by resampling whole cell types. Phi does not
-follow SI exactly, so the match holds on average, not for every neuron.
+Finds the Phi cutoff that matches SI = 0.1, for split methods scored with Phi. It uses the SFC split, where `SI_comparisons.ftr` gives each neuron both an SI and a Phi, and only the intrinsic neurons (the four super-classes the figures use).
+
+- Three estimates: the typical Phi of neurons with SI within 0.005 of 0.1; the Phi value that calls the same share of neurons mixed; the Phi cutoff that agrees with SI < 0.1 for the most neurons.
+- Recommended cutoff: the median of the three, rounded to two decimals, reported with their range.
+- Also printed: the share of neurons each method calls mixed, the match within super-classes and by input/output balance and synapse count, and 95% intervals by resampling whole cell types.
+- Phi does not follow SI exactly, so the match holds on average, not for every neuron.
 
 | | |
 |--|--|
