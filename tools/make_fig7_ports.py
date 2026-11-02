@@ -10,6 +10,8 @@ repository. Each generated script is the original text with only these changes:
     _out_dir (figure saves);
   - figure saves that were commented out switched on, and every save placed before plt.show();
   - svg.fonttype='none' and Arial added where the original did not set them;
+  - a call to methods.figure_text.use_arial_8(), so that every text is Arial 8 pt when a figure
+    is saved;
   - the per-script fixes listed in PORTS below, each of which must match the original exactly once.
 So a change to one of these scripts belongs in PORTS here, never in the script itself: a
 regeneration would undo it.
@@ -24,8 +26,9 @@ Both modes also check, for every port: that each original's sha256 equals ORIGIN
 (the files the ports are made from); that each fix and each path replacement applied, and every
 file name read or written has a config constant; that no Windows path (any drive letter) is left;
 that the figure saves switched on are exactly EXPECTED_SAVES; that each save comes before the
-next plt.show(); and that svg.fonttype 'none' and Arial are set. --selftest plants mistakes in
-the fix list (a save after plt.show(), the Arial line left out, a fix whose old text is not in the original)
+next plt.show(); that svg.fonttype 'none' and Arial are set; and that use_arial_8() is called. --selftest plants mistakes in
+the fix list (a save after plt.show(), the Arial line left out, a fix whose old text is not in the original,
+the use_arial_8() call left out)
 and requires each to be reported. It prints its result and writes no report file.
 Exit code 0 on PASS, 1 on FAIL.
 
@@ -88,6 +91,7 @@ EXPECTED_SAVE_FIGS = {name: 1 for names in EXPECTED_SAVES.values() for name in n
 EXPECTED_SAVE_FIGS["SI_vs_post_on_bouton_ALL_AXON_DENDRITE_2_new.svg"] = 2
 
 FONT = "mpl.rcParams['svg.fonttype'] = 'none'\nmpl.rcParams['font.family'] = 'Arial'\n"
+ARIAL_8 = "from methods.figure_text import use_arial_8\nuse_arial_8()   # every text in Arial 8 pt when a figure is saved\n"
 
 # original -> (port name, panel line, notes, exact (old, new) fixes applied after the path changes)
 PORTS = {
@@ -195,11 +199,13 @@ def generate(originals: Path, src_name: str, ledger: list) -> str:
     has_font = "svg.fonttype" in text
     head = ["# " + panel,
             "# Ported from the authors' original script %s." % src_name,
-            "# Paths come from config.py; every figure is saved before plt.show()"
+            "# Paths come from config.py; every figure is saved before plt.show(); every text is Arial 8 pt"
+            " when saved (methods/figure_text.py)"
             + ("" if has_font else "; svg.fonttype='none' and Arial (repository convention)") + "."]
     head += ["# " + n for n in notes]
     pre = ["import sys", "from pathlib import Path", "sys.path.insert(0, str(Path(__file__).parent.parent.parent))",
-           "from config import %s" % ", ".join(sorted(used | {"OUTPUT_DIR"})), ""]
+           "from config import %s" % ", ".join(sorted(used | {"OUTPUT_DIR"})),
+           ARIAL_8.rstrip("\n"), ""]
     if not has_font:
         pre += ["import matplotlib as mpl", FONT.rstrip("\n"), ""]
     pre += ['_out_dir = OUTPUT_DIR / "fig7" / "%s"' % new_name[:-3], "_out_dir.mkdir(parents=True, exist_ok=True)", ""]
@@ -217,6 +223,7 @@ def generate(originals: Path, src_name: str, ledger: list) -> str:
             ledger.append((new_name, "save at line %d comes before plt.show()" % (i + 1), 1 if last_show < last_fig or last_show < 0 else 0))
     for setting in ("mpl.rcParams['svg.fonttype'] = 'none'", "mpl.rcParams['font.family'] = 'Arial'"):
         ledger.append((new_name, "sets " + setting, 1 if setting in out else 0))
+    ledger.append((new_name, "calls use_arial_8()", 1 if re.search(r"^use_arial_8\(\)", out, re.M) else 0))
     return out
 
 
@@ -261,8 +268,8 @@ def check(originals: Path, ports: Path, write: bool = False, quiet: bool = False
 
 def selftest(originals: Path) -> list:
     """Generate with planted mistakes in this tool's own fix list; each must be reported."""
-    global PORTS, FONT
-    saved_ports, saved_font = dict(PORTS), FONT
+    global PORTS, FONT, ARIAL_8
+    saved_ports, saved_font, saved_arial_8 = dict(PORTS), FONT, ARIAL_8
     cases = []
     try:
         name, panel, notes, fixes = saved_ports["fig7S2a.py"]
@@ -287,10 +294,16 @@ def selftest(originals: Path) -> list:
         ledger = []
         generate(originals, "fig7k.py", ledger)
         got3 = [w for n, w, c in ledger if c != 1]
+        PORTS = dict(saved_ports)
+        ARIAL_8 = "from methods.figure_text import use_arial_8\n"
+        cases.append(("use_arial_8() call left out", "use_arial_8"))
+        ledger = []
+        generate(originals, "fig7e.py", ledger)
+        got4 = [w for n, w, c in ledger if c != 1]
     finally:
-        PORTS, FONT = saved_ports, saved_font
+        PORTS, FONT, ARIAL_8 = saved_ports, saved_font, saved_arial_8
     lines, missed = [], 0
-    for (label, must), got in zip(cases, (got1, got2, got3)):
+    for (label, must), got in zip(cases, (got1, got2, got3, got4)):
         ok = any(must in g for g in got)
         missed += not ok
         lines.append("%-7s %-32s %s" % ("caught" if ok else "MISSED", label, "; ".join(got)[:150]))

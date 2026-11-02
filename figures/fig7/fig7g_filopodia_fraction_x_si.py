@@ -1,6 +1,6 @@
 # Fig 7G: fraction of boutons with a postsynaptic terminal (left) and postsynaptic sites per bouton, among boutons with at least one (right), against SI.
 # Ported from the authors' original script fig7g.py.
-# Paths come from config.py; every figure is saved before plt.show().
+# Paths come from config.py; every figure is saved before plt.show(); every text is Arial 8 pt when saved (methods/figure_text.py).
 # Of the second plot's two saves, the one before plt.show() runs; the one after it is commented out.
 # The dashed lines at 0.24 and 0.75 are typed in; the 'All' lines use every super-class with no SI filter.
 # The axon and dendrite lines keep intrinsic boutons with SI >= 0.1 (left) or SI > 0.1 (right), binned in equal-count
@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import BOUTON_FILOPODIA_TABLE_FTR, BOUTON_TABLE_FTR, OUTPUT_DIR
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 
 _out_dir = OUTPUT_DIR / "fig7" / "fig7g_filopodia_fraction_x_si"
 _out_dir.mkdir(parents=True, exist_ok=True)

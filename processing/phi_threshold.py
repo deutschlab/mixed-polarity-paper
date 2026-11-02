@@ -41,6 +41,8 @@ mpl.rcParams['font.family'] = 'Arial'
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 from config import (SI_COMPARISONS_FTR, SI_UPDATED_SFC_FTR as SI_UPDATED_FTR,   # SFC_SI is checked against the SFC SI
                     NEURON_TABLE_SFC_FTR as NEURON_TABLE_FTR, OUTPUT_DIR)   # and the SFC cells, whatever SPLIT_METHOD says
 

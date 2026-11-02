@@ -1,7 +1,7 @@
 # Fig 7E: neurotransmitter pies, 'Neuron presynaptic to bouton' (left, from FILOPODIA_FILTERED_FTR) against
 # 'Any presynaptic neuron (control)' (right: every synapse whose presynaptic neuron has boutons).
 # Ported from the authors' original script fig7e.py.
-# Paths come from config.py; every figure is saved before plt.show().
+# Paths come from config.py; every figure is saved before plt.show(); every text is Arial 8 pt when saved (methods/figure_text.py).
 # Cannot run until SYNAPSES_NO_SELF_FTR (t2.ftr) and FILOPODIA_FILTERED_FTR are supplied; neither is in this repository.
 # Both pies count table rows (synapses), not neurons. The left pie keeps every row of FILOPODIA_FILTERED_FTR,
 # whatever its presynaptic neuron; the right pie only synapses whose presynaptic neuron is in BOUTON_TABLE_FTR.
@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import BOUTON_TABLE_FTR, FILOPODIA_FILTERED_FTR, NEURON_DATA_FTR, OUTPUT_DIR, SYNAPSES_NO_SELF_FTR
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 
 _out_dir = OUTPUT_DIR / "fig7" / "fig7e_nt_presynaptic_pies"
 _out_dir.mkdir(parents=True, exist_ok=True)

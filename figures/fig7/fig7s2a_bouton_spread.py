@@ -1,11 +1,13 @@
 # Supp 7-S2 A: mean RMS against mean centroid distance of each neuron's boutons.
 # Ported from the authors' original script fig7S2a.py.
-# Paths come from config.py; every figure is saved before plt.show().
+# Paths come from config.py; every figure is saved before plt.show(); every text is Arial 8 pt when saved (methods/figure_text.py).
 # It plots every neuron of BOUTON_INERTIA_FTR, before any cell type is excluded; it reads CONSOLIDATED_CELL_TYPES_CSV but does not use it.
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import BOUTON_INERTIA_FTR, CONSOLIDATED_CELL_TYPES_CSV, OUTPUT_DIR
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 
 _out_dir = OUTPUT_DIR / "fig7" / "fig7s2a_bouton_spread"
 _out_dir.mkdir(parents=True, exist_ok=True)

@@ -17,6 +17,8 @@ import matplotlib as mpl
 
 mpl.rcParams['svg.fonttype'] = 'none'
 mpl.rcParams['font.family'] = 'Arial'
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 #allsynapses=allsynapses.head(1000000)
 nodesG=pd.read_feather(NEURON_TABLE_FTR)
 nodesG=nodesG.drop(columns=['SI'])

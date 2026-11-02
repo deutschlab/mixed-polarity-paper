@@ -12,8 +12,8 @@ port whose inputs are missing.
 Then, for each pair, the original and the port each run in their own process with matplotlib
 drawing to no screen (Agg) and a time limit (--timeout, 1200 s). The original reads its Windows
 paths from the folders given with --inputs, by file name (default: the --originals folder), and
-runs with svg.fonttype 'none' and Arial set, the two settings the ports add, so text is laid out
-alike on both sides; the port reads the files config.py names, with config.OUTPUT_DIR pointed
+runs with svg.fonttype 'none' and Arial set and with use_arial_8() (every text Arial 8 pt when a
+figure is saved), the settings the ports add, so text is laid out alike on both sides; the port reads the files config.py names, with config.OUTPUT_DIR pointed
 into a work folder. Nothing real is written: figure saves, to_feather and the other pandas and
 pyarrow writers are recorded instead; any other file a script opens for writing (open, np.save
 ...) is recorded, and refused outside the work folder; and the size and date of every file
@@ -53,7 +53,7 @@ out of time; each still writes the report.
 time (MUTANTS below: a threshold, a reference line, the statistic, the order, a row dropped, a
 legend label, the axes swapped, an excluded type kept, a save removed, the font setting, the
 table destination, tick labels, colours, a save before the legend, the wrong figure saved, the
-layout, label rotation and size, the legend position, save options, extra reads and writes, and
+layout, label rotation and weight, the Arial 8 pt call removed, the legend position, save options, extra reads and writes, and
 a hand edit) and requires each to FAIL with both scripts finished. PASS there means every mutant was
 caught. --only does not apply to it.
 
@@ -112,7 +112,7 @@ import pandas as pd
 MODE, SCRIPT, RECORD, INPUTS, WORK, RENAME, READS, WRITES = sys.argv[1:9]
 INPUTS, READS, WRITES = json.loads(INPUTS), json.loads(READS), json.loads(WRITES)
 record = {"events": [], "tables": [], "reads": [], "read_files": [], "other_writes": [], "file_writes": []}
-# the ports add exactly these two settings (make_fig7_ports.py); the original runs with them too, so that
+# the ports add these two settings (make_fig7_ports.py); the original runs with them too, so that
 # text is laid out with the same font on both sides and the saved SVGs can be compared byte for byte
 if MODE == "original":
     matplotlib.rcParams["svg.fonttype"] = "none"
@@ -140,7 +140,12 @@ def audit(event, args):
         raise PermissionError("check_fig7_ports refused a write outside its work folder: " + real)
 if MODE == "port":
     import config
-    CONST = {str(Path(v)): k for k, v in vars(config).items() if isinstance(v, Path)}
+    # a path can have more than one name (NEURON_TABLE_SFC_FTR = NEURON_TABLE_FTR); the name defined
+    # first is the one the ports import
+    CONST = {}
+    for k, v in vars(config).items():
+        if isinstance(v, Path):
+            CONST.setdefault(str(Path(v)), k)
     config.OUTPUT_DIR = Path(WORK) / "outputs"
     FIG7_OUT = config.OUTPUT_DIR / "fig7"
 
@@ -292,7 +297,19 @@ def savefig(self, fname, *a, **k):
         ev["rendered_svg"] = buf.getvalue()[:200].lstrip().startswith(b"<?xml")
     record["events"].append(ev)
 matplotlib.figure.Figure.savefig = savefig
+# the ports also call use_arial_8() (make_fig7_ports.py), after this recorder is in place; the original
+# runs with it too, at the same point, so that both sides save the same Arial 8 pt text
+from methods.figure_text import set_figure_text
+if MODE == "original":
+    from methods.figure_text import use_arial_8
+    use_arial_8()
+def text_8():
+    # what use_arial_8() does at a save, done to every open figure, on both sides, before a figure is
+    # recorded at a plt.show() or at the end: a port saves some figures the original only shows
+    for n in plt.get_fignums():
+        set_figure_text(plt.figure(n))
 def show(*a, **k):
+    text_8()
     record["events"].append({"kind": "show", "figs": {str(n): snap_fig(plt.figure(n)) for n in plt.get_fignums()},
                              "svg": {str(n): svg_sha(plt.figure(n)) for n in plt.get_fignums()}})
 plt.show = show
@@ -300,6 +317,7 @@ os.chdir(WORK)
 sys.addaudithook(audit)
 try:
     runpy.run_path(SCRIPT, run_name="__main__")
+    text_8()
     record["final"] = {str(n): snap_fig(plt.figure(n)) for n in plt.get_fignums()}
     record["finished"] = True
 except BaseException as e:
@@ -356,7 +374,11 @@ MUTANTS = [
     ("legend_moved", "fig7g.py", "fig7g_filopodia_fraction_x_si.py",
      "plt.legend()\nplt.tight_layout()\n\n# ----------------------------------------------------\n# 12.",
      "plt.legend(loc='upper left')\nplt.tight_layout()\n\n# ----------------------------------------------------\n# 12."),
-    ("label_fontsize", "fig7S2a.py", "fig7s2a_bouton_spread.py", "ax.set_xlabel('Mean RMS')", "ax.set_xlabel('Mean RMS', fontsize=4)"),
+    # a font size is no longer a bug the figure shows (use_arial_8() sets every text to 8 pt), so the
+    # label is made bold instead
+    ("arial_8_call_removed", "fig7S2a.py", "fig7s2a_bouton_spread.py",
+     "use_arial_8()   # every text in Arial 8 pt when a figure is saved\n", ""),
+    ("label_bold", "fig7S2a.py", "fig7s2a_bouton_spread.py", "ax.set_xlabel('Mean RMS')", "ax.set_xlabel('Mean RMS', fontweight='bold')"),
     ("savefig_options", "fig7S2a.py", "fig7s2a_bouton_spread.py",
      "plt.savefig(_out_dir / 'inertia_all.svg', format='svg')\n",
      "plt.savefig(_out_dir / 'inertia_all.svg', format='svg', facecolor='red', bbox_inches='tight')\n"),

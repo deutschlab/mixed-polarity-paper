@@ -22,6 +22,8 @@ import matplotlib as mpl
 
 mpl.rcParams['svg.fonttype'] = 'none'
 mpl.rcParams['font.family'] = 'Arial'
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 
 _out_dir = OUTPUT_DIR / "supporting/pc1_x_nt_sclass_pies"
 _out_dir.mkdir(parents=True, exist_ok=True)

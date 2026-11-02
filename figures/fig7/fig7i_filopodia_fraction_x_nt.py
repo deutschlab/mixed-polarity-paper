@@ -1,6 +1,6 @@
 # Fig 7I: per-neuron fraction of boutons with a postsynaptic terminal, by neurotransmitter.
 # Ported from the authors' original script fig7i.py.
-# Paths come from config.py; every figure is saved before plt.show(); svg.fonttype='none' and Arial (repository convention).
+# Paths come from config.py; every figure is saved before plt.show(); every text is Arial 8 pt when saved (methods/figure_text.py); svg.fonttype='none' and Arial (repository convention).
 # It writes NEURONS_NT_BWF_FTR, which figures/fig7/filopodia_x_mirror_neurons.py and figures/fig5/reciprocal_fraction_x_bwf.py read.
 # Its neuron column is pandas' nullable Int64.
 # Its neuron set is every bouton neuron with a neurotransmitter in NEURON_DATA_FTR, all super-classes, no SI filter.
@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import BOUTON_FILOPODIA_TABLE_FTR, BOUTON_TABLE_FTR, NEURONS_NT_BWF_FTR, NEURON_DATA_FTR, OUTPUT_DIR
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 
 import matplotlib as mpl
 mpl.rcParams['svg.fonttype'] = 'none'

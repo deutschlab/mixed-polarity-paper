@@ -1,6 +1,6 @@
 # Fig 7F (left half: intrinsic super-classes) and Supp 7-S4 C (right half: the other super-classes): per-neuron fraction of boutons with a postsynaptic terminal.
 # Ported from the authors' original script fig7f_fig7S4c.py.
-# Paths come from config.py; every figure is saved before plt.show().
+# Paths come from config.py; every figure is saved before plt.show(); every text is Arial 8 pt when saved (methods/figure_text.py).
 # Each violin value is one neuron and compartment (the mean of 'filopodia' over its boutons), with no minimum bouton count.
 # The 'All' violins use every compartment row with no SI filter; the axon and dendrite violins keep SI >= 0.1.
 # Boutons with no compartment are left out of the violins but count in the bouton-level means that order the super-classes.
@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import BOUTON_TABLE_FTR, OUTPUT_DIR
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 
 _out_dir = OUTPUT_DIR / "fig7" / "fig7f_filopodia_fraction_violins"
 _out_dir.mkdir(parents=True, exist_ok=True)

@@ -21,6 +21,8 @@ import networkx as nx
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 from config import METHODS_DIR, NEURON_TABLE_FTR, OUTPUT_DIR
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *

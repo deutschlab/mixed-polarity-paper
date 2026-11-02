@@ -17,6 +17,8 @@ import matplotlib as mpl
 from matplotlib.collections import PolyCollection
 mpl.rcParams['svg.fonttype'] = 'none'
 mpl.rcParams['font.family'] = 'Arial'
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 # Data
 nodesG = pd.read_feather(NEURON_TABLE_FTR)
 nodesG=nodesG.dropna(subset=['dend_correct','axon_correct','super_class'])

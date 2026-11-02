@@ -4,6 +4,8 @@ mpl.rcParams['font.family'] = 'Arial'
 from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 from config import (
     FULL_RECI_CONNECTIONS_FTR, CONNECTIONS_TABLE_FTR, CONNECTIONS_TABLE_NONP_FTR,
     NEURON_TABLE_FTR, NEURON_TABLE_NONP_FTR, OUTPUT_DIR, METHODS_DIR,

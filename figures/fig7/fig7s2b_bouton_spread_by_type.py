@@ -1,12 +1,14 @@
 # Supp 7-S2 B: the same per cell type, coloured by why a type was excluded from the bouton analysis.
 # Ported from the authors' original script fig7S2b.py.
-# Paths come from config.py; every figure is saved before plt.show().
+# Paths come from config.py; every figure is saved before plt.show(); every text is Arial 8 pt when saved (methods/figure_text.py).
 # The cell-type table's root_id column is renamed to neuron for the merge.
 # The excluded-type lists write 'R1–6' with an en dash, while the table has 'R1-6', so R1-6 is coloured 'included'.
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import BOUTON_INERTIA_FTR, CONSOLIDATED_CELL_TYPES_CSV, NEURON_DATA_FTR, OUTPUT_DIR
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 
 _out_dir = OUTPUT_DIR / "fig7" / "fig7s2b_bouton_spread_by_type"
 _out_dir.mkdir(parents=True, exist_ok=True)

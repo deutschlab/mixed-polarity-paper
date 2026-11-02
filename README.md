@@ -194,6 +194,8 @@ Fig 1C and Fig 3C make a Neuroglancer link through `caveclient` before they draw
 
 Five scripts need others to run first: `figures/fig4/build_pc1_table.py` before `figures/fig4/syntype_x_pc1.py`, `figures/fig5/reciprocal_fraction.py` before `figures/fig5/reciprocal_fraction_model.py`, the three `figures/fig7/si_sim_*.py` scripts before `figures/fig7/si_comb_analysis.py`, and `figures/fig7/fig7i_filopodia_fraction_x_nt.py` before `figures/fig7/filopodia_x_mirror_neurons.py` and `figures/fig5/reciprocal_fraction_x_bwf.py` (it writes `neurons_nt_bwf_frac.ftr`; if it stops with an error, or is left out of a run such as `--only fig5`, those two read whatever copy is already there).
 
+Every text a script saves is Arial 8 pt: each script calls `use_arial_8()` from `methods/figure_text.py`, which sets all text (axes, ticks, legends, titles, colour bars, annotations, table cells) to Arial 8 pt as the figure is saved, and builds every legend at 8 pt, whatever sizes the script set. `tools/check_figure_text.py --outputs` reads a run's saved files and lists any text that is not. It changes only text, but labels take a different amount of room at 8 pt, so a panel's layout can shift.
+
 Each script saves its figures as SVG in its own folder, usually `outputs/figN/<name>/` (`outputs_maxsi/` under `SPLIT_METHOD = "maxsi"`); a few also write tables into `data/derived/` (`data/derived_maxsi/` or `data/intermediate_maxsi/` under `"maxsi"`). [docs/figure_to_script_map.md](docs/figure_to_script_map.md) shows which script makes which panel and where it saves it, with the exceptions and the token details in its section [Running the figure scripts](docs/figure_to_script_map.md#running-the-figure-scripts).
 
 A note on SI: most figure scripts take SI from the neuron or synapse table, and nine always take it from `SI_updated.ftr` (six in `figures/fig2`–`fig3`, `figures/fig7/filopodia_x_mirror_neurons.py` and the two MaxSI scripts in `figures/split_methods/`). The neuron and synapse tables the figures were made from come from an earlier run whose SI kept synapses from a neuron to itself, except for the 182 large cells from step 02a; the manuscript's Methods exclude self-synapses, as `SI_updated.ftr` does. After a fresh run each neuron has the same SI in the synapse table, the neuron table and `SI_updated.ftr`; tables from an earlier run may not match, which is why the synapse-type tools call the table SI "older" and `SI_updated.ftr` "corrected". (`SI_updated.ftr` has a few more neurons than the neuron table.) More in the same section of the map.
@@ -212,6 +214,7 @@ Run these from the repository root with the environment active. [docs/tools.md](
 | [`check_step05_root_id.py`](docs/tools.md#checking-that-a-figure-reproduces) | That step 05 writes `root_id` as exact cell IDs | Step 05's outputs, about 5 GB | A few seconds |
 | [`check_fig6_logic.py`](docs/tools.md#checking-that-a-figure-reproduces) | The Figure 6 script's calculations on a made-up connectome | No data | A few seconds |
 | [`check_fig4e_logic.py`](docs/tools.md#checking-that-a-figure-reproduces) | The revised Figure 4E script's calculations on a made-up table | No data | A few seconds |
+| [`check_figure_text.py`](docs/tools.md#checking-the-figure-text) | That `methods/figure_text.py` saves every text as Arial 8 pt and changes nothing else; with `--outputs`, the fonts in a run's saved files | No data, or a run's output folder | A few seconds, a few minutes with `--mutants`; `outputs/tools/check_figure_text/` |
 | [`make_fig7_ports.py`](docs/tools.md#checking-that-a-figure-reproduces) | Makes, or checks, the seven Fig 7 panel scripts from the authors' originals | The originals (maintainers) | Printed |
 | [`check_fig7_ports.py`](docs/tools.md#checking-that-a-figure-reproduces) | That each Fig 7 panel script draws what the original draws | The originals (maintainers) | About a minute, 5 with `--mutants` |
 | [`check_fig7_tables.py`](docs/tools.md#checking-that-a-figure-reproduces) | The Fig 7 input tables against a recorded reference | The undeposited tables (maintainers) | About a minute |
@@ -277,6 +280,7 @@ methods/
   methods_all.py    shared functions, used by most scripts
   node_cut_si.py    the SI of every single-node cut, used by steps 08 and 09
   flow_centrality.py  navis's synapse flow centrality without its dense matrix, used by steps 01, 02a and 08
+  figure_text.py    every saved text in Arial 8 pt, used by every figure script and phi_threshold.py
 
 figures/            63 scripts: fig1/ 6, fig2/ 11, fig3/ 13, fig4/ 6, fig5/ 8, fig6/ 1, fig7/ 13, split_methods/ 4, supporting/ 1
 

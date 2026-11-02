@@ -1,13 +1,15 @@
 # Fig 7K: share of postsynaptic terminals on boutons that are 'hand shake', other reciprocal, or not reciprocal,
 # by super-class of the neuron that owns the bouton (the postsynaptic neuron of these synapses).
 # Ported from the authors' original script fig7k.py.
-# Paths come from config.py; every figure is saved before plt.show(); svg.fonttype='none' and Arial (repository convention).
+# Paths come from config.py; every figure is saved before plt.show(); every text is Arial 8 pt when saved (methods/figure_text.py); svg.fonttype='none' and Arial (repository convention).
 # Reads super_class from NEURON_TABLE_FTR. The original read a copy of that table whose super_class is the same for all 138,289 neurons (only its nt_type column differs, and it is not used).
 # The bars pool terminals (synapses) across neurons and connections.
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from config import FILOPODIA_RECIPROCAL_FTR, NEURON_TABLE_FTR, OUTPUT_DIR
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 
 import matplotlib as mpl
 mpl.rcParams['svg.fonttype'] = 'none'

@@ -14,6 +14,8 @@ import pickle
     #reci_running_neurons_on_self
 #%%
 plt.rcParams.update({'svg.fonttype': 'none', 'font.family': 'Arial'})   # SVG text stays editable
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 nodesG=pd.read_feather(NEURON_TABLE_FTR)
 #%%
 a=nodesG.head()

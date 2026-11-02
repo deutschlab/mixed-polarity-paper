@@ -13,6 +13,8 @@ import pickle
 import matplotlib as mpl
 mpl.rcParams['svg.fonttype'] = 'none'
 mpl.rcParams['font.family'] = 'Arial'
+from methods.figure_text import use_arial_8
+use_arial_8()   # every text in Arial 8 pt when a figure is saved
 from scipy.stats import gaussian_kde
 #%%
 
