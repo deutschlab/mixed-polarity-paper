@@ -105,12 +105,13 @@ and [generated_tables.md](generated_tables.md) for key column descriptions.
 | `reciprocity_list_full_article_princeton.ftr`, `connections_by_syn_type_filtered_article_princeton.ftr`, `connections_by_syn_type_reciprocal_filtered_article_princeton.ftr` | `data/derived/` | `06_build_connection_reciprocity_table.py` |
 | Split-method batch files | `data/intermediate/alternative_to_SI/all_neurons_batches/` | `08_alternative_split_methods.py` (optional) |
 | MaxSI label batch files | `data/intermediate_maxsi/maxsi_labels/` | `09_maxsi_synapse_labels.py` (optional) |
-| The tables of steps 06 and 07 and of the table-writing figure scripts, built on the MaxSI split (same file names) | `data/derived_maxsi/`, `data/intermediate_maxsi/` | The same scripts, run with `SPLIT_METHOD = "maxsi"` after step 09 |
-| Every table of a fresh run of the pipeline from step 01 (same file names), except `swc_data.ftr` and the raw synapse tables, which stay in `data/derived/` | `data/derived_rebuild/`, `data/intermediate_rebuild/` (and `_rebuild_maxsi` with `SPLIT_METHOD = "maxsi"`) | The same scripts, run with `PIPELINE_RUN = "rebuild"` in `config.py` |
+| The same three tables and label batch files under the MinFisherP and MaxPhi splits | `data/derived_minfisherp/`, `data/intermediate_minfisherp/minfisherp_labels/`, `data/derived_maxphi/`, `data/intermediate_maxphi/maxphi_labels/` | `09_maxsi_synapse_labels.py` with `METHOD = "minfisherp"` or `"maxphi"` (optional) |
+| The tables of steps 06 and 07 and of the table-writing figure scripts, built on the MaxSI split (same file names) | `data/derived_maxsi/`, `data/intermediate_maxsi/` | The same scripts, run with `SPLIT_METHOD = "maxsi"` after step 09 (in the `_minfisherp` and `_maxphi` folders with `"minfisherp"` and `"maxphi"`) |
+| Every table of a fresh run of the pipeline from step 01 (same file names), except `swc_data.ftr` and the raw synapse tables, which stay in `data/derived/` | `data/derived_rebuild/`, `data/intermediate_rebuild/` (and `_rebuild_maxsi`, `_rebuild_minfisherp`, `_rebuild_maxphi` with the matching `SPLIT_METHOD`) | The same scripts, run with `PIPELINE_RUN = "rebuild"` in `config.py` |
 | Four PKL files per skeleton subfolder | `data/intermediate/processed_swc_data/` | `01_extract_compartments_SI.py` |
 | Large-neuron PKL files | `data/intermediate/processed_big_neurons/` | `02a_large_neurons_pipeline.py` |
 | Connector feather files | `data/intermediate/connectors/` | `02b_merge_connectors.py`, `02a_large_neurons_pipeline.py`, `03_merge_synapses_connectors.py` |
-| Generated figure files | `outputs/figN/` (`outputs_maxsi/figN/` with `SPLIT_METHOD = "maxsi"`) | Figure scripts |
+| Generated figure files | `outputs/figN/` (`outputs_maxsi/figN/` with `SPLIT_METHOD = "maxsi"`, likewise `outputs_minfisherp/`, `outputs_maxphi/`) | Figure scripts |
 | `all_synapses_unprocess_larva_th0.9_SI_filt_issue_solved.ftr` | `data/larva/output/` | `processing/larva/larva_process.py` |
 | `SI_list_larva_th_0.9_linker_SI_filt_issue_solved` | `data/larva/results/` | `processing/larva/larva_process.py` |
 

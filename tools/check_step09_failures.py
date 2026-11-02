@@ -55,6 +55,7 @@ Run it with --script on a copy of step 09 with a planted bug to see a check fail
 import argparse
 import ast
 import hashlib
+import os
 import shutil
 import subprocess
 import sys
@@ -178,7 +179,9 @@ def run(script, work, run_dir, accept_skeleton=False, accept_failed=None, plant=
     plant_file = work / "plant.py"
     plant_file.write_text(plant)
     patched = patched_copy(script, work, run_dir, accept_skeleton, accept_failed, plant_file, full, batch_size)
-    done = subprocess.run([sys.executable, str(patched)], cwd=work, capture_output=True, text=True)
+    # step 09's MaxSI run whatever STEP09_METHOD the shell has set
+    done = subprocess.run([sys.executable, str(patched)], cwd=work, capture_output=True, text=True,
+                          env={**os.environ, "STEP09_METHOD": "maxsi"})
     return done.returncode, done.stdout + done.stderr
 
 

@@ -3,7 +3,7 @@
 This document describes the processing pipeline that converts raw connectome inputs into the
 derived tables used by the figure scripts.
 
-**Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07 (08 is optional: the split-method comparison, run after `build_raw_synapse_table.py`, which builds its raw synapse table from the Codex CSV; `phi_threshold.py` is optional and runs after 08; 09 is optional: the MaxSI labels, run after 05 and `build_raw_synapse_table.py`). The larval step, `processing/larva/larva_process.py`, is separate and is needed only for Figure 2A.  
+**Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07 (08 is optional: the split-method comparison, run after `build_raw_synapse_table.py`, which builds its raw synapse table from the Codex CSV; `phi_threshold.py` is optional and runs after 08; 09 is optional: the MaxSI, MinFisherP or MaxPhi labels, run after 05 and `build_raw_synapse_table.py`). The larval step, `processing/larva/larva_process.py`, is separate and is needed only for Figure 2A.  
 **All paths are defined in:** `config.py`. With `PIPELINE_RUN = "rebuild"` every step reads and writes the `data/derived_rebuild/` and `data/intermediate_rebuild/` copies instead, for a fresh run that leaves the published tables untouched (under `"published"`, steps 01 to 07 stop at the start rather than write over them); `swc_data.ftr` and the raw synapse tables are read from `data/derived/` either way  
 **The numbered scripts import:** `methods/methods_all.py` via `METHODS_DIR`; 08 and 09 also import `methods/node_cut_si.py`; 01, 02a and 08 also import `methods/flow_centrality.py`, which gives navis's axon-dendrite split its synapse flow centrality without the dense geodesic matrix navis builds when navis-fastcore is not installed (the same values, in a fraction of the memory; it stops on any navis other than 1.7.0 or with navis-fastcore installed)
 
@@ -24,7 +24,7 @@ flowchart TD
     S06["06_build_connection_reciprocity_table\nCONNECTIONS_TABLE_FTR"]
     S07["07_pca_morphology\nPCA_TABLE_FTR"]
     S08["08_alternative_split_methods (optional)\nSI_COMPARISONS_FTR"]
-    S09["09_maxsi_synapse_labels (optional)\nMAXSI_SYNAPSE_TABLE_FTR, MAXSI_NEURON_TABLE_FTR, MAXSI_SI_UPDATED_FTR"]
+    S09["09_maxsi_synapse_labels (optional)\nMAXSI_SYNAPSE_TABLE_FTR, MAXSI_NEURON_TABLE_FTR, MAXSI_SI_UPDATED_FTR\n(MINFISHERP_*, MAXPHI_* by METHOD)"]
     FIGS["Figure scripts\nfig1-fig7"]
 
     RAW --> S01
@@ -258,24 +258,37 @@ single cut places every synapse except those on the cut node on one side, and on
 
 ---
 
-## Script 09 — MaxSI Synapse Labels (optional)
+## Script 09 — MaxSI, MinFisherP and MaxPhi Synapse Labels (optional)
 
 **File:** `processing/09_maxsi_synapse_labels.py`
 
-Labels every synapse end A or D under the MaxSI split, so that the figure scripts can read the
-MaxSI split in place of the published SFC split. The MaxSI tables inherit the SFC tables' cells and
+Labels every synapse end A or D under the MaxSI, MinFisherP or MaxPhi split, so that the figure
+scripts can read that split in place of the published SFC split. The setting `METHOD` (or the
+environment variable `STEP09_METHOD`, which overrides it) picks the cut rule and the folders:
+
+| `METHOD` | Cut node | Summary columns | Folders |
+|--|--|--|--|
+| `"maxsi"` | highest SI (nodes with no SI left out) | `MaxSI_SI`, `n_tied_max_SI`, `n_tied_max_SI_distinct_sides`, `n_close_max_SI` | `MAXSI_*` (`_maxsi`) |
+| `"minfisherp"` | lowest two-sided Fisher exact p of the side counts (nodes with no p left out; p = 0 ties included) | `MinFisherP_SI`, `fisher_p`, `n_tied_min_fisher_p`, `n_tied_min_fisher_p_distinct_sides` | `MINFISHERP_*` (`_minfisherp`) |
+| `"maxphi"` | highest \|phi\| of the side counts, phi = (ad − bc) / √((a+b)(c+d)(a+c)(b+d)), a, b = side 1 pre, post and c, d = side 2 pre, post (nodes where the root is 0 left out) | `MaxPhi_SI`, `Phi`, `n_tied_max_Phi`, `n_tied_max_Phi_distinct_sides` | `MAXPHI_*` (`_maxphi`) |
+
+MinFisherP runs the Fisher test at every node, so it is slower than the other two. A cell's SI is
+the SI of the chosen cut. MinFisherP chooses without regard to the SI, so its cut can have an empty
+SI (when every synapse off the cut node is of one kind). Such a cut leaves both sides with the same
+presynaptic fraction, so the cell fails and is dropped; the run prints the count of labelled cells
+with an empty SI, which is therefore 0. Below, the MaxSI names stand for the chosen method's. The tables inherit the SFC tables' cells and
 synapse rows: a cell the SFC split failed on is never tried. For every cell of `NEURON_TABLE_SFC_FTR`
 (every super-class), it heals the skeleton (`navis.heal_skeleton`) and attaches the synapses (`attach_synapses_princeton`, which keeps `synapse_id`). These are the two calls inside `methods_all.heal_attach_princeton`; step 09 makes them itself, so a failed cell records the real error message. It scores every candidate cut with
-step 08's own code (`methods/node_cut_si.py`) and cuts at the node with the highest SI; on a tie
-it takes the first node in the node table's order (pandas `idxmax`), and the summary records how many
-nodes tie, how many different side counts they give, and how many are within numpy isclose of the highest SI. Side 1 is the cut node's
+step 08's own code (`methods/node_cut_si.py`) and cuts at the node the method chooses; on a tie
+it takes the first node in the node table's order (pandas `idxmax`, or `idxmin` for MinFisherP), and the summary records how many
+nodes tie and how many different side counts they give (for MaxSI also how many are within numpy isclose of the highest SI). Side 1 is the cut node's
 child and its descendants, side 2 the rest of the cell without the cut node. The axon is the side
 whose presynaptic fraction is above the whole cell's, counted without the cut node's synapses;
 a cell whose two sides have the same fraction, or with a side that has no synapse, fails and gets
 no labels. The synapses on the cut node get no label. The raw synapse table must have no
 self-synapses (the script stops otherwise). Batches of 500, skipped when their files exist;
-each batch file is written under a temporary name holding the process id and renamed, the failures file last. The labelling can run as several copies at once: set `N_SHARDS` and `SHARD` in the settings, or the environment variables `STEP09_N_SHARDS` and `STEP09_SHARD`, and start one copy for each `SHARD`. Copy `k` labels the batches whose number, counted from 0, modulo `N_SHARDS` is `k` (copy 0 takes batch files 0001, 0001 + `N_SHARDS`, …), reads only those cells' synapses, and stops once its batches are done; a last run with `N_SHARDS = 1` (and the environment variables unset, since they override the settings) then finds every batch saved and builds the three tables. The batch files are the same bytes as a single run's.
-`batch_run.json` records the cell list, the raw synapse table, the skeleton files (count and a hash of
+each batch file is written under a temporary name holding the process id and renamed, the failures file last. The labelling can run as several copies at once: set `N_SHARDS` and `SHARD` in the settings, or the environment variables `STEP09_N_SHARDS` and `STEP09_SHARD`, and start one copy for each `SHARD`. Copy `k` labels the batches whose number, counted from 0, modulo `N_SHARDS` is `k` (copy 0 takes batch files 0001, 0001 + `N_SHARDS`, …), reads only those cells' synapses, and stops once its batches are done; a last run with `N_SHARDS = 1` (and `STEP09_N_SHARDS` and `STEP09_SHARD` unset, since they override the settings; keep `STEP09_METHOD` set to the same method as the copies) then finds every batch saved and builds the three tables. The failed-cell count differs between methods, so set `ACCEPT_FAILED_CELLS` (or the environment variable `STEP09_ACCEPT_FAILED_CELLS`) for each method's run. The batch files are the same bytes as a single run's.
+`batch_run.json` records the method, the cell list, the raw synapse table, the skeleton files (count and a hash of
 their paths and sizes) and the navis version, and a run with different ones is refused. It stops at the start if
 a skeleton file name is in two subfolders of `SWC_DIR`, and stops on a `MemoryError` instead of
 recording it as a failed cell. Before writing a table it prints the failure count and errors, then stops if: a cell failed for want of a
@@ -287,8 +300,8 @@ exactly once; or only some of its three tables exist.
 |--|--|
 | **Inputs** | `NEURON_TABLE_SFC_FTR`, `SYNAPSE_TABLE_SFC_FTR`, `SYNAPSE_TABLE_RAW_FTR` (without self-synapses; the script stops otherwise), the skeletons of every cell of the neuron table in `SWC_DIR` |
 | **Outputs** | Per batch in `MAXSI_LABEL_BATCH_DIR`: `labels_batch_NNNN.ftr` (`synapse_id`, `neuron`, `side`, `label`), `summary_batch_NNNN.ftr` (one row per cell: `best_node_id`, `MaxSI_SI`, `n_tied_max_SI`, `n_tied_max_SI_distinct_sides`, `n_close_max_SI`, side counts, `axon_side`), `failures_batch_NNNN.ftr`, `batch_run.json`. Combined: `MAXSI_SYNAPSE_TABLE_FTR` (the SFC synapse table's columns and dtypes; `comp` from the MaxSI labels, `SI_pre`/`SI_post` = `MaxSI_SI`; rows with an unlabelled end are left out and counted in the log), `MAXSI_NEURON_TABLE_FTR` (the SFC neuron table's columns, and its rows less the cells that failed, which are dropped and counted in the log as step 05 drops cells with no SI; `SI` = `MaxSI_SI`; `pre_A` to `post_L`, `axon_correct`, `dend_correct` counted from the MaxSI synapse table with step 05's code; `linker` = 0; every other column is copied from the SFC table, including the synapse, degree and partner counts and the ratio columns that step 07 and the figures use as cell features) and `MAXSI_SI_UPDATED_FTR` (`root_id`, `SI` = `MaxSI_SI`, in the format of `SI_updated.ftr`). The log also counts labelled ends that have no row in the SFC synapse table, ends lost to the cut node and to an unlabelled partner, and kept cells whose `axon_correct` or `dend_correct` is empty here but not in the SFC table. The three tables are written together, and none is overwritten if they exist |
-| **Downstream** | With `SPLIT_METHOD = "maxsi"` in `config.py`, every script that reads `SYNAPSE_TABLE_FTR`, `NEURON_TABLE_FTR` or `SI_UPDATED_FTR` reads these three tables instead. See README, Reproducing the analysis, for what else moves, what stops and the run order |
-| **Note** | `ONLY_LOCAL_SKELETONS = True` or a `LIMIT` runs only the cells whose skeleton is under `SWC_DIR` and writes everything to `MAXSI_SUBSET_DIR`, for checking; the synapse table holds only the rows whose two ends are both chosen cells, so the neuron table's `pre_A` to `post_L` are not the full cells' counts. `tools/check_step09_failures.py` runs step 09 on five local cells with planted failures. The MaxSI labels have no `L`, so `pre_L` and `post_L` are 0. Cost and memory: see README |
+| **Downstream** | With `SPLIT_METHOD = "maxsi"` in `config.py`, every script that reads `SYNAPSE_TABLE_FTR`, `NEURON_TABLE_FTR` or `SI_UPDATED_FTR` reads these three tables instead (`"minfisherp"` and `"maxphi"` the other methods' tables). See README, Reproducing the analysis, for what else moves, what stops and the run order |
+| **Note** | `ONLY_LOCAL_SKELETONS = True` or a `LIMIT` runs only the cells whose skeleton is under `SWC_DIR` and writes everything to `MAXSI_SUBSET_DIR` (`MINFISHERP_SUBSET_DIR`, `MAXPHI_SUBSET_DIR`), for checking; the synapse table holds only the rows whose two ends are both chosen cells, so the neuron table's `pre_A` to `post_L` are not the full cells' counts. `tools/check_step09_failures.py` runs step 09 on five local cells with planted failures. The labels have no `L`, so `pre_L` and `post_L` are 0. Cost and memory: see README |
 
 ---
 

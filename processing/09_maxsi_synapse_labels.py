@@ -1,21 +1,39 @@
 # -*- coding: utf-8 -*-
 """
-Per-synapse compartment labels for the MaxSI split.
+Per-synapse compartment labels for the MaxSI, MinFisherP or MaxPhi split.
 
 For every cell of NEURON_TABLE_SFC_FTR (every super-class): load the skeleton, heal it
 (navis.heal_skeleton), attach its synapses from SYNAPSE_TABLE_RAW_FTR
 (methods_all.attach_synapses_princeton, which keeps synapse_id; the same two calls as
 methods_all.heal_attach_princeton, made here so that an error keeps its own text), compute
-the SI of every candidate cut as step 08 does (methods/node_cut_si.py), and cut at the node
-with the highest SI. When several nodes share the highest SI, the first in the node table's
-order is taken (pandas idxmax); the summary records how many nodes tie and how many
-different side counts they give, and also how many nodes are within numpy isclose of the
+the side counts and SI of every candidate cut as step 08 does (methods/node_cut_si.py), and
+cut at one node. The METHOD setting picks it:
+- "maxsi": the node with the highest SI (nodes with no SI are left out);
+- "minfisherp": the node with the lowest p of the two-sided Fisher exact test on its side
+  counts (nodes with no p are left out; a node with no SI can be chosen). The test runs at
+  every node, so this method is slower than the other two;
+- "maxphi": the node with the highest |phi| of its side counts, phi = (ad - bc) /
+  sqrt((a + b)(c + d)(a + c)(b + d)) with a, b = side 1 pre, post and c, d = side 2 pre,
+  post (nodes where the square root is 0 are left out).
+When several nodes share the chosen value, the first in the node table's order is taken
+(pandas idxmax or idxmin); the summary records how many nodes tie and how many different
+side counts they give, and for MaxSI also how many nodes are within numpy isclose of the
 highest SI (for information). Another tied node can change the labels even with the same
-side counts, by putting different synapses on each side.
+side counts, by putting different synapses on each side. A cell's SI is the SI of the
+chosen cut. MinFisherP chooses without regard to the SI, so the chosen cut can have an empty
+SI (NaN, when the synapses off the cut node are all of one kind). Such a cut leaves both
+sides with the same presynaptic fraction, so the cell fails; the run prints the count of
+labelled cells with an empty SI, which is therefore 0. A cell with no candidate node fails.
 
-The MaxSI tables inherit the SFC tables' cells and synapse rows: only the cells of
+The tables inherit the SFC tables' cells and synapse rows: only the cells of
 NEURON_TABLE_SFC_FTR are tried (a cell the SFC split failed on is never tried here), and
 only the rows of SYNAPSE_TABLE_SFC_FTR are labelled.
+
+Each method writes to its own folders (config.py): METHOD = "maxsi" to the MAXSI_* paths
+(the _maxsi folders), "minfisherp" to the MINFISHERP_* paths (_minfisherp), "maxphi" to the
+MAXPHI_* paths (_maxphi). STEP09_METHOD in the environment overrides the setting. Below,
+the MaxSI names stand for the method's: MaxSI_SI is the summary's SI column under
+"maxsi", MinFisherP_SI and MaxPhi_SI under the other two.
 
 Side 1 is the cut node's one child and its descendants, side 2 the rest of the cell
 without the cut node. The synapses on the cut node itself get no label. The axon is the
@@ -30,12 +48,15 @@ Writes per batch of 500 cells, to MAXSI_LABEL_BATCH_DIR:
 - labels_batch_NNNN.ftr: synapse_id, neuron, side ('pre' or 'post'), label ('A' or 'D');
 - summary_batch_NNNN.ftr: one row per cell with its cut node, MaxSI_SI, the ties at the
   highest SI (n_tied_max_SI, n_tied_max_SI_distinct_sides, n_close_max_SI), side counts
-  and which side is the axon;
+  and which side is the axon. Under "minfisherp": MinFisherP_SI, the cut's fisher_p and
+  the ties at the lowest p (n_tied_min_fisher_p, n_tied_min_fisher_p_distinct_sides);
+  under "maxphi": MaxPhi_SI, the cut's Phi and the ties at the highest Phi (n_tied_max_Phi,
+  n_tied_max_Phi_distinct_sides);
 - failures_batch_NNNN.ftr: neuron and error, for cells with no labels.
 Each file is written under a temporary name and then renamed, the failures file last, and
-a batch is skipped if its three files exist. batch_run.json records the cell list, the
-batch size, the raw synapse table, the number of skeleton files under SWC_DIR with a hash
-of their sorted paths and sizes, the navis version, and a hash of the code that labels a
+a batch is skipped if its three files exist. batch_run.json records the method, the cell
+list, the batch size, the raw synapse table, the number of skeleton files under SWC_DIR with
+a hash of their sorted paths and sizes, the navis version, and a hash of the code that labels a
 cell (sections 3 to 6 of this script, methods/node_cut_si.py and methods/methods_all.py; not
 the settings); the run stops if the folder holds batches
 of a run where any of these differ. A MemoryError stops the run instead of being recorded
@@ -58,9 +79,10 @@ The combine section then writes
   the number of labelled ends that have no row in the SFC synapse table.
 - MAXSI_NEURON_TABLE_FTR: the rows and columns of NEURON_TABLE_SFC_FTR, keeping, as step
   05 does, only the cells that have an SI and a row in the synapse table: a cell that
-  failed here is dropped, and the number is printed. SI = MaxSI_SI. Recounted from
+  failed here is dropped, and the number is printed (a MinFisherP cell labelled with an
+  empty SI is kept). SI = MaxSI_SI. Recounted from
   MAXSI_SYNAPSE_TABLE_FTR with step 05's code (05:223-256), because they describe the
-  split: pre_A ... post_L, axon_correct, dend_correct. linker = 0, as the MaxSI split has
+  split: pre_A ... post_L, axon_correct, dend_correct. linker = 0, as the split has
   no linker compartment. Every other column is the SFC table's, including the cell
   properties out_synapses_count, in_synapses_count, the degree and partner columns and
   the six ratio columns: step 07's PCA and several figures use them as features of the
@@ -75,12 +97,13 @@ The three tables are written together, each to a .tmp file and then renamed, the
 last: if all exist, the run stops at the start and none is overwritten.
 
 config.SPLIT_METHOD = "maxsi" points SYNAPSE_TABLE_FTR, NEURON_TABLE_FTR and
-SI_UPDATED_FTR at these three tables.
+SI_UPDATED_FTR at these three tables ("minfisherp" and "maxphi" at those of the other two
+methods).
 
 ONLY_LOCAL_SKELETONS = True, or a LIMIT, runs only the cells whose skeleton is under
 SWC_DIR (the first LIMIT of them, by ID) and writes everything to MAXSI_SUBSET_DIR, for
-checking. The subset synapse table keeps only the rows whose two ends are both cells of
-the run, so its counts, and pre_A ... post_L in the subset neuron table, are not the full
+checking (MINFISHERP_SUBSET_DIR, MAXPHI_SUBSET_DIR for the other methods). The subset
+synapse table keeps only the rows whose two ends are both cells of the run, so its counts, and pre_A ... post_L in the subset neuron table, are not the full
 cells' counts.
 
 N_SHARDS and SHARD (or STEP09_N_SHARDS and STEP09_SHARD in the environment) split the labelling
@@ -97,6 +120,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (METHODS_DIR, SWC_DIR, NEURON_TABLE_SFC_FTR, SYNAPSE_TABLE_SFC_FTR,
                     SYNAPSE_TABLE_RAW_FTR, MAXSI_LABEL_BATCH_DIR, MAXSI_SUBSET_DIR,
                     MAXSI_SYNAPSE_TABLE_FTR, MAXSI_NEURON_TABLE_FTR, MAXSI_SI_UPDATED_FTR)
+from config import (MINFISHERP_LABEL_BATCH_DIR, MINFISHERP_SUBSET_DIR, MINFISHERP_SYNAPSE_TABLE_FTR,
+                    MINFISHERP_NEURON_TABLE_FTR, MINFISHERP_SI_UPDATED_FTR,
+                    MAXPHI_LABEL_BATCH_DIR, MAXPHI_SUBSET_DIR, MAXPHI_SYNAPSE_TABLE_FTR,
+                    MAXPHI_NEURON_TABLE_FTR, MAXPHI_SI_UPDATED_FTR)
 
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
@@ -115,6 +142,11 @@ import pyarrow.feather as feather
 
 #%%2 Settings
 
+# The cut rule: "maxsi" (highest SI), "minfisherp" (lowest Fisher p) or "maxphi" (highest |phi|). Each writes to its
+# own folders. STEP09_METHOD in the environment overrides it.
+METHOD = "maxsi"
+METHOD = os.environ.get("STEP09_METHOD", METHOD)
+
 BATCH_SIZE = 500
 
 # True: only the cells whose skeleton is under SWC_DIR, written to MAXSI_SUBSET_DIR
@@ -128,8 +160,11 @@ LIMIT = None
 ACCEPT_CELLS_WITHOUT_SKELETON = False
 
 # The tables are written only if exactly this many cells failed (None: only if none failed).
-# Run once, read the count and the errors the run prints, then set it.
+# Run once, read the count and the errors the run prints, then set it. The count differs between methods.
+# STEP09_ACCEPT_FAILED_CELLS in the environment overrides it.
 ACCEPT_FAILED_CELLS = None
+if os.environ.get("STEP09_ACCEPT_FAILED_CELLS"):
+    ACCEPT_FAILED_CELLS = int(os.environ["STEP09_ACCEPT_FAILED_CELLS"])
 
 # Shards: N copies of the labelling at once. N_SHARDS = 1 runs every batch and then writes the tables.
 # With N_SHARDS = N, the copy with SHARD = k (0 to N-1) runs the batches whose batch_number (from 0, section 6) leaves
@@ -144,19 +179,37 @@ SHARD = int(os.environ.get("STEP09_SHARD", SHARD))
 if not (N_SHARDS >= 1 and 0 <= SHARD < N_SHARDS):
     raise SystemExit(f"SHARD must be 0 to N_SHARDS - 1 (N_SHARDS = {N_SHARDS}, SHARD = {SHARD})")
 
+# per method: the prefix of its config names; its label batch folder, subset folder, synapse, neuron and SI tables;
+# and the names of its summary columns (the method's SI, the cut's value, the ties at that value)
+METHODS = {
+    "maxsi": ("MAXSI", MAXSI_LABEL_BATCH_DIR, MAXSI_SUBSET_DIR, MAXSI_SYNAPSE_TABLE_FTR, MAXSI_NEURON_TABLE_FTR,
+              MAXSI_SI_UPDATED_FTR, "MaxSI_SI", None, "n_tied_max_SI", "n_tied_max_SI_distinct_sides"),
+    "minfisherp": ("MINFISHERP", MINFISHERP_LABEL_BATCH_DIR, MINFISHERP_SUBSET_DIR, MINFISHERP_SYNAPSE_TABLE_FTR,
+                   MINFISHERP_NEURON_TABLE_FTR, MINFISHERP_SI_UPDATED_FTR, "MinFisherP_SI", "fisher_p",
+                   "n_tied_min_fisher_p", "n_tied_min_fisher_p_distinct_sides"),
+    "maxphi": ("MAXPHI", MAXPHI_LABEL_BATCH_DIR, MAXPHI_SUBSET_DIR, MAXPHI_SYNAPSE_TABLE_FTR, MAXPHI_NEURON_TABLE_FTR,
+               MAXPHI_SI_UPDATED_FTR, "MaxPhi_SI", "Phi", "n_tied_max_Phi", "n_tied_max_Phi_distinct_sides"),
+}
+if METHOD not in METHODS:
+    raise SystemExit(f'METHOD must be "maxsi", "minfisherp" or "maxphi", not {METHOD!r}')
+(PREFIX, LABEL_BATCH_DIR, SUBSET_DIR, SYNAPSE_TABLE_OUT_FTR, NEURON_TABLE_OUT_FTR, SI_UPDATED_OUT_FTR,
+ SI_COLUMN, VALUE_COLUMN, TIED_COLUMN, TIED_SIDES_COLUMN) = METHODS[METHOD]
+METHOD_NAME = SI_COLUMN[:-3]   # MaxSI, MinFisherP or MaxPhi, for the messages
+print(f"Method: {METHOD}")
+
 SUBSET_RUN = ONLY_LOCAL_SKELETONS or LIMIT is not None
 if SUBSET_RUN:
-    batch_dir = MAXSI_SUBSET_DIR / "batches"
-    batch_dir_setting = "MAXSI_SUBSET_DIR"
-    synapse_table_out = MAXSI_SUBSET_DIR / MAXSI_SYNAPSE_TABLE_FTR.name
-    neuron_table_out = MAXSI_SUBSET_DIR / MAXSI_NEURON_TABLE_FTR.name
-    si_updated_out = MAXSI_SUBSET_DIR / MAXSI_SI_UPDATED_FTR.name
+    batch_dir = SUBSET_DIR / "batches"
+    batch_dir_setting = f"{PREFIX}_SUBSET_DIR"
+    synapse_table_out = SUBSET_DIR / SYNAPSE_TABLE_OUT_FTR.name
+    neuron_table_out = SUBSET_DIR / NEURON_TABLE_OUT_FTR.name
+    si_updated_out = SUBSET_DIR / SI_UPDATED_OUT_FTR.name
 else:
-    batch_dir = MAXSI_LABEL_BATCH_DIR
-    batch_dir_setting = "MAXSI_LABEL_BATCH_DIR"
-    synapse_table_out = MAXSI_SYNAPSE_TABLE_FTR
-    neuron_table_out = MAXSI_NEURON_TABLE_FTR
-    si_updated_out = MAXSI_SI_UPDATED_FTR
+    batch_dir = LABEL_BATCH_DIR
+    batch_dir_setting = f"{PREFIX}_LABEL_BATCH_DIR"
+    synapse_table_out = SYNAPSE_TABLE_OUT_FTR
+    neuron_table_out = NEURON_TABLE_OUT_FTR
+    si_updated_out = SI_UPDATED_OUT_FTR
 
 NO_SKELETON = "No usable skeleton"   # the start of the error text of a cell that failed for want of one
 
@@ -166,16 +219,16 @@ def check_final_tables():
     tables = [synapse_table_out, neuron_table_out, si_updated_out]
     exist = [p.exists() for p in tables]
     if all(exist):
-        print("The three MaxSI tables already exist; not overwriting. Move or rename them to write new ones.")
+        print(f"The three {METHOD_NAME} tables already exist; not overwriting. Move or rename them to write new ones.")
         return True
     if any(exist):
-        raise SystemExit(f"Only some of the three MaxSI tables exist ({[p.name for p, e in zip(tables, exist) if e]} "
+        raise SystemExit(f"Only some of the three {METHOD_NAME} tables exist ({[p.name for p, e in zip(tables, exist) if e]} "
                          f"in {synapse_table_out.parent}), perhaps from a run that stopped. Move them away first.")
     return False
 
 
 if check_final_tables():   # stops here rather than redo every batch and then write nothing
-    raise SystemExit("Nothing to do: the three MaxSI tables exist. Move them away to build new ones.")
+    raise SystemExit(f"Nothing to do: the three {METHOD_NAME} tables exist. Move them away to build new ones.")
 
 
 #%%3 Cells to run
@@ -191,7 +244,8 @@ local = {np.int64(name[:-4]) for name in swc_names if name[:-4].isdigit()}
 
 # what the batches are made from, besides the cells and the synapse table (check_batch_record)
 swc_fingerprint = "\n".join(f"{f}\t{(SWC_DIR / f).stat().st_size}" for f in swc_files)
-skeleton_record = {"swc_files": len(swc_files),
+skeleton_record = {"method": METHOD,   # batches of one method are never mixed with another's
+                   "swc_files": len(swc_files),
                    "swc_files_sha256": hashlib.sha256(swc_fingerprint.encode()).hexdigest(),
                    "navis_version": navis.__version__,
                    # the code that labels a cell too, so that batches made by two versions of it are never mixed;
@@ -241,7 +295,7 @@ else:
 assert allsynapses["pre"].dtype == np.int64 and allsynapses["post"].dtype == np.int64
 n_self = int((allsynapses["pre"] == allsynapses["post"]).sum())
 if n_self:
-    raise SystemExit(f"{n_self:,} self-synapses in {SYNAPSE_TABLE_RAW_FTR.name}; the MaxSI split "
+    raise SystemExit(f"{n_self:,} self-synapses in {SYNAPSE_TABLE_RAW_FTR.name}; the {METHOD_NAME} split "
                      "leaves them out (RAW_TABLE_KEEP_SELF_SYNAPSES = False in config.py)")
 print("Synapses read:", len(allsynapses))
 
@@ -322,6 +376,43 @@ def label_by_cut_node(neuron, node_row):
     }
 
 
+def choose_cut_node(node_SI):
+    """
+    The cut node under METHOD: its row of calculate_node_SI's table, the candidate nodes (rows) and those tied with
+    it at the chosen value. On a tie the first node in the table's order is taken.
+    """
+    if METHOD == "maxsi":
+        candidates = node_SI.dropna(subset=["SI"])
+        if len(candidates) == 0:
+            raise ValueError("No valid node-level SI values.")
+        # highest SI; on a tie, the first node in the table's order
+        best = candidates.loc[candidates["SI"].idxmax()]
+        tied = candidates.loc[candidates["SI"] == best["SI"]]
+    elif METHOD == "minfisherp":
+        candidates = node_SI.loc[node_SI["fisher_p"].notna()]
+        if len(candidates) == 0:
+            raise ValueError("No node with a Fisher p-value.")
+        # lowest p (p = 0 included); on a tie, the first node in the table's order
+        best = candidates.loc[candidates["fisher_p"].idxmin()]
+        tied = candidates.loc[candidates["fisher_p"] == best["fisher_p"]]
+    else:   # "maxphi"
+        a = node_SI["side_1_pre"].to_numpy(dtype=np.float64)
+        b = node_SI["side_1_post"].to_numpy(dtype=np.float64)
+        c = node_SI["side_2_pre"].to_numpy(dtype=np.float64)
+        d = node_SI["side_2_post"].to_numpy(dtype=np.float64)
+        den = np.sqrt((a + b) * (c + d) * (a + c) * (b + d))
+        with np.errstate(divide="ignore", invalid="ignore"):
+            phi = np.where(den > 0, np.abs((a * d - b * c) / den), np.nan)
+        node_SI = node_SI.assign(Phi=phi)
+        candidates = node_SI.loc[node_SI["Phi"].notna()]
+        if len(candidates) == 0:
+            raise ValueError("No node with a phi value.")
+        # highest |phi|; on a tie, the first node in the table's order
+        best = candidates.loc[candidates["Phi"].idxmax()]
+        tied = candidates.loc[candidates["Phi"] == best["Phi"]]
+    return best, candidates, tied
+
+
 def maxsi_labels_one_cell(neuron_id, neuron_synapses):
     """Labels and summary row of one cell; raises on any failure."""
     if np.int64(neuron_id) not in local:
@@ -336,17 +427,12 @@ def maxsi_labels_one_cell(neuron_id, neuron_synapses):
     healed = navis.heal_skeleton(swc)
     neuron = attach_synapses_princeton(healed, neuron_synapses)
 
-    # the same object step 08 passes to calculate_node_SI (a NeuronList of one cell); the Fisher test is not used here
-    node_SI = calculate_node_SI(neuron, fisher=False)
+    # the same object step 08 passes to calculate_node_SI (a NeuronList of one cell); the Fisher test runs only for
+    # MinFisherP
+    node_SI = calculate_node_SI(neuron, fisher=(METHOD == "minfisherp"))
     if len(node_SI) == 0:
         raise ValueError("No valid node-level SI values.")
-    valid_node_SI = node_SI.dropna(subset=["SI"])
-    if len(valid_node_SI) == 0:
-        raise ValueError("No valid node-level SI values.")
-
-    # highest SI; on a tie, the first node in the table's order
-    best = valid_node_SI.loc[valid_node_SI["SI"].idxmax()]
-    tied = valid_node_SI.loc[valid_node_SI["SI"] == best["SI"]]
+    best, valid_node_SI, tied = choose_cut_node(node_SI)
 
     cell = neuron[0] if isinstance(neuron, navis.NeuronList) else neuron
     labelled, sides = label_by_cut_node(cell, best)
@@ -363,17 +449,29 @@ def maxsi_labels_one_cell(neuron_id, neuron_synapses):
         "label": labelled["label"].to_numpy(dtype=object),
     })
 
+    # different side counts among the tied nodes: above 1, another tied node would cut elsewhere (at 1, it can still
+    # put different synapses on each side)
+    n_tied_sides = len(tied[["side_1_pre", "side_1_post", "side_2_pre", "side_2_post"]].drop_duplicates())
+    if METHOD == "maxsi":
+        chosen = {
+            "MaxSI_SI": float(best["SI"]),
+            "n_tied_max_SI": len(tied),
+            "n_tied_max_SI_distinct_sides": n_tied_sides,
+            # for information only: nodes whose SI is within numpy isclose of the highest
+            "n_close_max_SI": int(np.isclose(valid_node_SI["SI"].to_numpy(), best["SI"]).sum()),
+        }
+    else:
+        chosen = {
+            SI_COLUMN: float(best["SI"]),   # NaN under MinFisherP when the cell's synapses off the cut are of one kind
+            VALUE_COLUMN: float(best[VALUE_COLUMN]),
+            TIED_COLUMN: len(tied),
+            TIED_SIDES_COLUMN: n_tied_sides,
+        }
+
     summary = {
         "neuron": np.int64(neuron_id),
         "best_node_id": np.int64(best["node_id"]),
-        "MaxSI_SI": float(best["SI"]),
-        "n_tied_max_SI": len(tied),
-        # different side counts among the tied nodes: above 1, another tied node would cut elsewhere (at 1,
-        # it can still put different synapses on each side)
-        "n_tied_max_SI_distinct_sides": len(tied[["side_1_pre", "side_1_post",
-                                                 "side_2_pre", "side_2_post"]].drop_duplicates()),
-        # for information only: nodes whose SI is within numpy isclose of the highest
-        "n_close_max_SI": int(np.isclose(valid_node_SI["SI"].to_numpy(), best["SI"]).sum()),
+        **chosen,
         "n_candidates": len(node_SI),
         "n_attached_pre": len(cell.presynapses),
         "n_attached_post": len(cell.postsynapses),
@@ -388,9 +486,15 @@ def maxsi_labels_one_cell(neuron_id, neuron_synapses):
 n_batches = int(np.ceil(len(all_neurons) / BATCH_SIZE))
 
 batch_dir.mkdir(parents=True, exist_ok=True)
+# MinFisherP's p-values, and which of them underflow to 0, depend on the scipy version
+if METHOD == "minfisherp":
+    import scipy
+    skeleton_record["scipy_version"] = scipy.__version__
+
 # stops on another run's batches, including one made from another skeleton set or navis version
 check_batch_record(batch_dir, all_neurons, BATCH_SIZE, extra=skeleton_record, setting_name=batch_dir_setting)
 
+print("Method:", METHOD)
 print("Batch size:", BATCH_SIZE)
 print("Number of batches:", n_batches)
 
@@ -558,13 +662,16 @@ del end_keys
 if two_labels:
     raise SystemExit("a synapse end has two labels")
 
-ties = maxsi_summary["n_tied_max_SI_distinct_sides"]
-print(f"Cells whose highest SI is shared by nodes that cut elsewhere (the first node is taken): "
+ties = maxsi_summary[TIED_SIDES_COLUMN]
+print(f"Cells whose chosen value ({METHOD_NAME}) is shared by nodes that cut elsewhere (the first node is taken): "
       f"{int((ties > 1).sum()):,}")
-print(f"Cells whose highest SI is shared by more than one node (another one can put different synapses on each "
-      f"side, even with the same counts): {int((maxsi_summary['n_tied_max_SI'] > 1).sum()):,}")
-print(f"Cells with more nodes within numpy isclose of the highest SI than exactly at it: "
-      f"{int((maxsi_summary['n_close_max_SI'] > maxsi_summary['n_tied_max_SI']).sum()):,}")
+print(f"Cells whose chosen value is shared by more than one node (another one can put different synapses on each "
+      f"side, even with the same counts): {int((maxsi_summary[TIED_COLUMN] > 1).sum()):,}")
+if METHOD == "maxsi":
+    print(f"Cells with more nodes within numpy isclose of the highest SI than exactly at it: "
+          f"{int((maxsi_summary['n_close_max_SI'] > maxsi_summary['n_tied_max_SI']).sum()):,}")
+print(f"Labelled cells with an empty {SI_COLUMN} (all their synapses off the cut node of one kind; kept): "
+      f"{int(maxsi_summary[SI_COLUMN].isna().sum()):,}")
 print(f"Labelled cells' synapse ends on the cut node, so unlabelled: "
       f"{int((maxsi_summary['node_pre_excluded'] + maxsi_summary['node_post_excluded']).sum()):,}")
 
@@ -583,7 +690,7 @@ if len(maxsi_failures) != accepted:
 write_tables = not check_final_tables()   # stops if only some of the three exist
 
 
-#%%8 MaxSI synapse table
+#%%8 Synapse table of the method
 
 if write_tables:
     if SUBSET_RUN:
@@ -639,7 +746,7 @@ if write_tables:
     print(f"Labelled ends with no row in {SYNAPSE_TABLE_SFC_FTR.name}: pre {n_pre_labels - int((~no_pre).sum()):,}, "
           f"post {n_post_labels - int((~no_post).sum()):,}")
 
-    si_by_cell = maxsi_summary.set_index("neuron")["MaxSI_SI"]
+    si_by_cell = maxsi_summary.set_index("neuron")[SI_COLUMN]
     kept = keys.loc[keep]
     # pre label * 2 + post label indexes AA, AD, DA, DD
     comp_index = (kept["pre_label"].to_numpy(dtype=np.int8) * 2 + kept["post_label"].to_numpy(dtype=np.int8))
@@ -695,7 +802,7 @@ if "labels" in globals():
 gc.collect()
 
 
-#%%9 MaxSI neuron table (step 05's compartment counts on the MaxSI synapse table)
+#%%9 Neuron table of the method (step 05's compartment counts on its synapse table)
 
 if write_tables:
     syn = feather.read_table(synapse_table_out, columns=["pre", "post", "comp"])
@@ -725,8 +832,8 @@ if write_tables:
     # 05:254-256
     maxsi_neurons["axon_correct"] = maxsi_neurons["pre_A"] / (maxsi_neurons["pre_A"] + maxsi_neurons["post_A"])
     maxsi_neurons["dend_correct"] = maxsi_neurons["post_D"] / (maxsi_neurons["pre_D"] + maxsi_neurons["post_D"])
-    maxsi_neurons["SI"] = maxsi_neurons["neuron"].map(maxsi_summary.set_index("neuron")["MaxSI_SI"]).astype(np.float64)
-    maxsi_neurons["linker"] = np.float64(0.0)   # the MaxSI split has no linker compartment
+    maxsi_neurons["SI"] = maxsi_neurons["neuron"].map(maxsi_summary.set_index("neuron")[SI_COLUMN]).astype(np.float64)
+    maxsi_neurons["linker"] = np.float64(0.0)   # the split has no linker compartment
 
     in_synapse_table = maxsi_neurons["neuron"].isin(pd.unique(maxsi_syn[["pre", "post"]].values.ravel()))
     del maxsi_syn
@@ -735,16 +842,17 @@ if write_tables:
     assert list(maxsi_neurons.columns) == list(neuron_table.columns)
     assert (maxsi_neurons.dtypes == neuron_table.dtypes).all(), maxsi_neurons.dtypes[maxsi_neurons.dtypes != neuron_table.dtypes]
 
-    # as step 05: only the cells with an SI (05:129) and a row in the synapse table (05:223, 298)
+    # as step 05: only the cells with an SI (05:129) and a row in the synapse table (05:223, 298). A cell has an SI
+    # here when it was labelled, even if the SI is empty (a MinFisherP cut with the synapses off it of one kind).
     in_run = maxsi_neurons["neuron"].isin(all_neurons)
     failed = maxsi_neurons["neuron"].isin(maxsi_failures["neuron"])
-    has_si = maxsi_neurons["SI"].notna()
+    has_si = maxsi_neurons["neuron"].isin(maxsi_summary["neuron"])
     keep = has_si & in_synapse_table
-    print(f"Cells in {NEURON_TABLE_SFC_FTR.name}: {len(maxsi_neurons):,}; dropped because the MaxSI split "
+    print(f"Cells in {NEURON_TABLE_SFC_FTR.name}: {len(maxsi_neurons):,}; dropped because the {METHOD_NAME} split "
           f"failed: {int(failed.sum()):,}"
           + (f"; dropped because not in this subset run: {int((~in_run).sum()):,}" if SUBSET_RUN else "")
-          + f"; dropped with a MaxSI_SI but no row in the MaxSI synapse table: {int((has_si & ~in_synapse_table).sum()):,}"
-          f"; kept {int(keep.sum()):,}")
+          + f"; dropped with a {SI_COLUMN} but no row in the {METHOD_NAME} synapse table: "
+          f"{int((has_si & ~in_synapse_table).sum()):,}; kept {int(keep.sum()):,}")
     assert int((~has_si).sum()) == int(failed.sum()) + int((~in_run).sum())
 
     # the figures drop cells with an empty axon_correct or dend_correct
@@ -761,11 +869,11 @@ if write_tables:
     print(f"Wrote {neuron_table_out} ({len(maxsi_neurons):,} rows)")
 
 
-#%%10 MaxSI SI table (the format of SI_updated.ftr)
+#%%10 SI table of the method (the format of SI_updated.ftr)
 
 if write_tables:
     si_updated = pd.DataFrame({"root_id": maxsi_summary["neuron"].to_numpy(dtype=np.int64),
-                               "SI": maxsi_summary["MaxSI_SI"].to_numpy(dtype=np.float64)})
+                               "SI": maxsi_summary[SI_COLUMN].to_numpy(dtype=np.float64)})
     si_updated_out.parent.mkdir(parents=True, exist_ok=True)
     write_whole(pa.Table.from_pandas(si_updated, preserve_index=False), si_updated_out)   # last: its name marks a finished run
     print(f"Wrote {si_updated_out} ({len(si_updated):,} rows)")

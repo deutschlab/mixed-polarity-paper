@@ -37,7 +37,8 @@ OUTPUT_DIR = ROOT / "outputs"
 # published table. Inputs no script here builds stay where they are (REBUILD_KEEPS_PUBLISHED below); the co-authors'
 # tables, made from the published tables, have no rebuilt version, so their scripts stop (REBUILD_NOT_AVAILABLE;
 # neuron_data.ftr and the 4E olfactory table move too, and their only readers stop on the tables above anyway).
-# The split setting (SPLIT_METHOD, further down) applies on top: "rebuild" with "maxsi" gives data/derived_rebuild_maxsi.
+# The split setting (SPLIT_METHOD, further down) applies on top: "rebuild" with "maxsi" gives data/derived_rebuild_maxsi
+# (data/derived_rebuild_minfisherp and data/derived_rebuild_maxphi for the other two cut rules).
 PIPELINE_RUN = "published"
 PUBLISHED_DERIVED_DIR = DERIVED_DATA_DIR
 if PIPELINE_RUN == "published":
@@ -186,35 +187,52 @@ if PIPELINE_RUN == "rebuild":
 # step 05 builds the neuron table here, then writes NEURON_TABLE_FTR and deletes this copy
 NEURON_TABLE_PARTIAL_FTR = NEURON_TABLE_FTR.with_name(NEURON_TABLE_FTR.stem + "_partial.ftr")
 
-# --- MaxSI split (processing/09_maxsi_synapse_labels.py) ---
-# Step 09 cuts every cell of NEURON_TABLE_SFC_FTR at its highest-SI node (as step 08 finds it), labels each
-# synapse end A or D, and writes three tables in the format of the SFC ones: the synapse and neuron tables below and
-# MAXSI_SI_UPDATED_FTR.
-# Every table built on the MaxSI split lives in a folder of its own: the published folder's name with "_maxsi" added
-# (data/derived/ -> data/derived_maxsi/, data/intermediate/ -> data/intermediate_maxsi/), under the same file name.
-# So no step run under MaxSI can write over a published table.
-def _maxsi_path(p):
+# --- MaxSI, MinFisherP and MaxPhi splits (processing/09_maxsi_synapse_labels.py) ---
+# Step 09 cuts every cell of NEURON_TABLE_SFC_FTR at one node, labels each synapse end A or D, and writes three tables
+# in the format of the SFC ones: the synapse and neuron tables below and the method's SI table. Its METHOD setting
+# picks the node: "maxsi" the highest SI, "minfisherp" the lowest Fisher p, "maxphi" the highest |phi|, all
+# from the node table step 08 also uses; ties go to the first node in that table's order.
+# Every table built on one of these splits lives in a folder of its own: the published folder's name with "_maxsi",
+# "_minfisherp" or "_maxphi" added (data/derived/ -> data/derived_maxsi/, data/intermediate/ ->
+# data/intermediate_maxsi/), under the same file name. So no step run under one of them can write over a published
+# table, or over another method's.
+def _method_path(p, method):
     rel = Path(p).relative_to(DATA_DIR)
-    return DATA_DIR / (rel.parts[0] + "_maxsi") / Path(*rel.parts[1:])
+    return DATA_DIR / (rel.parts[0] + "_" + method) / Path(*rel.parts[1:])
+
+
+def _maxsi_path(p):
+    return _method_path(p, "maxsi")
 
 
 MAXSI_LABEL_BATCH_DIR    = _maxsi_path(INTERMEDIATE_DIR / "maxsi_labels" / "batches")
 MAXSI_SUBSET_DIR         = _maxsi_path(INTERMEDIATE_DIR / "maxsi_labels" / "subset")   # step 09 with ONLY_LOCAL_SKELETONS: batches and the three tables, for checking only
 MAXSI_SYNAPSE_TABLE_FTR  = _maxsi_path(SYNAPSE_TABLE_FTR)
 MAXSI_NEURON_TABLE_FTR   = _maxsi_path(NEURON_TABLE_FTR)
+MINFISHERP_LABEL_BATCH_DIR   = _method_path(INTERMEDIATE_DIR / "minfisherp_labels" / "batches", "minfisherp")
+MINFISHERP_SUBSET_DIR        = _method_path(INTERMEDIATE_DIR / "minfisherp_labels" / "subset", "minfisherp")
+MINFISHERP_SYNAPSE_TABLE_FTR = _method_path(SYNAPSE_TABLE_FTR, "minfisherp")
+MINFISHERP_NEURON_TABLE_FTR  = _method_path(NEURON_TABLE_FTR, "minfisherp")
+MAXPHI_LABEL_BATCH_DIR       = _method_path(INTERMEDIATE_DIR / "maxphi_labels" / "batches", "maxphi")
+MAXPHI_SUBSET_DIR            = _method_path(INTERMEDIATE_DIR / "maxphi_labels" / "subset", "maxphi")
+MAXPHI_SYNAPSE_TABLE_FTR     = _method_path(SYNAPSE_TABLE_FTR, "maxphi")
+MAXPHI_NEURON_TABLE_FTR      = _method_path(NEURON_TABLE_FTR, "maxphi")
 
-# Which split the scripts read: "sfc" (the published synapse flow centrality split, steps 01-05) or "maxsi" (step 09).
-# Steps 04 and 05 always write the SFC tables and SI_updated.ftr, and step 09 always reads them (the *_SFC_FTR names).
-# Under "maxsi", the two tables and every table built from them (by steps 06 and 07 and by the figure scripts that
-# write a table) point into the _maxsi folders, under the same file names. SI_UPDATED_FTR does too, and step 09
-# writes it there (MAXSI_SI_UPDATED_FTR, root_id and the MaxSI SI of every cell it labels). Steps 08 and
-# phi_threshold.py always read the SFC tables, since their output doesn't depend on the split. Raw tables, skeletons
-# and annotations stay where they are; the co-authors' tables are in MAXSI_NOT_AVAILABLE below.
+# Which split the scripts read: "sfc" (the published synapse flow centrality split, steps 01-05), or "maxsi",
+# "minfisherp" or "maxphi" (step 09 run with that METHOD). Steps 04 and 05 always write the SFC tables and
+# SI_updated.ftr, and step 09 always reads them (the *_SFC_FTR names). Under "maxsi", the two tables and every table
+# built from them (by steps 06 and 07 and by the figure scripts that write a table) point into the _maxsi folders,
+# under the same file names. SI_UPDATED_FTR does too, and step 09 writes it there (MAXSI_SI_UPDATED_FTR, root_id and
+# the MaxSI SI of every cell it labels). "minfisherp" and "maxphi" do the same with their own folders and tables.
+# Steps 08 and phi_threshold.py always read the SFC tables, since their output doesn't depend on the split. Raw
+# tables, skeletons and annotations stay where they are; the co-authors' tables are in MAXSI_NOT_AVAILABLE below.
 SPLIT_METHOD = "sfc"
 SYNAPSE_TABLE_SFC_FTR = SYNAPSE_TABLE_FTR   # the names set above
 NEURON_TABLE_SFC_FTR  = NEURON_TABLE_FTR
 SI_UPDATED_SFC_FTR    = SI_UPDATED_FTR      # step 05 writes it under this name, so the switch never moves its output
 MAXSI_SI_UPDATED_FTR  = _maxsi_path(SI_UPDATED_SFC_FTR)   # step 09; the same path as SI_UPDATED_FTR under "maxsi"
+MINFISHERP_SI_UPDATED_FTR = _method_path(SI_UPDATED_SFC_FTR, "minfisherp")   # likewise under "minfisherp"
+MAXPHI_SI_UPDATED_FTR     = _method_path(SI_UPDATED_SFC_FTR, "maxphi")       # likewise under "maxphi"
 MAXSI_SWITCHED = [
     "SYNAPSE_TABLE_FTR", "NEURON_TABLE_FTR", "SI_UPDATED_FTR",
     # step 06
@@ -231,7 +249,8 @@ MAXSI_SWITCHED = [
 # inertia, per-synapse bouton flags, t2), Dudi's 4E table and the Buhmann tables (Fig 6 and some supplementary
 # panels). There is no MaxSI version, so under "maxsi" they point into the _maxsi folders too, where nothing writes
 # them: a script that reads one stops, instead of drawing an SFC panel among the MaxSI ones. Don't copy the SFC
-# files there to make such a script run. (neuron_data.ftr stays: its scripts use only cell-type columns.)
+# files there to make such a script run. (neuron_data.ftr stays: its scripts use only cell-type columns.) The same
+# holds under "minfisherp" and "maxphi", with their folders.
 MAXSI_NOT_AVAILABLE = [
     "BOUTON_TABLE_FTR", "BOUTON_FILOPODIA_TABLE_FTR", "FILOPODIA_FILTERED_FTR", "FILOPODIA_RECIPROCAL_FTR",
     "BOUTON_INERTIA_FTR", "SYN_BOUTON_FTR", "SYN_BOUTON_NEW_FTR", "SYNAPSES_NO_SELF_FTR",
@@ -250,22 +269,23 @@ if PIPELINE_RUN == "rebuild":
     del _name, _p
 if SPLIT_METHOD == "sfc":
     pass
-elif SPLIT_METHOD == "maxsi":
+elif SPLIT_METHOD in ("maxsi", "minfisherp", "maxphi"):
     for _name in MAXSI_SWITCHED + MAXSI_NOT_AVAILABLE:
-        globals()[_name] = _maxsi_path(globals()[_name])
+        globals()[_name] = _method_path(globals()[_name], SPLIT_METHOD)
     del _name
-    OUTPUT_DIR = OUTPUT_DIR.with_name(OUTPUT_DIR.name + "_maxsi")   # outputs_maxsi (outputs_rebuild_maxsi under "rebuild")
+    # outputs_maxsi (outputs_rebuild_maxsi under "rebuild"), and likewise for the other two
+    OUTPUT_DIR = OUTPUT_DIR.with_name(OUTPUT_DIR.name + "_" + SPLIT_METHOD)
     RESULTS_DIR = FIGURES_DIR = OUTPUT_DIR   # the two aliases set above
 else:
-    raise ValueError(f'SPLIT_METHOD must be "sfc" or "maxsi", not {SPLIT_METHOD!r}')
+    raise ValueError(f'SPLIT_METHOD must be "sfc", "maxsi", "minfisherp" or "maxphi", not {SPLIT_METHOD!r}')
 
 
 def refuse_published_run(step):
     """Stop a pipeline step when PIPELINE_RUN is "published".
 
     Steps 01 to 07 write their tables to the paths set above. Under "published" those are the published tables in
-    data/intermediate, data/derived (and data/derived_maxsi under SPLIT_METHOD = "maxsi"). Some are writable and would
-    be overwritten without a word; others were delivered read-only by the co-authors, but a write through a temporary
+    data/intermediate, data/derived (and data/derived_maxsi under SPLIT_METHOD = "maxsi", likewise for "minfisherp"
+    and "maxphi"). Some are writable and would be overwritten without a word; others were delivered read-only by the co-authors, but a write through a temporary
     file and a rename (os.replace, as steps 01, 02b, 03 and 04 do) replaces a read-only file in a writable folder without an error
     too. A fresh run of the pipeline goes to the _rebuild folders, under PIPELINE_RUN = "rebuild".
     """

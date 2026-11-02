@@ -56,6 +56,10 @@ outputs/
 outputs_maxsi/
 outputs_rebuild/
 outputs_rebuild_maxsi/
+outputs_minfisherp/
+outputs_maxphi/
+outputs_rebuild_minfisherp/
+outputs_rebuild_maxphi/
 
 # Data directories — no raw or generated data committed
 data/raw/swc/
@@ -70,6 +74,18 @@ data/raw_rebuild/
 data/derived_rebuild_maxsi/
 data/intermediate_rebuild_maxsi/
 data/raw_rebuild_maxsi/
+data/derived_minfisherp/
+data/intermediate_minfisherp/
+data/raw_minfisherp/
+data/derived_maxphi/
+data/intermediate_maxphi/
+data/raw_maxphi/
+data/derived_rebuild_minfisherp/
+data/intermediate_rebuild_minfisherp/
+data/raw_rebuild_minfisherp/
+data/derived_rebuild_maxphi/
+data/intermediate_rebuild_maxphi/
+data/raw_rebuild_maxphi/
 data/larva/output/
 data/larva/results/
 # larval raw inputs: keep only the placeholder files
