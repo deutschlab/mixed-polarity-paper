@@ -10,6 +10,18 @@ With `PIPELINE_RUN = "rebuild"` (a fresh run of the pipeline), the same applies 
 
 ---
 
+## Running the figure scripts
+
+Fig 1C and Fig 3C make a Neuroglancer link through `caveclient` before they draw the panel, so they stop with an error unless you have a FlyWire account and a CAVE token saved on your machine (see the caveclient documentation). Every script imports `methods/methods_all.py`, which imports `caveclient` and `nglui`, so both packages must be installed (they are in the pinned requirements); only these two panels need the token. Both panels also write a `temp_link_<random hex>.html` file into the folder you run them from and try to open it with Microsoft Edge at its Windows path; on macOS and Linux they print "Edge executable not found" and carry on.
+
+Each script saves its figures as SVG in its own folder, usually `outputs/figN/<name>/`, `outputs/split_methods/<name>/` or `outputs/supporting/<name>/`. One exception: the Fig 1C script writes to `outputs/fig3/pc1_example/`. The two Fig 4 PC1 scripts also write PNG, and `figures/fig5/syn_type_x_reci_x_npil.py` writes PDF. A few figure scripts also write tables into `data/derived/`. Under `SPLIT_METHOD = "maxsi"` the figures go to `outputs_maxsi/` instead of `outputs/`, and those tables to `data/derived_maxsi/` or `data/intermediate_maxsi/`.
+
+A note on SI: step 04 stores each neuron's SI in the synapse table as `SI_pre` and `SI_post`, and step 05 stores it in the neuron table and in `SI_updated.ftr`. All three come from the same output of steps 01 and 02a, so after a fresh run each neuron has the same SI in all three (`SI_updated.ftr` has a few more neurons than the neuron table). Tables from an earlier run may not match, which is why the synapse-type tools refer to the table SI as "older" and to `SI_updated.ftr` as "corrected".
+
+Most figure scripts take SI from the neuron table or the synapse table, and nine always take it from `SI_updated.ftr` (six in `figures/fig2`–`fig3`, `figures/fig7/filopodia_x_mirror_neurons.py` and the two MaxSI scripts in `figures/split_methods/`); the revised Fig 4E and the Figure 6 script can be set to it (`DATA_SOURCE = 'princeton'` and `SI_SOURCE = 'SI_updated'`). The neuron and synapse tables the figures were made from (not included; see the README's [What you can reproduce](../README.md#what-you-can-reproduce)) come from an earlier run whose SI kept synapses from a neuron to itself, except for the 182 large cells from step 02a. The manuscript's Methods exclude self-synapses, as `SI_updated.ftr` does.
+
+---
+
 ## Figure 1 — Synaptic polarity and compartment canonicality
 
 Shows that neurons separate synaptic inputs to dendrites and outputs to axons. Panels include
@@ -121,7 +133,7 @@ multiple classification models.
 > not available, and a rerun differs from them (by up to 3.4 points in a cell of the
 > confusion matrix; accuracy 40.5% against 39.6%). That is more than the seed or the sign of PC1 changes, and fits
 > a different table, but that table cannot be checked. A rerun can be checked against an independent rebuild of
-> the model with `tools/check_simple_pc1_model.py` (README, Tools). `syntype_x_pc1.py` draws a decision surface too, but its save line (586) is
+> the model with `tools/check_simple_pc1_model.py` ([docs/tools.md](tools.md#checking-the-simple-pc1-model)). `syntype_x_pc1.py` draws a decision surface too, but its save line (586) is
 > commented out, so which script made the published Fig 4D is not settled. Fig 4 Supp 1 holds only skeleton
 > images of the Fig 4D neurons.
 >
@@ -212,7 +224,7 @@ reads `NEURON_TABLE_FTR` and `SYNAPSE_TABLE_FTR` instead (and `SI_UPDATED_FTR` i
 > of the olfactory and Kenyon-cell populations (not panels of the submitted paper), and `PopulationSummary.csv`.
 > With `DATA_SOURCE = 'princeton'` and the SI computed with self-synapses kept (`SI_SOURCE = 'neuron_table'`), almost no Kenyon cell has
 > SI ≥ 0.1, so that population is skipped and writes no figures. `tools/check_fig6_logic.py` checks the script's
-> calculations on a made-up connectome, without the Buhmann tables (README, Tools).
+> calculations on a made-up connectome, without the Buhmann tables ([docs/tools.md](tools.md#checking-that-a-figure-reproduces)).
 
 ## Figure 7 — Postsynaptic terminals on multisynaptic boutons
 
