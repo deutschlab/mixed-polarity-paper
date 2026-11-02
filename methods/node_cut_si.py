@@ -259,6 +259,10 @@ def calculate_node_SI(neuron, fisher=True):
 
     results = []
 
+    # Fisher test results by 2x2 table: many nodes have the same side counts, and fisher_exact
+    # gives the same result for the same table, so each distinct table is tested once.
+    fisher_cache = {}
+
     for node_index, node_id in enumerate(node_ids):
 
         # Exclude root
@@ -315,13 +319,16 @@ def calculate_node_SI(neuron, fisher=True):
             fisher_odds_ratio = np.nan
             fisher_p = np.nan
         else:
-            fisher_odds_ratio, fisher_p = fisher_exact(
-                [
-                    [side_1_pre, side_1_post],
-                    [side_2_pre, side_2_post]
-                ],
-                alternative="two-sided"
-            )
+            table_key = (side_1_pre, side_1_post, side_2_pre, side_2_post)
+            if table_key not in fisher_cache:
+                fisher_cache[table_key] = fisher_exact(
+                    [
+                        [side_1_pre, side_1_post],
+                        [side_2_pre, side_2_post]
+                    ],
+                    alternative="two-sided"
+                )
+            fisher_odds_ratio, fisher_p = fisher_cache[table_key]
 
         fisher_log2_odds_ratio = np.log2(
             (
