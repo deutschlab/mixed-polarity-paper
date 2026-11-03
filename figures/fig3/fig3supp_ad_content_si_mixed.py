@@ -56,6 +56,8 @@ df_comb_g_dend['rolling_correct'] = df_comb_g_dend['dend_correct'].rolling(windo
 df_comb_g_dend['rolling_correct']=df_comb_g_dend['rolling_correct']*100
 #%%
 
+MIXED_RULE = "si"   # "si": the main figure; "cutoffs": the supplement (see the labels below)
+
 # --- Define SI grid ---
 si_points = np.arange(0, 1.01, 0.05)
 
@@ -93,9 +95,16 @@ for _, r in thr_df.iterrows():
     dend_thr  = float(r['dend_correct'])  # %
 
     # ---- label neurons for this SI_point ----
-    tmp_nodes = nodesG[['neuron','axon_correct','dend_correct']].copy()
-    tmp_nodes['axon_label'] = np.where(tmp_nodes['axon_correct'] * 100 > axon_thr, 'A', 'M')
-    tmp_nodes['dend_label'] = np.where(tmp_nodes['dend_correct'] * 100 > dend_thr, 'D', 'M')
+    # MIXED_RULE "si" (the main figure): a cell with SI below this point counts as mixed, in both compartments.
+    # MIXED_RULE "cutoffs" (the supplement): a compartment is mixed when its share of correct synapses is not above
+    # the rolling curve's value at this point.
+    tmp_nodes = nodesG[['neuron','SI','axon_correct','dend_correct']].copy()
+    if MIXED_RULE == "si":
+        tmp_nodes['axon_label'] = np.where(tmp_nodes['SI'] >= si_point, 'A', 'M')
+        tmp_nodes['dend_label'] = np.where(tmp_nodes['SI'] >= si_point, 'D', 'M')
+    else:
+        tmp_nodes['axon_label'] = np.where(tmp_nodes['axon_correct'] * 100 > axon_thr, 'A', 'M')
+        tmp_nodes['dend_label'] = np.where(tmp_nodes['dend_correct'] * 100 > dend_thr, 'D', 'M')
 
     # ---- attach labels to synapses (pre=x, post=y) ----
     tmp = allsynapses[['synapse_id','pre','post','npil','comp']].copy()

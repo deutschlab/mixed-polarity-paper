@@ -123,21 +123,23 @@ allsynapses=pd.read_feather(SYNAPSE_TABLE_FTR)
 #%%
 nodesG=nodesG[['neuron','SI','axon_correct','dend_correct']]
 #%%
-# Use the previously computed axon_val threshold from SI=0.1
-threshold = axon_val  # from earlier step
-
-# Create a new column based on comparison
-nodesG['axon_label'] = nodesG['axon_correct'].apply(lambda x: 'A' if x*100 > threshold else 'M')
+# MIXED_RULE "si" (the main figure): a cell with SI below 0.1 counts as mixed, in both its axon and its dendrite.
+# MIXED_RULE "cutoffs" (the supplement): a compartment counts as mixed when its share of correct synapses is not
+# above the rolling curve's value at SI 0.1 (axon_val for axons, dend_val for dendrites).
+MIXED_RULE = "si"
+if MIXED_RULE == "si":
+    nodesG['axon_label'] = np.where(nodesG['SI'] >= 0.1, 'A', 'M')
+else:
+    nodesG['axon_label'] = nodesG['axon_correct'].apply(lambda x: 'A' if x*100 > axon_val else 'M')
 
 # Verify result
 print(nodesG['axon_label'].value_counts())
 
 
-# Use the previously computed axon_val threshold from SI=0.1
-threshold = dend_val  # from earlier step
-
-# Create a new column based on comparison
-nodesG['dend_label'] = nodesG['dend_correct'].apply(lambda x: 'D' if x*100 > threshold else 'M')
+if MIXED_RULE == "si":
+    nodesG['dend_label'] = np.where(nodesG['SI'] >= 0.1, 'D', 'M')
+else:
+    nodesG['dend_label'] = nodesG['dend_correct'].apply(lambda x: 'D' if x*100 > dend_val else 'M')
 
 # Verify result
 print(nodesG['dend_label'].value_counts())

@@ -103,11 +103,15 @@ whether neurons within the same type use the same synapse-type pattern.
 | Fig 3 Supp 1A (Buhmann curve) / 2A/B | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_correct_compartment_buhmann/` |
 | Fig 3 Supp 2C | `figures/fig3/si_x_npil_x_synapse_detection.py` | `SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_npil_x_synapse_detection/` |
 
-> Fig 3E is `synaptic_type_npils2_v2.svg` (line 428 of `fig3d_si_compartment_correct.py`), which marks a compartment
-> mixed by the same percentage cutoffs as Fig 3D. With lines 19-22 switched off, so that the script keeps the SI in
-> `NEURON_TABLE_FTR`, it draws the panel's bars exactly (the published figure also lists three neighbouring pairs of
-> neuropil labels in the opposite order: MB CA/BU, MB PED/FB and MB VL/AL). As committed, those lines replace that SI
-> with `SI_UPDATED_FTR`, which changes the cutoffs, the bars and their order. `fig3e_syntype_composition.py` instead
+> Fig 3E is `synaptic_type_npils2_v2.svg` (line 433 of `fig3d_si_compartment_correct.py`). The script's
+> `MIXED_RULE` picks how a compartment is called mixed. `"si"`, the setting for the main 3D and 3E, marks both
+> compartments of a cell mixed when the cell's SI (from `SI_UPDATED_FTR`, lines 21-24) is below 0.1. `"cutoffs"`, for
+> the supplement, marks a compartment mixed when its share of correct synapses is not above the rolling curve's value
+> at SI 0.1, the rule of the published 3D and 3E. The published panels were drawn on the neuron table's SI: with lines
+> 21-24 switched off, so that the script keeps the SI in `NEURON_TABLE_FTR`, `"cutoffs"` draws the published 3E bars
+> exactly (the published figure also lists three neighbouring pairs of neuropil labels in the opposite order: MB
+> CA/BU, MB PED/FB and MB VL/AL). As committed, those lines use `SI_UPDATED_FTR`, which changes the cut-offs, the bars
+> and their order. `fig3supp_ad_content_si_mixed.py` has the same setting and applies it at each point of its SI grid. `fig3e_syntype_composition.py` instead
 > marks each end of a synapse mixed when that cell's SI computed with self-synapses kept (`SI_pre`/`SI_post` in the synapse table) is below 0.1,
 > and as committed it stops at line 40 (`KeyError: ['neuron']`) before any figure is saved.
 
