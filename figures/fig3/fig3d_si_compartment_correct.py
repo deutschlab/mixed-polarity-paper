@@ -186,6 +186,10 @@ allsynapses['comp_second_corrected'] = np.select(
 allsynapses2=allsynapses.head(10000)
 #%%
 allsynapses['comp2']=allsynapses['comp_first_corrected']+allsynapses['comp_second_corrected']
+# GROUP_MIXED = True: every synapse with a mixed end (AM, MA, MD, DM, MM) is one category, "Mixed"
+GROUP_MIXED = True
+if GROUP_MIXED:
+    allsynapses.loc[allsynapses['comp2'].str.contains('M'), 'comp2'] = 'Mixed'
 #%%
 allsynapses=allsynapses[['synapse_id','pre', 'post', 'post_x', 'post_y', 'post_z', 'pre_x', 'pre_y', 'pre_z',
        'npil', 'comp2','SI_pre','SI_post' ]]
@@ -228,6 +232,7 @@ custom_palette = {
     'DD': '#F4B95A',   # gold
     'MD': '#fff2cc'    # very light pastel gold,
     ,'MM': 'darkgrey'
+    , 'Mixed': '#4F4F4F'   # dark grey
 }
 
 # Darker gray for "other" categories
@@ -290,6 +295,7 @@ custom_palette = {
     'MD': '#fff2cc' ,
     'MM':'black'
     
+    , 'Mixed': '#4F4F4F'   # dark grey
 }
 default_color = '#4F4F4F'  # darker grey for other categories
 
@@ -353,6 +359,7 @@ custom_palette = {
     'DD': '#F4B95A',   # gold
     'MD': '#fff2cc',   # very light pastel gold
     'MM': 'black'
+    , 'Mixed': '#4F4F4F'   # dark grey
 }
 default_color = '#4F4F4F'  # darker grey for other categories
 

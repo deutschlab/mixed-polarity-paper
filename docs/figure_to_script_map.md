@@ -103,7 +103,7 @@ whether neurons within the same type use the same synapse-type pattern.
 | Fig 3 Supp 1A (Buhmann curve) / 2A/B | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_correct_compartment_buhmann/` |
 | Fig 3 Supp 2C | `figures/fig3/si_x_npil_x_synapse_detection.py` | `SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_npil_x_synapse_detection/` |
 
-> Fig 3E is `synaptic_type_npils2_v2.svg` (line 433 of `fig3d_si_compartment_correct.py`). The script's
+> Fig 3E is `synaptic_type_npils2_v2.svg` (line 440 of `fig3d_si_compartment_correct.py`). The script's
 > `MIXED_RULE` picks how a compartment is called mixed. `"si"`, the setting for the main 3D and 3E, marks both
 > compartments of a cell mixed when the cell's SI (from `SI_UPDATED_FTR`, lines 21-24) is below 0.1. `"cutoffs"`, for
 > the supplement, marks a compartment mixed when its share of correct synapses is not above the rolling curve's value
@@ -111,7 +111,9 @@ whether neurons within the same type use the same synapse-type pattern.
 > 21-24 switched off, so that the script keeps the SI in `NEURON_TABLE_FTR`, `"cutoffs"` draws the published 3E bars
 > exactly (the published figure also lists three neighbouring pairs of neuropil labels in the opposite order: MB
 > CA/BU, MB PED/FB and MB VL/AL). As committed, those lines use `SI_UPDATED_FTR`, which changes the cut-offs, the bars
-> and their order. `fig3supp_ad_content_si_mixed.py` has the same setting and applies it at each point of its SI grid. `fig3e_syntype_composition.py` instead
+> and their order. `fig3supp_ad_content_si_mixed.py` has the same setting and applies it at each point of its SI grid.
+> `GROUP_MIXED = True` then counts every synapse with a mixed end (AM, MA, MD, DM, MM) as one category, "Mixed", in
+> the 3D pie and 3E. The shares are pooled over synapses, and "Mixed" means at least one end is mixed. `fig3e_syntype_composition.py` instead
 > marks each end of a synapse mixed when that cell's SI computed with self-synapses kept (`SI_pre`/`SI_post` in the synapse table) is below 0.1,
 > and as committed it stops at line 40 (`KeyError: ['neuron']`) before any figure is saved.
 
