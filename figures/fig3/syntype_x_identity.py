@@ -81,7 +81,8 @@ del syn_df
 #%%
 syn_df_m=syn_df_m[syn_df_m['comp'].isin(['AA','DD','DA','AD'])]
 #%%
-syn_df_m=syn_df_m[(syn_df_m['primary_SI_mean_x']>=0.1)&(syn_df_m['primary_SI_mean_y']>=0.1)]
+# each cell at SI >= 0.1 on its own (not its type's mean SI)
+syn_df_m=syn_df_m[(syn_df_m['SI_pre']>=0.1)&(syn_df_m['SI_post']>=0.1)]
 #%%
 syn_df_m=syn_df_m.dropna(subset=['primary_type_x','primary_type_y'])
 #%%

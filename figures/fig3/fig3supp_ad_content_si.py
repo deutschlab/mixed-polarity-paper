@@ -35,9 +35,9 @@ syn_df=pd.read_feather(SYNAPSE_TABLE_FTR)
 #%%
 syn_df=syn_df[syn_df['comp'].isin(['AD','AA','DD','DA'])]
 #%%
-syn_df=syn_df.merge(nodesG[['neuron','super_class']],how='left',left_on='pre',right_on='neuron')
+syn_df=syn_df.merge(nodesG[['neuron','super_class','primary_type']],how='left',left_on='pre',right_on='neuron')
 #%%
-syn_df=syn_df.merge(nodesG[['neuron','super_class']],how='left',left_on='post',right_on='neuron')
+syn_df=syn_df.merge(nodesG[['neuron','super_class','primary_type']],how='left',left_on='post',right_on='neuron')
 #%%
 aa=syn_df.head(1000)
 #%%
@@ -51,6 +51,7 @@ r_list=[]
 for i in range(0,100,5):
     i_t=i/100
     mask=syn_df.query("SI_pre>= @i_t and SI_post>= @i_t")
+    mask=mask[mask['primary_type_x']!=mask['primary_type_y']]   # pairs of different types, as in the left pie
     r=mask.groupby(by='comp').size()
     r2=r/r.sum()
     r2=r2.reset_index()
@@ -108,6 +109,8 @@ plt.show()
 
 
 syn_df2=syn_df.query('SI_post>=0.1 and SI_pre>=0.1')
+# Fig 3F's left pie: pairs of cells of different types only; same-type pairs are the right pie (syntype_x_identity.py)
+syn_df2=syn_df2[syn_df2['primary_type_x']!=syn_df2['primary_type_y']]
 #%%
 custom_palette = {
     'AA': '#8b2be2',

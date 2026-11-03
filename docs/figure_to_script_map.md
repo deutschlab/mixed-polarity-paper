@@ -94,8 +94,8 @@ whether neurons within the same type use the same synapse-type pattern.
 | Fig 3D (AD content, mixed) | `figures/fig3/fig3supp_ad_content_si_mixed.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/supp_ad_content_si_mixed/` |
 | Fig 3E (drawn with the neuron table's SI; see the note) | `figures/fig3/fig3d_si_compartment_correct.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/SI_x_correct_compartment/` |
 | Not a panel of the submitted paper (synapse types per neuropil with an SI cutoff; stops before saving, see the note) | `figures/fig3/fig3e_syntype_composition.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_composition/` |
-| Fig 3F (AD content) | `figures/fig3/fig3supp_ad_content_si.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/supp_ad_content_si/` |
-| Fig 3F (syntype x identity) | `figures/fig3/syntype_x_identity.py` | `CLASSIFICATION_CSV`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_x_identity/` |
+| Fig 3F (left pie: pairs of different cell types, each cell at SI ≥ 0.1; also the AD content curve, on the same pairs) | `figures/fig3/fig3supp_ad_content_si.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/supp_ad_content_si/` |
+| Fig 3F (right pie: same-type pairs, each cell at SI ≥ 0.1) | `figures/fig3/syntype_x_identity.py` | `CLASSIFICATION_CSV`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_x_identity/` |
 | Fig 3G | `figures/fig3/nt_syn_type_same_not_same.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/nt_syn_type_same_not_same/` |
 | Fig 3H | `figures/fig3/syntype_x_strength_x_identity.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_x_strength_x_identity/` |
 | Fig 3I | `figures/fig3/syn_type_prob_based_on_other_syn_type_princeton.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR` | `outputs/fig3/syn_type_prob/` |
