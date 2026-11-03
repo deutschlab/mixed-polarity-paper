@@ -121,6 +121,7 @@ print(f"  Dendrite → {dend_val:.2f}%")
 #%%
 allsynapses=pd.read_feather(SYNAPSE_TABLE_FTR)
 #%%
+cell_type = nodesG.set_index('neuron')['primary_type']   # for the 3F pies below
 nodesG=nodesG[['neuron','SI','axon_correct','dend_correct']]
 #%%
 # MIXED_RULE "si" (the main figure): a cell with SI below 0.1 counts as mixed, in both its axon and its dendrite.
@@ -232,7 +233,7 @@ custom_palette = {
     'DD': '#F4B95A',   # gold
     'MD': '#fff2cc'    # very light pastel gold,
     ,'MM': 'darkgrey'
-    , 'Mixed': '#4F4F4F'   # dark grey
+    , 'Mixed': 'black'
 }
 
 # Darker gray for "other" categories
@@ -265,12 +266,38 @@ wedges, texts, autotexts = ax.pie(
     counterclock=False,
     wedgeprops={'linewidth': 2, 'edgecolor': 'white'}  # thicker white lines between slices
 )
+for label, pct in zip(comp_counts.index, autotexts):
+    if label == 'Mixed':
+        pct.set_color('white')   # readable on the black slice
 plt.xlim(0,0.6)
 ax.set_title('Distribution of comp2 combinations')
 plt.tight_layout()
 plt.savefig(_out_dir / "synaptic_type_pie2_v2.svg")
 
 plt.show()
+
+#%% 3F's two pies with mixed ends (Dudi's plan, row 159): every synapse between the cells above, each end labelled
+# by MIXED_RULE, split into pairs of the same primary_type and pairs of different types. No SI filter: the mixed
+# label takes its place.
+same_type = cell_type.reindex(allsynapses['pre']).to_numpy() == cell_type.reindex(allsynapses['post']).to_numpy()
+for name, keep in (("syn_type_same_ptype_pie_mixed.svg", same_type),
+                   ("syn_type_diff_ptype_pie_mixed.svg", ~same_type)):
+    counts = allsynapses.loc[keep, 'comp2'].value_counts()
+    order = [k for k in ['AA', 'AD', 'DA', 'DD'] if k in counts.index]
+    counts = counts.reindex(order + [k for k in counts.index if k not in order])
+    fig, ax = plt.subplots(figsize=(4, 4))
+    _, _, pcts = ax.pie(counts, labels=counts.index, colors=[custom_palette.get(k, '#4F4F4F') for k in counts.index],
+                        autopct='%1.1f%%', startangle=90, counterclock=False,
+                        wedgeprops={'linewidth': 2, 'edgecolor': 'white'})
+    for label, pct in zip(counts.index, pcts):
+        if label == 'Mixed':
+            pct.set_color('white')   # readable on the black slice
+    ax.set_title(f"{'Same' if name.startswith('syn_type_same') else 'Different'} type connections, "
+                 f"Total Syn: {int(counts.sum()):,}")
+    plt.tight_layout()
+    plt.savefig(_out_dir / name)
+    plt.close(fig)
+    print(name, int(counts.sum()), (counts / counts.sum() * 100).round(1).to_dict())
 
 
     #%%
@@ -295,7 +322,7 @@ custom_palette = {
     'MD': '#fff2cc' ,
     'MM':'black'
     
-    , 'Mixed': '#4F4F4F'   # dark grey
+    , 'Mixed': 'black'
 }
 default_color = '#4F4F4F'  # darker grey for other categories
 
@@ -359,7 +386,7 @@ custom_palette = {
     'DD': '#F4B95A',   # gold
     'MD': '#fff2cc',   # very light pastel gold
     'MM': 'black'
-    , 'Mixed': '#4F4F4F'   # dark grey
+    , 'Mixed': 'black'
 }
 default_color = '#4F4F4F'  # darker grey for other categories
 

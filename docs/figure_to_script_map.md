@@ -113,7 +113,10 @@ whether neurons within the same type use the same synapse-type pattern.
 > CA/BU, MB PED/FB and MB VL/AL). As committed, those lines use `SI_UPDATED_FTR`, which changes the cut-offs, the bars
 > and their order. `fig3supp_ad_content_si_mixed.py` has the same setting and applies it at each point of its SI grid.
 > `GROUP_MIXED = True` then counts every synapse with a mixed end (AM, MA, MD, DM, MM) as one category, "Mixed", in
-> the 3D pie and 3E. The shares are pooled over synapses, and "Mixed" means at least one end is mixed. `fig3e_syntype_composition.py` instead
+> the 3D pie and 3E. The shares are pooled over synapses, and "Mixed" means at least one end is mixed. The same script
+> also draws 3F's two pies with mixed ends (`syn_type_same_ptype_pie_mixed.svg` and `syn_type_diff_ptype_pie_mixed.svg`):
+> every synapse between these cells, with no SI filter, split into pairs of the same `primary_type` and pairs of
+> different types. With `"cutoffs"` they are the supplement's old-rule 3F. `fig3e_syntype_composition.py` instead
 > marks each end of a synapse mixed when that cell's SI computed with self-synapses kept (`SI_pre`/`SI_post` in the synapse table) is below 0.1,
 > and as committed it stops at line 40 (`KeyError: ['neuron']`) before any figure is saved.
 
