@@ -69,6 +69,10 @@ post_g = pd.pivot_table(
     columns='post_compartment',
     aggfunc='sum',
 )
+# the compartment columns by name, so that a split with no linker (MaxSI) still gets an (empty) L column
+assert set(pre_g.columns) <= {'A','D','L'} and set(post_g.columns) <= {'A','D','L'}, 'unexpected compartment label'
+pre_g=pre_g.reindex(columns=['A','D','L'])
+post_g=post_g.reindex(columns=['A','D','L'])
 pre_g=pre_g.reset_index()
 pre_g.columns=['neuron','pre_A','pre_D','pre_L']
 post_g=post_g.reset_index()
