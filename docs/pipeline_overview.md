@@ -265,7 +265,7 @@ Gives each larval cell a PC1 built the way step 07 builds the adult one, for the
 
 **File:** `processing/08_alternative_split_methods.py`
 
-Compares the published SFC axon/dendrite split with two single-node cuts: the node whose cut gives the highest SI (MaxSI) and the node with the lowest Fisher p-value (MinFisherP). Candidates are non-root nodes with exactly one child, scored without their own synapses by `methods/node_cut_si.py` (shared with step 09). It runs over the intrinsic neurons in batches of 500, skipping batches already saved, and never overwrites an existing `SI_comparisons.ftr`. `MaxSI_SI` can be lower than `SFC_SI` (2,433 of 118,347 neurons in the authors' `SI_comparisons.ftr`): the SFC score leaves linker synapses out, while a single cut puts every synapse but the cut node's on a side, and only one-child nodes can be cut.
+Compares the published SFC axon/dendrite split with two single-node cuts: the node whose cut gives the highest SI (MaxSI) and the node with the lowest Fisher p-value (MinFisherP); on a tie for the lowest p, which is common where many nodes reach p = 0, it takes the first node in the node table's order, as step 09 does. Candidates are non-root nodes with exactly one child, scored without their own synapses by `methods/node_cut_si.py` (shared with step 09). It runs over the intrinsic neurons in batches of 500, skipping batches already saved, and never overwrites an existing `SI_comparisons.ftr`. `MaxSI_SI` can be lower than `SFC_SI` (2,433 of 118,347 neurons in the authors' `SI_comparisons.ftr`): the SFC score leaves linker synapses out, while a single cut puts every synapse but the cut node's on a side, and only one-child nodes can be cut.
 
 | | |
 |--|--|

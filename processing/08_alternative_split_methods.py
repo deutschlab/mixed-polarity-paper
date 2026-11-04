@@ -464,20 +464,13 @@ def run_neuron_batch_pipeline(
             # Maximum-SI node
             best_node = valid_node_SI.iloc[0]
 
-            # Minimum-p Fisher node
-            valid_fisher_nodes = (
-                node_SI
-                .dropna(subset=["fisher_p"])
-                .sort_values(
-                    "fisher_p",
-                    ascending=True
-                )
-                .reset_index(drop=True)
-            )
+            # Minimum-p Fisher node: on a tie (many nodes reach p = 0), the first node in the node table's order,
+            # as step 09 chooses it
+            valid_fisher_nodes = node_SI.dropna(subset=["fisher_p"])
 
             if len(valid_fisher_nodes) > 0:
                 best_fisher_node = (
-                    valid_fisher_nodes.iloc[0]
+                    valid_fisher_nodes.loc[valid_fisher_nodes["fisher_p"].idxmin()]
                 )
             else:
                 best_fisher_node = None
