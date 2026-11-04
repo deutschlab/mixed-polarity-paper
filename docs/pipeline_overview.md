@@ -291,7 +291,7 @@ Labels every synapse end A or D under the MaxSI, MinFisherP or MaxPhi split, for
 | `"minfisherp"` | lowest two-sided Fisher exact p of the side counts (nodes with no p left out; p = 0 ties included) | `MinFisherP_SI`, `fisher_p`, `n_tied_min_fisher_p`, `n_tied_min_fisher_p_distinct_sides` | `MINFISHERP_*` (`_minfisherp`) |
 | `"maxphi"` | highest \|phi\| of the side counts, phi = (ad − bc) / √((a+b)(c+d)(a+c)(b+d)), a, b = side 1 pre, post and c, d = side 2 pre, post (nodes where the root is 0 left out) | `MaxPhi_SI`, `Phi`, `n_tied_max_Phi`, `n_tied_max_Phi_distinct_sides` | `MAXPHI_*` (`_maxphi`) |
 
-A cell's SI is that of the chosen cut. Ties go to the first node in node-table order (pandas `idxmax`; `idxmin` for MinFisherP), and the summary counts the tied nodes and their distinct side counts (for MaxSI also the nodes within numpy isclose of the highest SI). Step 08 breaks ties by a sort, so for MinFisherP the two can differ when several nodes tie at the lowest p. Step 08 computes phi only for the SFC and MinFisherP cuts.
+A cell's SI is that of the chosen cut. Ties go to the first node in node-table order (pandas `idxmax`; `idxmin` for MinFisherP), and the summary counts the tied nodes and their distinct side counts (for MaxSI also the nodes within numpy isclose of the highest SI). Step 08 picks MinFisherP the same way, but breaks MaxSI ties by a sort on SI and takes the first row, so for MaxSI the two can pick different nodes with the same SI. Step 08 computes phi only for the SFC and MinFisherP cuts.
 
 **How a cell is cut.**
 
