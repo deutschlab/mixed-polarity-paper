@@ -147,6 +147,7 @@ Each step below links to its full description in [docs/pipeline_overview.md](doc
 | [phi_threshold.py](docs/pipeline_overview.md#phi-threshold-optional) (optional) | The Phi cutoff that matches SI = 0.1 (printed, and a plot) | 05, 08 | |
 | [09](docs/pipeline_overview.md#script-09--maxsi-minfisherp-and-maxphi-synapse-labels-optional) (optional) | Synapse, neuron and SI tables in `data/derived_maxsi/` (or `_minfisherp`, `_maxphi`) | 04, 05, raw synapse table without self-synapses, all skeletons | About 30 minutes as 5 copies (MaxSI) |
 | [larva/larva_process.py](docs/pipeline_overview.md#larval-step-for-figure-2a) | Larval SI for Figure 2A, run separately | Larval raw files | |
+| [larva/larva_maxsi_labels.py](docs/pipeline_overview.md#larval-maxsi-step-for-figure-2a-on-the-maxsi-split) | Larval SI and synapse tables on the MaxSI split, in `data/larva_maxsi/` (Figure 2A under `SPLIT_METHOD = "maxsi"`) | Larval raw files | About 2 minutes |
 
 | Setting | Where | What it does |
 |---|---|---|
@@ -184,7 +185,7 @@ Notes:
 - Step 01 skips neurons with more than 80,000 skeleton nodes; step 02a processes the large neurons, from a list of 186 neuron IDs written into the script, not from step 01's size check (182 of them got an SI). Run step 02b only after step 01 has finished every subfolder.
 - `swc_data.ftr` and the raw synapse table stay in `data/derived/` under `"rebuild"` too, since no step from 01 to 07 makes them. The raw table is needed only by steps 08 and 09 and three figure scripts (`figures/fig1/create_split_axon_dendrite_princeton.py` and the two `figures/split_methods/skeleton_comparisons*.py`). For a split made by step 09, run 01 → … → 05, then 09 with that method, then set `SPLIT_METHOD` to the same method and run 06 → 07, then the figure scripts, the ones that write tables first.
 - Tables with no MaxSI version (`MAXSI_NOT_AVAILABLE`) stop the scripts that read them under `"maxsi"`, and the same holds for the other two methods. Do not copy the SFC files into the `_maxsi` folders to make them run. If a script stops on a missing file in a `_maxsi` folder, either the script that writes it (09, 06, 07 or a figure script) has not yet run under `"maxsi"`, or the table has no MaxSI version.
-- The larval SI for Figure 2A comes from `processing/larva/larva_process.py`, which runs separately from these steps. As committed it gives no usable output (see above).
+- The larval SI for Figure 2A comes from `processing/larva/larva_process.py` (SFC split), which runs separately from these steps; as committed it gives no usable output (see above). Under `SPLIT_METHOD = "maxsi"` Figure 2A reads the larval MaxSI tables from `processing/larva/larva_maxsi_labels.py` instead, which also runs separately. Each larval step writes its own folders, whatever `PIPELINE_RUN` is.
 
 ### Figures
 
@@ -275,6 +276,7 @@ processing/         the pipeline, from raw data to derived tables
   09_maxsi_synapse_labels.py               optional: synapse, neuron and SI tables under the MaxSI, MinFisherP or MaxPhi split
   phi_threshold.py                         optional: the Phi cutoff that matches SI = 0.1
   larva/larva_process.py                   larval SI for Figure 2A
+  larva/larva_maxsi_labels.py              larval SI and synapse tables on the MaxSI split
 
 methods/
   methods_all.py    shared functions, used by most scripts
@@ -298,6 +300,7 @@ data/               mostly empty; the data goes here (see data/README.md)
   derived_rebuild/  tables made by a fresh run (PIPELINE_RUN = "rebuild")
   intermediate_rebuild/  working files made by a fresh run
   larva/            larval data, from the corresponding authors
+  larva_maxsi/      larval tables on the MaxSI split
 
 docs/               the reference documents listed above
   data_availability.md, pipeline_overview.md, figure_to_script_map.md, generated_tables.md, tools.md

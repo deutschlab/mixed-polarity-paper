@@ -218,6 +218,16 @@ MAXPHI_SUBSET_DIR            = _method_path(INTERMEDIATE_DIR / "maxphi_labels" /
 MAXPHI_SYNAPSE_TABLE_FTR     = _method_path(SYNAPSE_TABLE_FTR, "maxphi")
 MAXPHI_NEURON_TABLE_FTR      = _method_path(NEURON_TABLE_FTR, "maxphi")
 
+# --- larval MaxSI split (processing/larva/larva_maxsi_labels.py) ---
+# The larval cells cut as step 09 cuts the adult ones. The SI and synapse tables are written in the layout of the
+# SFC larval tables above, under the same file names in data/larva_maxsi/, so Figure 2A reads them under
+# SPLIT_METHOD = "maxsi" (LARVA_SI_FTR and LARVA_SYNAPSES_FTR are in MAXSI_SWITCHED below).
+LARVA_SWC_NAVIS_DIR      = LARVA_DATA_DIR / "swc_navis"   # the larval skeletons converted to the form navis reads
+LARVA_MAXSI_SI_FTR       = _maxsi_path(LARVA_SI_FTR)
+LARVA_MAXSI_SYNAPSES_FTR = _maxsi_path(LARVA_SYNAPSES_FTR)
+LARVA_MAXSI_SUMMARY_FTR  = LARVA_MAXSI_SYNAPSES_FTR.parent / "larva_maxsi_summary.ftr"    # the cut of each cell
+LARVA_MAXSI_FAILURES_FTR = LARVA_MAXSI_SYNAPSES_FTR.parent / "larva_maxsi_failures.ftr"   # cells whose split failed
+
 # Which split the scripts read: "sfc" (the published synapse flow centrality split, steps 01-05), or "maxsi",
 # "minfisherp" or "maxphi" (step 09 run with that METHOD). Steps 04 and 05 always write the SFC tables and
 # SI_updated.ftr, and step 09 always reads them (the *_SFC_FTR names). Under "maxsi", the two tables and every table
@@ -244,6 +254,9 @@ MAXSI_SWITCHED = [
     "PC1_TABLE_CSV", "PC1_TABLE_PREDICTIONS_CSV", "RECI_PROP_FTR", "NEURONS_NT_BWF_FTR",
     "FILOPODIA_NODES_BASELINE_FTR", "FILOPODIA_NODES_NO_FILOPODIA_FTR", "FILOPODIA_NODES_SAMPLEOUT_FTR",
     "RF_MODEL_PKL",
+    # the larval tables of Figure 2A (processing/larva/larva_maxsi_labels.py writes the MaxSI ones; there is no
+    # larval MinFisherP or MaxPhi split, so under those the figure stops)
+    "LARVA_SI_FTR", "LARVA_SYNAPSES_FTR",
 ]
 # Tables that exist only for the SFC split (or for Buhmann's synapses): Majd's Fig 7 tables (bouton, filopodia,
 # inertia, per-synapse bouton flags, t2), Dudi's 4E table and the Buhmann tables (Fig 6 and some supplementary

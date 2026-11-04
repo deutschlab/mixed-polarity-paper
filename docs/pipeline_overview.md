@@ -2,7 +2,7 @@
 
 The processing steps that turn the raw connectome inputs into the derived tables the figure scripts read.
 
-- **Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07. Optional: `build_raw_synapse_table.py` (the raw synapse table, from the Codex CSV) → 08 (split-method comparison) → `phi_threshold.py`; and 09 (MaxSI, MinFisherP or MaxPhi labels), after 05 and `build_raw_synapse_table.py`. The larval step, `processing/larva/larva_process.py`, runs separately, for Figure 2A only.
+- **Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07. Optional: `build_raw_synapse_table.py` (the raw synapse table, from the Codex CSV) → 08 (split-method comparison) → `phi_threshold.py`; and 09 (MaxSI, MinFisherP or MaxPhi labels), after 05 and `build_raw_synapse_table.py`. The two larval steps run separately, for Figure 2A only: `processing/larva/larva_process.py` (SFC split) and `processing/larva/larva_maxsi_labels.py` (MaxSI split, which 2A reads under `SPLIT_METHOD = "maxsi"`). Each writes its own folders, whatever `PIPELINE_RUN` is.
 - **Paths:** all in `config.py`; `PIPELINE_RUN` and `SPLIT_METHOD` choose the folders ([Settings](#settings-split_method-and-pipeline_run)).
 - **Shared code:** the numbered scripts import `methods/methods_all.py` via `METHODS_DIR`; 08 and 09 also `methods/node_cut_si.py`; 01, 02a and 08 also `methods/flow_centrality.py`, which gives navis's synapse flow centrality without the dense geodesic matrix navis builds when navis-fastcore is not installed (the same values, in a fraction of the memory).
 
@@ -231,7 +231,20 @@ Attaches the larval synapses to the larval skeletons, splits each neuron into ax
 | **Inputs** | `LARVA_SWC_DIR`, `LARVA_SYNAPSE_TABLE_CSV`, `LARVA_NEURON_LIST_CSV` (the larval raw files, from the corresponding authors) |
 | **Outputs** | `LARVA_SI_FTR`, `LARVA_SYNAPSES_FTR`, and intermediate connector tables in `LARVA_DATA_DIR` |
 | **Downstream** | `figures/fig2/fig2a_si_cdf_adult_larva.py` |
-| **Note** | As committed it produces no usable output. It calls `attach_synapses_larva2` (line 101), which is not defined in this repository, and the bare `except` in `heal_attach` (called once on the whole neuron list, line 147) turns that error into a text string, so no neuron is split and the SI output is empty |
+| **Note** | As committed it produces no usable output. It calls `attach_synapses_larva2` (line 101), which neither it nor anything it imports defines, and the bare `except` in `heal_attach` (called once on the whole neuron list, line 147) turns that error into a text string, so no neuron is split and the SI output is empty |
+
+## Larval MaxSI step (for Figure 2A on the MaxSI split)
+
+**File:** `processing/larva/larva_maxsi_labels.py`
+
+Cuts every larval cell at the node with the highest SI, as step 09 cuts the adult cells, and writes the larval tables that Figure 2A reads under `SPLIT_METHOD = "maxsi"`. Independent of scripts 01–09. For each cell of the neuron list it converts the skeleton to the form navis reads (into `LARVA_SWC_NAVIS_DIR`), heals it, drops the synapses from a cell onto itself, attaches the rest to their nearest node (at most 10,000 nm away), computes the SI of every single-node cut with `methods/node_cut_si.py` and keeps the highest, the first such node on a tie. The ends on each side are labelled A or D; ends on the cut node get no label. Unlike step 09, which tries only the cells the SFC split kept, it tries every cell of the neuron list. Its `choose_cut_node` and `label_by_cut_node` are copies of step 09's and must stay identical to them. A converted skeleton is reused while it is newer than the raw file; delete `data/larva/swc_navis/` to convert them all again. The step writes `data/larva_maxsi/` whatever `PIPELINE_RUN` is. If no cell can be split it stops without writing, and the tables of an earlier run stay in place. The 63 cells it cannot split have only input or only output synapses in the larval table (self-synapses out), so no cut gives an SI, and Figure 2A leaves them out.
+
+| | |
+|--|--|
+| **Inputs** | `LARVA_SWC_DIR`, `LARVA_SYNAPSE_TABLE_CSV`, `LARVA_NEURON_LIST_CSV` |
+| **Outputs** | `LARVA_MAXSI_SI_FTR` and `LARVA_MAXSI_SYNAPSES_FTR` (in `data/larva_maxsi/`, the file names and layout of `LARVA_SI_FTR` and `LARVA_SYNAPSES_FTR`), `LARVA_MAXSI_SUMMARY_FTR`, `LARVA_MAXSI_FAILURES_FTR`; converted skeletons in `LARVA_SWC_NAVIS_DIR` |
+| **Downstream** | `figures/fig2/fig2a_si_cdf_adult_larva.py` (under `SPLIT_METHOD = "maxsi"`, `config.py` points `LARVA_SI_FTR` and `LARVA_SYNAPSES_FTR` here) |
+| **Run time** | About 2 minutes (2,952 cells; 2,889 split, 63 have no cut with an SI). The step prints its run time and counts |
 
 ---
 

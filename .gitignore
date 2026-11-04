@@ -88,6 +88,8 @@ data/intermediate_rebuild_maxphi/
 data/raw_rebuild_maxphi/
 data/larva/output/
 data/larva/results/
+data/larva/swc_navis/
+data/larva_maxsi/
 # larval raw inputs: keep only the placeholder files
 data/larva/raw/*
 !data/larva/raw/.gitkeep
