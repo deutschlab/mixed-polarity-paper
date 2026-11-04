@@ -94,7 +94,7 @@ def fonts(svg):
     return Counter((m.group(1).strip(), m.group(2)) for m in FONT.finditer(svg))
 def all_arial_8(svg):
     f = fonts(svg)
-    bad = {k: v for k, v in f.items() if k[1] != "Arial" or not re.fullmatch(r"(?:(?:italic|bold|oblique)\s+)*8px", k[0])}
+    bad = {k: v for k, v in f.items() if k[1] != "Arial" or not re.fullmatch(r"(?:(?:italic|bold|oblique|[1-9]00)\s+)*8px", k[0])}
     return f, bad
 def texts_in(svg):
     return len(re.findall(r"<text\b", svg))
@@ -364,7 +364,7 @@ MUTANTS = [
 
 
 SVG_FONT = re.compile(r"font:\s*([^;\"]*?)\s*'([^']+)'")
-SVG_OK = re.compile(r"(?:(?:italic|bold|oblique)\s+)*8px")
+SVG_OK = re.compile(r"(?:(?:italic|bold|oblique|[1-9]00)\s+)*8px")
 # matplotlib draws maths exponents and subscripts at 0.7 of the text size; they are meant to be smaller
 SMALL_MATHS = {("5.6px", "Arial"), ("italic 5.6px", "Arial"), ("oblique 5.6px", "Arial")}
 
