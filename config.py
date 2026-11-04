@@ -227,6 +227,7 @@ LARVA_MAXSI_SI_FTR       = _maxsi_path(LARVA_SI_FTR)
 LARVA_MAXSI_SYNAPSES_FTR = _maxsi_path(LARVA_SYNAPSES_FTR)
 LARVA_MAXSI_SUMMARY_FTR  = LARVA_MAXSI_SYNAPSES_FTR.parent / "larva_maxsi_summary.ftr"    # the cut of each cell
 LARVA_MAXSI_FAILURES_FTR = LARVA_MAXSI_SYNAPSES_FTR.parent / "larva_maxsi_failures.ftr"   # cells whose split failed
+LARVA_MAXSI_PC1_FTR      = LARVA_MAXSI_SYNAPSES_FTR.parent / "larva_maxsi_pc1.ftr"        # processing/larva/larva_pc1.py
 
 # Which split the scripts read: "sfc" (the published synapse flow centrality split, steps 01-05), or "maxsi",
 # "minfisherp" or "maxphi" (step 09 run with that METHOD). Steps 04 and 05 always write the SFC tables and

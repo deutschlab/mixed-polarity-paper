@@ -150,6 +150,12 @@ reads under `SPLIT_METHOD = "maxsi"`.
 | `data/larva_maxsi/output/larva_maxsi_failures.ftr` | `LARVA_MAXSI_FAILURES_FTR` | Cells whose split failed, with the error. |
 | `data/larva/swc_navis/` | `LARVA_SWC_NAVIS_DIR` | The larval skeletons converted to the form navis reads. |
 
+### Files made by `processing/larva/larva_pc1.py`
+
+| File | Config variable | Description |
+|------|----------------|-------------|
+| `data/larva_maxsi/output/larva_maxsi_pc1.ftr` | `LARVA_MAXSI_PC1_FTR` | Each larval cell's six features, PC1 and PC1 percentile. |
+
 ---
 
 ## Derived tables (`data/derived/`)

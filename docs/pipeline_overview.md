@@ -2,7 +2,7 @@
 
 The processing steps that turn the raw connectome inputs into the derived tables the figure scripts read.
 
-- **Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07. Optional: `build_raw_synapse_table.py` (the raw synapse table, from the Codex CSV) → 08 (split-method comparison) → `phi_threshold.py`; and 09 (MaxSI, MinFisherP or MaxPhi labels), after 05 and `build_raw_synapse_table.py`. The two larval steps run separately, for Figure 2A only: `processing/larva/larva_process.py` (SFC split) and `processing/larva/larva_maxsi_labels.py` (MaxSI split, which 2A reads under `SPLIT_METHOD = "maxsi"`). Each writes its own folders, whatever `PIPELINE_RUN` is.
+- **Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07. Optional: `build_raw_synapse_table.py` (the raw synapse table, from the Codex CSV) → 08 (split-method comparison) → `phi_threshold.py`; and 09 (MaxSI, MinFisherP or MaxPhi labels), after 05 and `build_raw_synapse_table.py`. The larval steps run separately: `processing/larva/larva_process.py` (SFC split, Figure 2A) and `processing/larva/larva_maxsi_labels.py` (MaxSI split, which 2A reads under `SPLIT_METHOD = "maxsi"`), then `processing/larva/larva_pc1.py` (each larval cell's PC1, for the larval 4D). Each writes its own folders, whatever `PIPELINE_RUN` is.
 - **Paths:** all in `config.py`; `PIPELINE_RUN` and `SPLIT_METHOD` choose the folders ([Settings](#settings-split_method-and-pipeline_run)).
 - **Shared code:** the numbered scripts import `methods/methods_all.py` via `METHODS_DIR`; 08 and 09 also `methods/node_cut_si.py`; 01, 02a and 08 also `methods/flow_centrality.py`, which gives navis's synapse flow centrality without the dense geodesic matrix navis builds when navis-fastcore is not installed (the same values, in a fraction of the memory).
 
@@ -245,6 +245,19 @@ Cuts every larval cell at the node with the highest SI, as step 09 cuts the adul
 | **Outputs** | `LARVA_MAXSI_SI_FTR` and `LARVA_MAXSI_SYNAPSES_FTR` (in `data/larva_maxsi/`, the file names and layout of `LARVA_SI_FTR` and `LARVA_SYNAPSES_FTR`), `LARVA_MAXSI_SUMMARY_FTR`, `LARVA_MAXSI_FAILURES_FTR`; converted skeletons in `LARVA_SWC_NAVIS_DIR` |
 | **Downstream** | `figures/fig2/fig2a_si_cdf_adult_larva.py` (under `SPLIT_METHOD = "maxsi"`, `config.py` points `LARVA_SI_FTR` and `LARVA_SYNAPSES_FTR` here) |
 | **Run time** | About 2 minutes (2,952 cells; 2,889 split, 63 have no cut with an SI). The step prints its run time and counts |
+
+## Larval PC1 step
+
+**File:** `processing/larva/larva_pc1.py`
+
+Gives each larval cell a PC1 built the way step 07 builds the adult one, for the larval version of Figure 4D. The larva has no mesh, so it uses the six features it has: cable length and leaf count of the converted skeleton (read with navis, not healed), and synapse and partner counts in and out, counted on the larval MaxSI synapse table. Every larval cell with a MaxSI split is used; the larva has no super-class, so there is no filter like step 07's. A cell with no counted synapse on one side (none of its partners there was split) has a missing feature and is left out, as step 07 does. The skeletons are not healed, so the step stops if one has more than one piece. PCA as step 07: the six columns, standardised, two components, fitted on the larval cells only. PCA's sign is arbitrary, so the step sets it: a positive loading on length.
+
+| | |
+|--|--|
+| **Inputs** | `LARVA_MAXSI_SUMMARY_FTR`, `LARVA_MAXSI_SYNAPSES_FTR`, `LARVA_SWC_NAVIS_DIR` (all from `larva_maxsi_labels.py`, which needs the larval raw files) |
+| **Outputs** | `LARVA_MAXSI_PC1_FTR`: `neuron`, the six features, `PC1`, `PC1_percentile` (rank among the larval cells, above 0 up to 1; the adult table has no such column) |
+| **Downstream** | None in this repository yet (the larval 4D) |
+| **Run time** | About 15 seconds (2,889 cells with a MaxSI split; 2,842 with all six features, 47 left out). The step prints its counts and loadings |
 
 ---
 

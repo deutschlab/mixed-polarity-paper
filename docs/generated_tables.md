@@ -136,6 +136,7 @@ Written by the larval steps in `processing/larva/`, from the larval raw files in
 | `data/larva_maxsi/results/SI_list_larva_th_0.9_linker_SI_filt_issue_solved` (`LARVA_MAXSI_SI_FTR`) | `larva/larva_maxsi_labels.py` | One row per split cell: `neuron` (int64), `SI` (the SI at the cut), `linker` (always False) |
 | `data/larva_maxsi/output/larva_maxsi_summary.ftr` (`LARVA_MAXSI_SUMMARY_FTR`) | `larva/larva_maxsi_labels.py` | One row per split cell: `best_node_id`, `MaxSI_SI`, `n_tied_max_SI` and `n_tied_max_SI_distinct_sides`, `n_candidates`, attached and labelled synapse counts, side counts, the synapse ends on the cut node, `axon_side` and the side and whole-cell presynaptic fractions |
 | `data/larva_maxsi/output/larva_maxsi_failures.ftr` (`LARVA_MAXSI_FAILURES_FTR`) | `larva/larva_maxsi_labels.py` | One row per cell whose split failed: `neuron`, `error` |
+| `data/larva_maxsi/output/larva_maxsi_pc1.ftr` (`LARVA_MAXSI_PC1_FTR`) | `larva/larva_pc1.py` | One row per larval cell with all six features: `neuron` (int64), `in_partners`, `in_synapses_count`, `leafs`, `length` (nm), `out_partners`, `out_synapses_count`, `PC1` (positive loading on length), `PC1_percentile` |
 
 ## Intermediate pipeline files (`data/intermediate/`)
 

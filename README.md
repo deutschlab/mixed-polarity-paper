@@ -148,6 +148,7 @@ Each step below links to its full description in [docs/pipeline_overview.md](doc
 | [09](docs/pipeline_overview.md#script-09--maxsi-minfisherp-and-maxphi-synapse-labels-optional) (optional) | Synapse, neuron and SI tables in `data/derived_maxsi/` (or `_minfisherp`, `_maxphi`) | 04, 05, raw synapse table without self-synapses, all skeletons | About 30 minutes as 5 copies (MaxSI) |
 | [larva/larva_process.py](docs/pipeline_overview.md#larval-step-for-figure-2a) | Larval SI for Figure 2A, run separately | Larval raw files | |
 | [larva/larva_maxsi_labels.py](docs/pipeline_overview.md#larval-maxsi-step-for-figure-2a-on-the-maxsi-split) | Larval SI and synapse tables on the MaxSI split, in `data/larva_maxsi/` (Figure 2A under `SPLIT_METHOD = "maxsi"`) | Larval raw files | About 2 minutes |
+| [larva/larva_pc1.py](docs/pipeline_overview.md#larval-pc1-step) | Each larval cell's PC1, in `data/larva_maxsi/` | larva_maxsi_labels.py | About 15 seconds |
 
 | Setting | Where | What it does |
 |---|---|---|
@@ -277,6 +278,7 @@ processing/         the pipeline, from raw data to derived tables
   phi_threshold.py                         optional: the Phi cutoff that matches SI = 0.1
   larva/larva_process.py                   larval SI for Figure 2A
   larva/larva_maxsi_labels.py              larval SI and synapse tables on the MaxSI split
+  larva/larva_pc1.py                       each larval cell's PC1
 
 methods/
   methods_all.py    shared functions, used by most scripts
