@@ -268,6 +268,9 @@ plt.show()
 #%%
 import scipy.stats as stats
 
+# Each cell's synapses per connection, reciprocal (t1) and non-reciprocal (t2), the two values 5B plots; paired by cell
+t1 = final_neuron_stats_df['reciprocal_ratio']
+t2 = final_neuron_stats_df['non_reciprocal_ratio']
 diff = t1 - t2
 
 # Histogram and KDE
@@ -482,7 +485,7 @@ corrs = (
 
 # Add global correlation across all data
 overall_corr = aa["SI"].corr(aa["ratio"])
-corrs = pd.concat([corrs, pd.DataFrame([["All", overall_corr]], columns=["super_class_x", "corr_SI_ratio"])])
+corrs = pd.concat([corrs, pd.DataFrame([["All", overall_corr]], columns=["super_class", "corr_SI_ratio"])])
 
 # Visualization
 plt.figure(figsize=(5, 4))
