@@ -130,11 +130,12 @@ multiple classification models.
 | Panel | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|
 | (table for Fig 4A / 4C) | `figures/fig4/build_pc1_table.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `PCA_TABLE_FTR` | writes `PC1_TABLE_CSV` (`data/derived/PC1_table.csv`); run before `syntype_x_pc1.py` |
-| Fig 4A / 4C / Supp | `figures/fig4/syntype_x_pc1.py` | `NEURON_TABLE_FTR`, `PC1_TABLE_CSV`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/syntype_x_pc1/`, where it also saves and reloads the model `rf_pc1_model.joblib`; writes `PC1_TABLE_PREDICTIONS_CSV` |
-| Fig 4B | `figures/fig4/models_comparison.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/models_comparison/` |
+| (tables for Fig 4A and 4B) | `figures/fig4/fig4_heldout_models.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | writes `FIG4_HELDOUT_MODELS_FTR` and `FIG4_HELDOUT_CONFUSION_FTR`: each model scored on neurons it never saw (five cell splits); run before `models_comparison.py`; about 25 minutes |
+| Fig 4C, 4D (super-class densities) / Supp; the published 4A and 4D | `figures/fig4/syntype_x_pc1.py` | `NEURON_TABLE_FTR`, `PC1_TABLE_CSV`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/syntype_x_pc1/`, where it also saves and reloads the model `rf_pc1_model.joblib`; writes `PC1_TABLE_PREDICTIONS_CSV` |
+| Fig 4A, 4B | `figures/fig4/models_comparison.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `FIG4_HELDOUT_MODELS_FTR`, `FIG4_HELDOUT_CONFUSION_FTR` | `outputs/fig4/models_comparison/`: `confusion_matrix_pc1_unseen_neurons.svg` (4A) and `accuracy_values.svg` (4B) |
 | Fig 4E (revision) | `figures/fig4/syntype_x_pathway_layers.py` | `PER_TYPE_SUMMARY_CSV` (not deposited; or a stand-in rebuilt from `SYNAPSE_TABLE_FTR` and `NEURON_TABLE_FTR`, or the Buhmann tables, which need `NEURON_TABLE_NONP_FTR` and `SYNAPSE_TABLE_NONP_FTR` in `data/derived/` and are not deposited; see `DATA_SOURCE`), `NEURON_DATA_FTR`, `SI_UPDATED_FTR` (with `DATA_SOURCE = 'princeton'` and `SI_SOURCE = 'SI_updated'`), `OLFACTORY_CLASS_NEUROPIL_CSV` (printed only, optional) | `outputs/fig4/syntype_x_pathway_layers/`: the four panels of the revised 4E are `LayerComposition_AllSynapses_collapsed_lines.svg`, `LayerComposition_WithinType_collapsed_lines.svg`, `LayerComposition_Olfactory_AllSynapses_lines.svg` and `LayerComposition_Olfactory_WithinType_lines.svg`; also two stacked-bar plots and the tables as CSV |
 | Fig 4D check, revision (planned): most common type on 4D's PC1 axes, and the steps of two-step AD chains | `figures/fig4/ad_chains_x_pc1.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/ad_chains_x_pc1/`: `ad_chains_most_common_type.svg` and `ad_chains_steps.svg`, each with a CSV of its numbers |
-| Not settled (see note) | `figures/fig4/syntype_x_pc1_simple_model.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/syntype_x_pc1_simple_model/` |
+| Fig 4D (the map) | `figures/fig4/syntype_x_pc1_simple_model.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/syntype_x_pc1_simple_model/` |
 
 > `syntype_x_pc1_simple_model.py` saves a feature-importance plot, a confusion matrix and a decision surface
 > for a model on PC1, the same kinds of plot as Fig 4A and 4D. It reads the PCA table step 07 writes
@@ -142,8 +143,9 @@ multiple classification models.
 > not available, and a rerun differs from them (by up to 3.4 points in a cell of the
 > confusion matrix; accuracy 40.5% against 39.6%). That is more than the seed or the sign of PC1 changes, and fits
 > a different table, but that table cannot be checked. A rerun can be checked against an independent rebuild of
-> the model with `tools/check_simple_pc1_model.py` ([docs/tools.md](tools.md#checking-the-simple-pc1-model)). `syntype_x_pc1.py` draws a decision surface too, but its save line (586) is
-> commented out, so which script made the published Fig 4D is not settled. Fig 4 Supp 1 holds only skeleton
+> the model with `tools/check_simple_pc1_model.py` ([docs/tools.md](tools.md#checking-the-simple-pc1-model)). `syntype_x_pc1.py` draws a decision surface too, with its forest of trees without a leaf limit; its save line is
+> commented out. That forest drew the published Fig 4D (compared with the published panel's map). The redrawn 4D is
+> the 100-leaf model's map, the model 4A reports on neurons it never saw. Fig 4 Supp 1 holds only skeleton
 > images of the Fig 4D neurons.
 >
 > In the revision, Fig 4E is new: `figures/fig4/syntype_x_pathway_layers.py`, ported from the corresponding

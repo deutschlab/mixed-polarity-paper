@@ -1,6 +1,7 @@
 # Random forest predicting a synapse's type from PC1 of its two cells, on PCA_TABLE_FTR, with at most 100 leaves
-# per tree. It does not draw the published 4D: that surface is drawn by syntype_x_pc1.py's model (the Fig 4B legend
-# says 4A's matrix and 4D's surface are the same model).
+# per tree: the Fig 4 model. Its decision surface is Fig 4D. Fig 4A, the same model's confusion matrix on neurons it
+# never saw, is drawn by fig4_heldout_models.py; the confusion matrix saved here scores a random split of synapses,
+# whose cells are also in training. (The published 4D was drawn by syntype_x_pc1.py's forest without a leaf limit.)
 import matplotlib as mpl
 mpl.rcParams['svg.fonttype'] = 'none'
 mpl.rcParams['font.family'] = 'Arial'
@@ -299,17 +300,23 @@ Z = rf_clf.predict(np.c_[xx.ravel(), yy.ravel()])
 Z_idx = np.vectorize(class_to_idx.get)(Z).reshape(xx.shape)
 
 # =========================
-# 1) Decision surface only
+# 1) Decision surface only (Fig 4D)
 # =========================
-plt.figure(figsize=(4, 4))
-plt.contourf(xx, yy, Z_idx, alpha=1, cmap=cmap, levels=len(classes))
-plt.xlabel("PC1_x")
-plt.ylabel("PC1_y")
-plt.title('Decision surface (no points)')
-plt.xlim(x_min, x_max); plt.ylim(y_min, y_max)
-sns.despine(right=True, top=True)
+# Each grid point drawn as a cell in its predicted type's colour (a contour plot would interpolate between the type
+# numbers and paint thin bands of types the model never predicted). The surface is a raster inside the SVG; the text
+# stays editable. The four type names above the plot are the key, as in the published panel.
+from matplotlib.colors import BoundaryNorm
+norm = BoundaryNorm(np.arange(-0.5, len(classes)), cmap.N)
+fig, ax = plt.subplots(figsize=(2.4, 2.6))
+ax.pcolormesh(xx, yy, Z_idx, cmap=cmap, norm=norm, shading='auto', rasterized=True)
+ax.set_xlabel("PC1 pre neuron")
+ax.set_ylabel("PC1 post neuron")
+ax.set_xlim(x_min, x_max); ax.set_ylim(y_min, y_max); ax.set_aspect('equal')
+for k, t in enumerate(['AD', 'AA', 'DD', 'DA']):
+    ax.text(0.2 + 0.2 * k, 1.03, t, color=class_colors[t], transform=ax.transAxes, ha='center', va='bottom')
+sns.despine(ax=ax, right=True, top=True)
 plt.tight_layout()
 
 
-plt.savefig(_out_dir / "surface_desicion_map_not_simpler_princeton.png", dpi=300, bbox_inches='tight')
+plt.savefig(_out_dir / "surface_desicion_map_not_simpler_princeton.svg", dpi=600, bbox_inches='tight')
 plt.show()

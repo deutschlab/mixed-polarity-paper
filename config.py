@@ -111,6 +111,8 @@ ALL_R_FULL_PKL                = RECIPROCITY_CALC_DIR / "partners" / "all_r_full_
 SELF_SDI_FTR                  = RECIPROCITY_CALC_DIR / "self_SDI.ftr"
 RF_MODEL_PKL                  = RECIPROCITY_MODELS_DIR / "final_random_forest_model_princeton.pkl"
 PC1_TABLE_CSV                 = DERIVED_DATA_DIR / "PC1_table.csv"
+FIG4_HELDOUT_MODELS_FTR       = DERIVED_DATA_DIR / "fig4_heldout_models.ftr"      # figures/fig4/fig4_heldout_models.py
+FIG4_HELDOUT_CONFUSION_FTR    = DERIVED_DATA_DIR / "fig4_heldout_confusion.ftr"   # the same script, for 4A
 PC1_TABLE_PREDICTIONS_CSV     = DERIVED_DATA_DIR / "PC1_table_with_predictions.csv"
 
 # --- fig2 additional data paths ---
@@ -252,7 +254,7 @@ MAXSI_SWITCHED = [
     # step 07 (step 08 always reads the SFC cells, so its table doesn't switch)
     "PCA_TABLE_FTR",
     # tables figure scripts write
-    "PC1_TABLE_CSV", "PC1_TABLE_PREDICTIONS_CSV", "RECI_PROP_FTR", "NEURONS_NT_BWF_FTR",
+    "PC1_TABLE_CSV", "PC1_TABLE_PREDICTIONS_CSV", "FIG4_HELDOUT_MODELS_FTR", "FIG4_HELDOUT_CONFUSION_FTR", "RECI_PROP_FTR", "NEURONS_NT_BWF_FTR",
     "FILOPODIA_NODES_BASELINE_FTR", "FILOPODIA_NODES_NO_FILOPODIA_FTR", "FILOPODIA_NODES_SAMPLEOUT_FTR",
     "RF_MODEL_PKL",
     # the larval tables of Figure 2A (processing/larva/larva_maxsi_labels.py writes the MaxSI ones; there is no

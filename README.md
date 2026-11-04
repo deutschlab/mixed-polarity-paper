@@ -194,7 +194,7 @@ The figure scripts are in `figures/fig1/` to `figures/fig7/`, usually one per pa
 
 Fig 1C and Fig 3C make a Neuroglancer link through `caveclient` before they draw the panel, so they stop with an error unless you have a FlyWire account and a CAVE token saved on your machine. Every script imports `caveclient` and `nglui` through `methods/methods_all.py`, so both must be installed (they are in the pinned requirements).
 
-Five scripts need others to run first: `figures/fig4/build_pc1_table.py` before `figures/fig4/syntype_x_pc1.py`, `figures/fig5/reciprocal_fraction.py` before `figures/fig5/reciprocal_fraction_model.py`, the three `figures/fig7/si_sim_*.py` scripts before `figures/fig7/si_comb_analysis.py`, and `figures/fig7/fig7i_filopodia_fraction_x_nt.py` before `figures/fig7/filopodia_x_mirror_neurons.py` and `figures/fig5/reciprocal_fraction_x_bwf.py` (it writes `neurons_nt_bwf_frac.ftr`; if it stops with an error, or is left out of a run such as `--only fig5`, those two read whatever copy is already there).
+Six scripts need others to run first: `figures/fig4/build_pc1_table.py` before `figures/fig4/syntype_x_pc1.py`, `figures/fig4/fig4_heldout_models.py` before `figures/fig4/models_comparison.py`, `figures/fig5/reciprocal_fraction.py` before `figures/fig5/reciprocal_fraction_model.py`, the three `figures/fig7/si_sim_*.py` scripts before `figures/fig7/si_comb_analysis.py`, and `figures/fig7/fig7i_filopodia_fraction_x_nt.py` before `figures/fig7/filopodia_x_mirror_neurons.py` and `figures/fig5/reciprocal_fraction_x_bwf.py` (it writes `neurons_nt_bwf_frac.ftr`; if it stops with an error, or is left out of a run such as `--only fig5`, those two read whatever copy is already there).
 
 Every text a script saves is Arial 8 pt: each script calls `use_arial_8()` from `methods/figure_text.py`, which sets all text (axes, ticks, legends, titles, colour bars, annotations, table cells) to Arial 8 pt as the figure is saved, and builds every legend at 8 pt, whatever sizes the script set. `tools/check_figure_text.py --outputs` reads a run's saved files and lists any text that is not. It changes only text, but labels take a different amount of room at 8 pt, so a panel's layout can shift.
 
@@ -286,7 +286,7 @@ methods/
   flow_centrality.py  navis's synapse flow centrality without its dense matrix, used by steps 01, 02a and 08
   figure_text.py    every saved text in Arial 8 pt, used by every figure script and phi_threshold.py
 
-figures/            63 scripts: fig1/ 6, fig2/ 11, fig3/ 13, fig4/ 6, fig5/ 8, fig6/ 1, fig7/ 13, split_methods/ 4, supporting/ 1
+figures/            64 scripts: fig1/ 6, fig2/ 11, fig3/ 13, fig4/ 7, fig5/ 8, fig6/ 1, fig7/ 13, split_methods/ 4, supporting/ 1
 
 tools/              check and comparison tools (see Tools above and docs/tools.md)
 

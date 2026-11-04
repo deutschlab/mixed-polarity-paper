@@ -4,6 +4,7 @@ Each script under figures/ runs in its own process through tools/run_figure.py a
 writes into its own subfolder of the output folder, named after the script. Some
 scripts read what others write, so those run first, in this order:
 figures/fig4/build_pc1_table.py (read by figures/fig4/syntype_x_pc1.py),
+figures/fig4/fig4_heldout_models.py (read by figures/fig4/models_comparison.py),
 figures/fig5/reciprocal_fraction.py (read by figures/fig5/reciprocal_fraction_model.py),
 the three figures/fig7/si_sim_*.py scripts (read by figures/fig7/si_comb_analysis.py)
 and figures/fig7/fig7i_filopodia_fraction_x_nt.py (read by figures/fig7/filopodia_x_mirror_neurons.py
@@ -61,11 +62,12 @@ sys.path.insert(0, str(REPO_ROOT))
 from config import (SPLIT_METHOD, PIPELINE_RUN, PUBLISHED_DERIVED_DIR, RAW_DATA_DIR, DERIVED_DATA_DIR,  # noqa: E402  (recorded in commit.txt and inputs.txt)
                     MAXSI_NEURON_TABLE_FTR, MAXSI_LABEL_BATCH_DIR)
 
-FIRST = ["figures/fig4/build_pc1_table.py", "figures/fig5/reciprocal_fraction.py",
+FIRST = ["figures/fig4/build_pc1_table.py", "figures/fig4/fig4_heldout_models.py", "figures/fig5/reciprocal_fraction.py",
          "figures/fig7/si_sim_baseline.py", "figures/fig7/si_sim_no_filopodia.py",
          "figures/fig7/si_sim_sampleout.py", "figures/fig7/fig7i_filopodia_fraction_x_nt.py"]
 SLOW = {"figures/fig3/syntype_x_features.py", "figures/fig4/syntype_x_pc1.py",
-        "figures/fig4/build_pc1_table.py", "figures/fig3/fig3supp_ad_content_si_mixed.py"}
+        "figures/fig4/build_pc1_table.py", "figures/fig3/fig3supp_ad_content_si_mixed.py",
+        "figures/fig4/fig4_heldout_models.py"}
 DONE = ("finished", "stopped with an error")
 
 
