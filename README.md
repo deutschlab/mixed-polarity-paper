@@ -286,7 +286,7 @@ methods/
   flow_centrality.py  navis's synapse flow centrality without its dense matrix, used by steps 01, 02a and 08
   figure_text.py    every saved text in Arial 8 pt, used by every figure script and phi_threshold.py
 
-figures/            64 scripts: fig1/ 6, fig2/ 11, fig3/ 13, fig4/ 7, fig5/ 8, fig6/ 1, fig7/ 13, split_methods/ 4, supporting/ 1
+figures/            65 scripts: fig1/ 6, fig2/ 11, fig3/ 13, fig4/ 8, fig5/ 8, fig6/ 1, fig7/ 13, split_methods/ 4, supporting/ 1
 
 tools/              check and comparison tools (see Tools above and docs/tools.md)
 
