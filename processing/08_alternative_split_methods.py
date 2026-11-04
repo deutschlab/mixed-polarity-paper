@@ -18,9 +18,15 @@ the SFC neuron table in batches of 500 (118,377 in the rebuild, 237 batches);
 the range follows that table's size. A batch is skipped if its files already exist; the run stops if
 those files have no record or come from another run (batch_run.json), and, when
 combining, if a batch file is missing or the range does not end at the last batch.
+
+Several copies can run at once (N_SHARDS and SHARD in section 2, or STEP08_N_SHARDS and STEP08_SHARD in the
+environment); each runs every N_SHARDS-th batch and stops, and a final run with N_SHARDS = 1 combines the batches.
+docs/pipeline_overview.md says how to launch, resume and finish them.
 """
 #%%1 Imports
 
+import hashlib
+import os
 import sys
 from pathlib import Path
 # Make repo root importable so config.py can be found from any working directory
@@ -34,6 +40,10 @@ from flow_centrality import prepare_for_split   # the flow column without navis'
 import numpy as np
 import pandas as pd
 import navis
+import pyarrow.dataset as ds
+import pyarrow.feather as feather
+import scipy
+from config import SWC_DIR
 
 from math import log
 from scipy.stats import fisher_exact
@@ -48,6 +58,21 @@ FLOW_THRESHOLD = 1
 # Column in NEURON_TABLE_FTR that holds the neuron ID.
 NEURON_ID_COL = "neuron"
 
+BATCH_SIZE = 500
+
+# Shards: N copies of step 08 at once, as step 09 runs. N_SHARDS = 1 runs every batch and then writes
+# SI_comparisons.ftr. With N_SHARDS = N, the copy with SHARD = k (0 to N-1) runs the batches whose batch_number (from 0,
+# section 10) leaves k when divided by N, reads only the synapses of their cells, and stops after its batches. The
+# batches are dealt from the full list, so a copy that is restarted gets the same ones. Once every copy has finished, a
+# run with N_SHARDS = 1 finds every batch done and writes the table. STEP08_N_SHARDS and STEP08_SHARD in the
+# environment override the two settings, to launch the copies from a shell.
+N_SHARDS = 1
+SHARD = 0
+N_SHARDS = int(os.environ.get("STEP08_N_SHARDS", N_SHARDS))
+SHARD = int(os.environ.get("STEP08_SHARD", SHARD))
+if not (N_SHARDS >= 1 and 0 <= SHARD < N_SHARDS):
+    raise SystemExit(f"SHARD must be 0 to N_SHARDS - 1 (N_SHARDS = {N_SHARDS}, SHARD = {SHARD})")
+
 
 
 #%%3 Load data
@@ -61,14 +86,28 @@ nodesG=nodesG[nodesG['super_class'].isin(['central','optic','visual_centrifugal'
 
 # The synapse columns step 08 uses, read straight from the file without a second copy. neuropil is left out: the
 # attach function adds it only when called with neuropils=True, which step 08 never does.
+SYNAPSE_COLUMNS = ["synapse_id", "pre_x", "pre_y", "pre_z", "post_x", "post_y", "post_z", "size", "pre", "post"]
+
+# The cells in the order section 10 runs them; with N_SHARDS > 1, this copy reads only the synapses of its batches'
+# cells (batch_number % N_SHARDS == SHARD in section 10)
+_cells = nodesG.dropna(subset=[NEURON_ID_COL]).drop_duplicates(subset=[NEURON_ID_COL])[NEURON_ID_COL].to_numpy()
+_shard_cells = _cells[(np.arange(len(_cells)) // BATCH_SIZE) % N_SHARDS == SHARD]
+if len(_shard_cells) == 0:
+    raise SystemExit(f"Shard {SHARD} of {N_SHARDS} has no batch: N_SHARDS is above the number of batches")
+
+
+def _read_shard(columns):
+    ids = [int(x) for x in _shard_cells]
+    return (ds.dataset(str(SYNAPSE_TABLE_RAW_FTR), format="feather")
+            .to_table(columns=columns, filter=ds.field("pre").isin(ids) | ds.field("post").isin(ids))
+            .to_pandas())
+
+
 allsynapses = pd.read_feather(
     SYNAPSE_TABLE_RAW_FTR,
-    columns=[
-        "synapse_id",
-        "pre_x", "pre_y", "pre_z",
-        "post_x", "post_y", "post_z",
-        "size", "pre", "post"
-    ])
+    columns=SYNAPSE_COLUMNS) if N_SHARDS == 1 else _read_shard(SYNAPSE_COLUMNS)
+if N_SHARDS > 1:
+    print(f"Shard {SHARD} of {N_SHARDS}: {len(_shard_cells):,} cells, {len(allsynapses):,} synapses")
 
 
 #%%4 SI functions and node-level SI (methods/node_cut_si.py)
@@ -723,8 +762,6 @@ all_neurons = (
 # Batch settings
 # ---------------------------------------------------------
 
-BATCH_SIZE = 500
-
 n_batches = int(
     np.ceil(len(all_neurons) / BATCH_SIZE)
 )
@@ -740,7 +777,38 @@ batch_data_path.mkdir(
     parents=True,
     exist_ok=True
 )
-check_batch_record(batch_data_path, all_neurons[NEURON_ID_COL], BATCH_SIZE)   # stops on another run's batches
+# upload_swc reads <SWC_DIR>/<subfolder>/<id>.swc from whichever subfolder it meets first, in no fixed order
+swc_files = sorted(p.relative_to(SWC_DIR).as_posix() for p in SWC_DIR.glob("*/*.swc"))
+swc_names = pd.Series([f.split("/")[-1] for f in swc_files], dtype=object)
+repeated = sorted(set(swc_names[swc_names.duplicated(keep=False)]))
+if repeated:
+    raise SystemExit(f"{len(repeated):,} skeleton file names appear in more than one subfolder of {SWC_DIR}, "
+                     f"for example {repeated[:5]}. Keep one copy of each.")
+swc_fingerprint = "\n".join(f"{f}\t{(SWC_DIR / f).stat().st_size}" for f in swc_files)
+# what the batches are made from, besides the cells and the synapse table: the skeleton set, the navis and scipy
+# versions (MinFisherP's p-values, and which underflow to 0, depend on scipy), the settings and synapse columns it
+# uses, and the code that scores a cell and runs the batches (sections 4 to 10 of this script, up to the combining
+# sections, and the methods files it calls), so that batches of two versions are never mixed
+batch_record = {"swc_files": len(swc_files),
+                "flow_threshold": FLOW_THRESHOLD,
+                "synapse_columns": SYNAPSE_COLUMNS,
+                "swc_files_sha256": hashlib.sha256(swc_fingerprint.encode()).hexdigest(),
+                "navis_version": navis.__version__,
+                "scipy_version": scipy.__version__,
+                "code_sha256": hashlib.sha256(
+                    Path(__file__).read_text(encoding="utf-8").split("\n#%%4 ")[1].split("\nSTART_BATCH = 1")[0].encode()
+                    + (METHODS_DIR / "node_cut_si.py").read_bytes()
+                    + (METHODS_DIR / "flow_centrality.py").read_bytes()
+                    + (METHODS_DIR / "methods_all.py").read_bytes()).hexdigest()}
+check_batch_record(batch_data_path, all_neurons[NEURON_ID_COL], BATCH_SIZE, extra=batch_record)   # stops on another run's batches
+
+
+def write_whole(frame, path):
+    """Write to a temporary name, then rename, so that a run stopped mid-write leaves no file under the real name.
+    The temporary name holds the process id, so two copies writing the same batch never share it."""
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+    frame.to_feather(tmp)
+    tmp.replace(path)
 
 print("Total neurons:", len(all_neurons))
 print("Batch size:", BATCH_SIZE)
@@ -752,6 +820,9 @@ print("Number of batches:", n_batches)
 # ---------------------------------------------------------
 
 for batch_number in range(n_batches):
+
+    if batch_number % N_SHARDS != SHARD:   # another copy's batch
+        continue
 
     batch_id = batch_number + 1
 
@@ -828,7 +899,12 @@ for batch_number in range(n_batches):
     ) = run_neuron_batch_pipeline(
 
         nodes_dataframe=batch_neurons,
-        synapses_dataframe=allsynapses,
+        # Only the synapses of this batch's cells: each cell then searches a small table instead of all of them.
+        # A cell's synapses are pre == cell or post == cell, so this keeps every one of them, in the same order.
+        synapses_dataframe=allsynapses.loc[
+            allsynapses["pre"].isin(batch_neurons[NEURON_ID_COL].to_numpy())
+            | allsynapses["post"].isin(batch_neurons[NEURON_ID_COL].to_numpy())
+        ],
 
         neuron_id_col=NEURON_ID_COL,
         flow_thresh=FLOW_THRESHOLD
@@ -853,23 +929,10 @@ for batch_number in range(n_batches):
     # Save batch
     # -----------------------------------------------------
 
-    summary_df.reset_index(
-        drop=True
-    ).to_feather(
-        summary_file
-    )
-
-    all_node_si_df.reset_index(
-        drop=True
-    ).to_feather(
-        nodes_file
-    )
-
-    failures_df.reset_index(
-        drop=True
-    ).to_feather(
-        failures_file
-    )
+    # each file under a temporary name first; the failures file last, since a batch counts as done when all three exist
+    write_whole(summary_df.reset_index(drop=True), summary_file)
+    write_whole(all_node_si_df.reset_index(drop=True), nodes_file)
+    write_whole(failures_df.reset_index(drop=True), failures_file)
 
 
     print(
@@ -894,6 +957,9 @@ for batch_number in range(n_batches):
     gc.collect()
 
 
+if N_SHARDS > 1:
+    raise SystemExit(f"Shard {SHARD} of {N_SHARDS}: its batches are done. Once every copy has finished, run with "
+                     "N_SHARDS = 1 to check the batches and write SI_comparisons.ftr.")
 print("\nFinished all batches.")
 #%%
 
@@ -936,6 +1002,10 @@ failure_frames = [pd.read_feather(p) for p in
                   if p.exists()]
 failures_all = pd.concat(failure_frames, ignore_index=True) if failure_frames else pd.DataFrame(columns=["neuron_id", "error"])
 n_done = sum(len(f) for f in summary_frames)
+_listed = pd.concat([f["neuron_id"] for f in summary_frames] + [failures_all["neuron_id"]], ignore_index=True)
+if _listed.duplicated().any() or set(_listed.astype(np.int64)) != set(all_neurons[NEURON_ID_COL].astype(np.int64)):
+    raise SystemExit(f"The batches list {int(_listed.duplicated().sum())} neurons twice, or not exactly the run's "
+                     "neurons; rerun the batches rather than combine them")
 if n_done + len(failures_all) != len(all_neurons):
     raise SystemExit(f"{n_done} neurons in the summaries and {len(failures_all)} in the failures, "
                      f"but the run had {len(all_neurons)}")
