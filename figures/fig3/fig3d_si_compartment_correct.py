@@ -70,13 +70,26 @@ fig, ax1 = plt.subplots(figsize=(8, 4))
 sns.histplot(nodesG['SI'], bins=60, color='blue', alpha=0.3, ax=ax1, label='SI dist')
 
 ax1.set_xlabel('Segregation Index (SI)')
-ax1.set_ylabel('Count')
+ax1.set_ylabel('Cells')
 ax1.legend(loc='upper left')
 
 # --- Plot rolling correctness ---
+# The drawn curves are smoothed for display only: at each cell, the mean over the cells whose SI lies within
+# DISPLAY_HALF_WIDTH of it, so the smoothing has the same width in SI everywhere (a fixed number of cells would span a
+# much wider SI range where cells are few, near SI 0.5 and above). The cut-offs at SI 0.1 (axon_val, dend_val, below)
+# still come from the trailing 400-cell mean above, so the old-rule labels and every number they feed are unchanged;
+# the drawn curves differ from them at SI 0.1 by well under a point.
+DISPLAY_HALF_WIDTH = 0.0125
 ax2 = ax1.twinx()
-ax2.plot(df_comb_g_axon['SI'], df_comb_g_axon['rolling_correct'], color='#92278f', lw=2, label='Axon rolling correct (%)')
-ax2.plot(df_comb_g_dend['SI'], df_comb_g_dend['rolling_correct'], color='#fbb042', lw=2, label='Dendrite rolling correct (%)')
+for col, color, label in [('axon_correct', '#92278f', 'Axon rolling correct (%)'),
+                          ('dend_correct', '#fbb042', 'Dendrite rolling correct (%)')]:
+    d = df[[col, 'SI']].dropna().sort_values('SI').reset_index(drop=True)
+    si, val = d['SI'].to_numpy(), d[col].to_numpy()
+    lo = np.searchsorted(si, si - DISPLAY_HALF_WIDTH, side='left')
+    hi = np.searchsorted(si, si + DISPLAY_HALF_WIDTH, side='right')
+    csum = np.concatenate([[0.0], np.cumsum(val)])
+    smooth = (csum[hi] - csum[lo]) / (hi - lo) * 100
+    ax2.plot(si, smooth, color=color, lw=2, label=label)
 
 ax2.set_ylabel('Rolling mean of correctness (%)')
 ax2.legend(loc='upper right')
@@ -102,8 +115,8 @@ ax2.axhline(axon_val, color='#92278f', linestyle='--', lw=1, alpha=0.7)
 ax2.axhline(dend_val, color='#fbb042', linestyle='--', lw=1, alpha=0.7)
 
 # --- Annotate each value ---
-ax2.text(si_point + 0.003+0.72, axon_val, f'Axon: {axon_val:.2f}%', color='#92278f', va='bottom',size=15)
-ax2.text(si_point + 0.003+0.72, dend_val-0.5, f'Dend: {dend_val:.2f}%', color='#fbb042', va='bottom',size=15)
+ax2.text(0.45, axon_val, f'Axon: {axon_val:.2f}%', color='#92278f', va='bottom',size=15)   # inside the axes (x limit 0.6)
+ax2.text(0.45, dend_val-0.5, f'Dend: {dend_val:.2f}%', color='#fbb042', va='bottom',size=15)
 
 # --- Titles and layout ---
 plt.title('SI Distribution and Rolling Correctness (Axon vs Dendrite)')
