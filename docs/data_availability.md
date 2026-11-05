@@ -158,7 +158,7 @@ Whether the Buhmann run differed in anything else is not recorded here.
 | Fig 3 Supp 1A (Buhmann curve) | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `neuron_data_full_article.ftr` |
 | Fig 3 Supp 2A/B | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `synapses_783_article.ftr` |
 | Fig 3 Supp 2C | `figures/fig3/si_x_npil_x_synapse_detection.py` | `synapses_783_article.ftr` |
-| Fig 6A–D, Supp 6-S1, 6-S2A, 6-S3 | `figures/fig6/aadd_specific_circuits.py` (with its default `DATA_SOURCE = 'buhmann'`) | `neuron_data_full_article.ftr`, `synapses_783_article.ftr` |
+| Fig 6A–D, Supp 6-S1, 6-S2A, 6-S3, as submitted | `figures/fig6/aadd_specific_circuits.py` with `DATA_SOURCE = 'buhmann'` (its default is `'princeton'`, the tables of the rest of the paper) | `neuron_data_full_article.ftr`, `synapses_783_article.ftr` |
 
 `figures/fig5/fig5d_chi_reci_identity.py` also reads the Buhmann neuron and connection tables, from
 line 554, after it has saved all its figures. Nothing from them is saved or printed: the reciprocal

@@ -14,7 +14,9 @@ The script is run as it is, except for:
   - its settings (DATA_SOURCE, SI_SOURCE), replaced by exact text for the variants below;
   - matplotlib drawing to no screen (the Agg backend), and the SVGs going to the temporary folder.
 
-Checks, on the default settings (DATA_SOURCE = 'buhmann', the tables named
+The script's default is DATA_SOURCE = 'princeton' (the revised paper uses the Princeton tables);
+the checks run it with DATA_SOURCE = 'buhmann' set in its text, so that the made-up tables below
+are read as the Buhmann ones. Checks, on those settings (DATA_SOURCE = 'buhmann', the tables named
 NEURON_TABLE_NONP_FTR and SYNAPSE_TABLE_NONP_FTR):
   - which connections count: cells with SI >= 0.1 (an SI of exactly 0.1 is kept), a known and
     non-empty type, and both cells in the population (an empty type, a missing SI, an SI of 0.05,
@@ -110,6 +112,7 @@ CAPTURES = [
      "        _check['widths'][(Population, comp)] = [float(x) for x in widths]\n"),
 ]
 SETTING_BUHMANN = "DATA_SOURCE = 'buhmann'\n"
+SETTING_DEFAULT = "DATA_SOURCE = 'princeton'\n"   # the script's own default
 SETTING_SI = "SI_SOURCE = 'neuron_table'\n"
 
 # ---------------------------------------------------------------- the made-up connectome
@@ -363,6 +366,12 @@ def main() -> None:
     except LookupError as error:
         results.append((False, f"the lines to record after were found: {error}"))
         finish()
+    n_default = source.count(SETTING_DEFAULT)
+    results.append((n_default == 1, "the script's default is DATA_SOURCE = 'princeton' "
+                                    f"(found {n_default} time(s))"))
+    if n_default != 1:
+        finish()
+    source = source.replace(SETTING_DEFAULT, SETTING_BUHMANN)   # the checks below read the made-up tables as Buhmann
 
     with tempfile.TemporaryDirectory() as tmp:
         config = write_tables(Path(tmp))

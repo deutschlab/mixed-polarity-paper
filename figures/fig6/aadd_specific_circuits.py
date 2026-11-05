@@ -66,8 +66,9 @@ SI_threshold = 0.1
 # 77 ALPN types against the figure's 75); the Supp 6-S3 graphs have the same edges. With
 # 'princeton' the numbers differ more (e.g. ALPN AA 0.43 instead of 0.59).
 # With 'buhmann', SI and primary_type come from the Buhmann neuron table and SI_SOURCE is
-# ignored.
-DATA_SOURCE = 'buhmann'
+# ignored. The revised paper uses the Princeton tables everywhere, Figure 6 included, so
+# 'princeton' is the default; 'buhmann' reproduces the submitted panels.
+DATA_SOURCE = 'princeton'
 # Which SI stands in for the SI column of the MATLAB script's neuron_data.csv:
 # 'neuron_table' (NEURON_TABLE_FTR SI, the SI most figure scripts use) or 'SI_updated'.
 SI_SOURCE = 'neuron_table'
@@ -319,8 +320,13 @@ for nPopulation, pop in enumerate(C):
               f" ({len(yb)} connections)")
         sd = yb.std(ddof=1) if len(yb) > 1 else 0.0
         ax.text(x0, yb.mean() + 1.3 * sd, f"{med:g}", ha='center')
-        ax.set_ylim(0, max(yb.mean() + 1.5 * sd, 1))
-        ax.set_yticks(np.arange(0, 16, 5))
+        # the axis holds every population's whole whisker (the MATLAB script set it from each population in
+        # turn, so the last one could cut an earlier, longer whisker)
+        top = max(yb.mean() + 1.5 * sd, bs['whishi'] + 1, 1)
+        if nSummaryPlot > 1:
+            top = max(top, ax.get_ylim()[1])
+        ax.set_ylim(0, top)
+        ax.set_yticks(np.arange(0, top + 1, 5))
         ax.set_ylabel('Synapses per connection')
 
         for ax in ax_summary[:, 0]:
