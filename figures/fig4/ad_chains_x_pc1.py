@@ -14,6 +14,8 @@
 #      null is 1/6, 1/3, 1/3, 1/6 on any network. The error bars of the real chains are a 95% range from a Poisson
 #      bootstrap over the middle cells' primary types (1,000 draws); those of the nulls are the shuffles' 95% range.
 #      Neither null keeps the link between PC1 and a cell's number of connections (PC1 is partly built from them).
+#      Both nulls are computed, printed and written to the CSV; the figure draws the across-all-cells null only, unless
+#      DRAW_SUPER_CLASS_NULL is set to True below.
 # Each panel is written as an SVG with the numbers behind it as a CSV.
 import sys
 from pathlib import Path
@@ -36,6 +38,7 @@ INTRINSIC = ['central', 'optic', 'visual_projection', 'visual_centrifugal']
 TYPES = ['AA', 'AD', 'DA', 'DD']
 custom_palette = {'AA': '#8b2be2', 'AD': '#9F4800', 'DA': '#B3B3B3', 'DD': '#F4B95A'}
 SHUFFLES, BOOT, SEED = 200, 1000, 0
+DRAW_SUPER_CLASS_NULL = False   # True also draws the PC1-shuffled-in-super-class bars in panel D
 _out_dir = OUTPUT_DIR / "fig4" / "ad_chains_x_pc1"
 _out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -159,17 +162,23 @@ x = np.arange(4)
 err = np.abs(np.percentile(boot, [2.5, 97.5], axis=0) - obs)
 err_sc = np.abs(np.percentile(null_sc, [2.5, 97.5], axis=0) - null_sc.mean(axis=0))
 err_all = np.abs(np.percentile(null_all, [2.5, 97.5], axis=0) - null_all.mean(axis=0))
+w = 0.27 if DRAW_SUPER_CLASS_NULL else 0.38
 plt.figure(figsize=(3.2, 2.6))
-plt.bar(x - 0.27, 100 * obs, 0.27, yerr=100 * err, capsize=2, color=custom_palette['AD'],
-        label='AD chains (95%, cell types)')
-plt.bar(x, 100 * null_sc.mean(axis=0), 0.27, yerr=100 * err_sc, capsize=2, color='#BBBBBB',
-        label='PC1 shuffled in super-class')
-plt.bar(x + 0.27, 100 * null_all.mean(axis=0), 0.27, yerr=100 * err_all, capsize=2, color='#6E6E6E',
-        label='PC1 shuffled across all cells')
+plt.bar(x - (w if DRAW_SUPER_CLASS_NULL else w / 2), 100 * obs, w, yerr=100 * err, capsize=2,
+        color=custom_palette['AD'], label='AD chains (95%, cell types)')
+if DRAW_SUPER_CLASS_NULL:
+    plt.bar(x, 100 * null_sc.mean(axis=0), w, yerr=100 * err_sc, capsize=2, color='#BBBBBB',
+            label='PC1 shuffled in super-class')
+plt.bar(x + (w if DRAW_SUPER_CLASS_NULL else w / 2), 100 * null_all.mean(axis=0), w, yerr=100 * err_all, capsize=2,
+        color='#6E6E6E', label='PC1 shuffled across all cells')
 plt.xticks(x, ['climb,\nclimb', 'climb,\nnot', 'not,\nclimb', 'not,\nnot'], fontsize=6.5)
 plt.yticks(fontsize=6.5)
 plt.ylabel('% of two-step AD chains', fontsize=7)
 plt.title('steps of AD -> AD chains', fontsize=7.5)
+_tops = [np.percentile(boot, 97.5, axis=0), np.percentile(null_all, 97.5, axis=0)]
+if DRAW_SUPER_CLASS_NULL:
+    _tops.append(np.percentile(null_sc, 97.5, axis=0))
+plt.ylim(0, 130 * np.max(_tops))   # room above every drawn bar and whisker for the legend
 plt.legend(fontsize=6, frameon=False)
 plt.tight_layout()
 plt.savefig(_out_dir / "ad_chains_steps.svg")
