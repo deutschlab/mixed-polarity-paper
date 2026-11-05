@@ -426,15 +426,21 @@ plt.show()
 #%%
 # Step 6: Compute and Display the Confusion Matrix
 # Compute and normalize confusion matrix
-cm = confusion_matrix(y_test, y_pred, labels=rf_clf.classes_)
+# Rows and columns in the paper's order (as Fig 4A), taken by name: confusion_matrix reorders by the labels given, so
+# every value stays with its own type. (The published 3J printed this order over a matrix in the classifier's own
+# order, AA, AD, DA, DD, so its labels named the wrong rows and columns.)
+LABELS = ['AD', 'AA', 'DD', 'DA']
+assert set(LABELS) == set(rf_clf.classes_)
+cm = confusion_matrix(y_test, y_pred, labels=LABELS)
 cm_percentage = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis] * 100
+print('3J diagonal (recall per type, %):', dict(zip(LABELS, np.round(np.diag(cm_percentage), 2))))
 
 # Setup figure and axis
-fig, ax = plt.subplots(figsize=(1.5,1.5))  # Set figure size
-disp = ConfusionMatrixDisplay(confusion_matrix=cm_percentage, display_labels=rf_clf.classes_)
+fig, ax = plt.subplots(figsize=(2.6, 2.6))  # as Fig 4A, so the values fit at 8 pt
+disp = ConfusionMatrixDisplay(confusion_matrix=cm_percentage, display_labels=LABELS)
 
 # Plot confusion matrix with formatting
-disp.plot(cmap='Blues', values_format='.2f', ax=ax, colorbar=False)
+disp.plot(cmap='Blues', values_format='.1f', ax=ax, colorbar=False)
 for text in disp.text_.ravel():  # flatten the array
     text.set_fontsize(4)
 # Format axis labels and ticks
