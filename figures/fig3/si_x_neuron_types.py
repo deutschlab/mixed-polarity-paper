@@ -132,7 +132,7 @@ line_spacing = 3.5
 plt.text(x_pos, y_start - 0 * line_spacing, f'T4 Neurons, n = {len(T4_neurons)}', color='blue', fontsize=8)
 plt.text(x_pos, y_start - 1 * line_spacing, f'DM Neurons, n = {len(dm_neurons)}', color='green', fontsize=8)
 plt.text(x_pos, y_start - 2 * line_spacing, f'ring Neurons, n = {len(ring_neurons)}', color='red', fontsize=8)
-plt.text(x_pos, y_start - 3 * line_spacing, f'LC Neurons, n = {len(lc_neurons)}', color='orange', fontsize=8)
+plt.text(x_pos, y_start - 3 * line_spacing, f'LC10a-d Neurons, n = {len(lc_neurons)}', color='orange', fontsize=8)   # LC10a, b, c and d only
 
 # Labels and styling
 plt.xlabel('SI', size=8)
