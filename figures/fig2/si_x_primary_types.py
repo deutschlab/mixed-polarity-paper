@@ -177,7 +177,8 @@ else:
 ss_total = ss_between + ss_within
 
 eta_sq = ss_between / ss_total
-omega_sq = (ss_between - (df1 * ss_within / df2)) / (ss_total + ss_within)
+ms_within = ss_within / df2
+omega_sq = (ss_between - df1 * ms_within) / (ss_total + ms_within)
 
 print(f"\nEffect sizes:")
 print(f"η² (eta squared) = {eta_sq:.3f}")

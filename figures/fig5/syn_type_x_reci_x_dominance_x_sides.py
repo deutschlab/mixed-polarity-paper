@@ -257,7 +257,7 @@ sns.heatmap(
     cmap='Blues',
     cbar=True,
     cbar_kws={"location": "left"},
-    vmin=0, vmax=100,    annot_kws={"size": 4}
+    vmin=0, vmax=80,    annot_kws={"size": 4}
 ,
     ax=ax
 )
@@ -296,7 +296,7 @@ sns.heatmap(
     cmap='Blues',
     cbar=True,
     cbar_kws={"location": "left"},
-    vmin=0, vmax=100,
+    vmin=0, vmax=80,
     ax=ax,  annot_kws={"size": 4}
 )
 

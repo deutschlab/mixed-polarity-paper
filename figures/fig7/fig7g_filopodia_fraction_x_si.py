@@ -5,6 +5,7 @@
 # The dashed lines at 0.24 and 0.75 are typed in; the 'All' lines use every super-class with no SI filter.
 # The axon and dendrite lines keep intrinsic boutons with SI >= 0.1 (left) or SI > 0.1 (right), binned in equal-count
 # SI bins over axon and dendrite boutons together; r and p are computed over boutons, not neurons.
+# p below 0.001 is written '< 0.001', so the labels stay Arial 8 pt; above it, '=' and three decimals.
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -205,15 +206,13 @@ r_all, p_all = stats.pearsonr(
 # ----------------------------------------------------
 # 8. Helper for p-value formatting
 # ----------------------------------------------------
-def format_p(p, threshold=1e-3, min_exp=-30):
-    if p <= 0 or not np.isfinite(p):
-        return rf"<10^{{{min_exp}}}"
+def format_p(p, threshold=1e-3):
+    # p below the threshold is written '< 0.001', so every character stays Arial 8 pt (a maths exponent is drawn smaller)
+    if not np.isfinite(p):
+        return "=n/a"
     if p < threshold:
-        exp = int(np.floor(np.log10(p)))
-        if exp < min_exp:
-            return rf"<10^{{{min_exp}}}"
-        return rf"<10^{{{exp}}}"
-    return f"{p:.3f}"
+        return f"<{threshold:g}"
+    return f"={p:.3f}"
 
 # ----------------------------------------------------
 # 9. Plot (UPDATED)
@@ -411,15 +410,13 @@ r_D, p_D = stats.pearsonr(
 # ----------------------------------------------------
 # 6. Helper for p-value formatting
 # ----------------------------------------------------
-def format_p(p, threshold=1e-3, min_exp=-30):
-    if p <= 0 or not np.isfinite(p):
-        return rf"<10^{{{min_exp}}}"
+def format_p(p, threshold=1e-3):
+    # p below the threshold is written '< 0.001', so every character stays Arial 8 pt (a maths exponent is drawn smaller)
+    if not np.isfinite(p):
+        return "=n/a"
     if p < threshold:
-        exp = int(np.floor(np.log10(p)))
-        if exp < min_exp:
-            return rf"<10^{{{min_exp}}}"
-        return rf"<10^{{{exp}}}"
-    return f"{p:.3f}"
+        return f"<{threshold:g}"
+    return f"={p:.3f}"
 
 # ----------------------------------------------------
 # 7. Plot

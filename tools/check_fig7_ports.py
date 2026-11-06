@@ -44,6 +44,8 @@ Numbers must agree within np.allclose(rtol=1e-9, atol=1e-9) after rounding to 12
 Known, deliberate differences, applied to the original's run so the comparison is like for like:
   fig7S2b.py  the original stops on a KeyError (the cell-type table names its column root_id);
               the original's read of that table renames the column, as the port does in its code.
+  fig7g.py    the port writes p below 0.001 as '< 0.001' (Arial 8 pt) where the original writes a maths
+              exponent; the original is run with the port's p formatter (SAME_P_LABELS), so the labels compare.
 A pair where both sides stop because t2.ftr or filopodia_filtered.ftr is missing (at present only fig7e reads them) is
 reported NOT RUN, not FAIL; it is compared as soon as the files are there. A run in which no pair
 is compared fails, and so do an unknown --only name, a wrong --originals and a script that runs
@@ -93,6 +95,25 @@ import make_fig7_ports as mk  # noqa: E402
 OUT_DIR = OUTPUT_DIR / "tools" / "check_fig7_ports"
 PORTS_DIR = REPO_ROOT / "figures" / "fig7"
 RENAME_ROOT_ID = {"fig7S2b.py"}
+# originals run with the port's p-value formatter: the generator's fixes whose old text defines format_p
+SAME_P_LABELS = {"fig7g.py"}
+
+
+def original_to_run(originals: Path, orig: str, rec_dir: Path) -> Path:
+    """The original script, or for SAME_P_LABELS a copy of it with the generator's format_p fixes applied."""
+    if orig not in SAME_P_LABELS:
+        return originals / orig
+    text = (originals / orig).read_text(encoding="utf-8")
+    fixes = [(o, n) for o, n in mk.PORTS[orig][3] if "def format_p" in o]
+    if not fixes:
+        raise RuntimeError("no format_p fix for %s in tools/make_fig7_ports.py" % orig)
+    for o, n in fixes:
+        if text.count(o) != 1:
+            raise RuntimeError("a format_p fix for %s does not match the original once" % orig)
+        text = text.replace(o, n)
+    copy = rec_dir / ("p_labels__" + orig)
+    copy.write_text(text, encoding="utf-8")
+    return copy
 NOT_SUPPLIED_OK = ("t2.ftr", "filopodia_filtered.ftr")
 # (original, config constant) pairs whose two sides read different files on purpose: the fig7k port reads
 # NEURON_TABLE_FTR where the original read a copy that differs only in a column it does not use
@@ -553,7 +574,8 @@ def check_pairs(originals: Path, inputs: list, ports: Path, only, out_dir: Path,
             failed += 1
             continue
         try:
-            a = run("original", originals / orig, rec_dir / (orig + ".original.json"), inputs, orig in RENAME_ROOT_ID, timeout)
+            a = run("original", original_to_run(originals, orig, rec_dir), rec_dir / (orig + ".original.json"), inputs,
+                    orig in RENAME_ROOT_ID, timeout)
             b = run("port", port, rec_dir / (orig + ".port.json"), inputs, False, timeout)
             read_files |= set(a.get("read_files", [])) | set(b.get("read_files", []))
             if not a.get("finished") and not b.get("finished") and not_supplied(a) and not_supplied(b):
@@ -571,7 +593,8 @@ def check_pairs(originals: Path, inputs: list, ports: Path, only, out_dir: Path,
             lines.append("FAIL     %-18s %s (sha %s)" % (orig, port_name, sha))
             lines += ["           " + p[:220] for p in problems[:8]]
         else:
-            note = "; root_id renamed for the original too" if orig in RENAME_ROOT_ID else ""
+            note = ("; root_id renamed for the original too" if orig in RENAME_ROOT_ID else
+                    "; the original run with the port's p labels" if orig in SAME_P_LABELS else "")
             lines.append("PASS     %-18s %s (sha %s): %d figure(s), %d save(s) byte-identical, %d table(s), %d read(s), %d printed line(s)%s"
                          % (orig, port_name, sha, len(b["final"]), len(mk.EXPECTED_SAVES[orig]), len(b["tables"]),
                             len(b["reads"]), len(b["printed"]), note))
