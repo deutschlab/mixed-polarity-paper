@@ -175,11 +175,20 @@ reciprocity prediction.
 | Not a panel of the submitted paper (Supp 5-S1 has only panels A and B, both examples) | `figures/fig5/reciprocal_fraction_model.py` | `NEURON_TABLE_FTR`, `RECI_PROP_FTR` | `outputs/fig5/reciprocal_fraction_model/`; writes `RF_MODEL_PKL` |
 | Not a panel of the submitted paper | `figures/fig5/syn_type_strength_identity.py` | `CONNECTIONS_TABLE_FTR`, `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_strength_identity/` |
 
-> Fig 5G and 5H: in `syn_type_x_reci_x_dominance/`, 5G (All) is `same_type_percentage_princeton.svg` (line 219) and 5H is
-> `not_same_type_percentage_princeton.svg` (line 247). In `syn_type_x_reci_x_dominance_x_sides/`, 5G Ipsilateral is
-> `same_type_percentage_same_side_totalnorm_princeton.svg` (line 271) and 5G Contralateral is
-> `not_same__side_type_percentage_totalnorm_princeton.svg` (line 312; same-type pairs on opposite sides, despite the
+> Fig 5G and 5H: in `syn_type_x_reci_x_dominance/`, 5G (All) is `same_type_percentage_princeton.svg` and 5H is
+> `not_same_type_percentage_princeton.svg`. In `syn_type_x_reci_x_dominance_x_sides/`, 5G Ipsilateral is
+> `same_type_percentage_same_side_totalnorm_princeton.svg` and 5G Contralateral is
+> `not_same__side_type_percentage_totalnorm_princeton.svg` (same-type pairs on opposite sides, despite the
 > name). That script's other two SVGs, which reuse the base script's file names, are not panels.
+> 5G (All) and 5H keep pairs whose two cells are in the four intrinsic super-classes, as the sides script does, and give
+> each cell as a share of the pairs with one dominant synapse type (more than half of the synapses) in each direction,
+> so each panel sums to 100%; the script asserts it. 3G (`nt_syn_type_same_not_same.py`) keeps synapses whose two cells
+> are in its filtered neuron table. 3H's inset, the cumulative curve for SI >= 0.1 (`syntype_x_strength_x_identity.py`),
+> is on synapses between intrinsic cells with a cell type and both compartment flags, as the main panel; its "All
+> synapses" curve is whole-brain. 4B's cell-type model
+> (`fig4_heldout_models.py`) picks, for each pair of cell types, the synapse type with the largest share of its own
+> type's training synapses (each synapse weighted by 1 / its type's training count), the rule that maximises balanced
+> accuracy on the training synapses; the three forests are trained on the balanced resample.
 
 > `fig5d_chi_reci_identity.py` reads the Buhmann tables (`*_NONP_FTR`) from line 554, after all its figures are
 > saved; nothing from them is saved or printed. See the Buhmann section of [data_availability.md](data_availability.md).

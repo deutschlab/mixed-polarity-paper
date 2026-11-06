@@ -257,6 +257,7 @@ rr_all['cdf'] = rr_all['rolling sum'] / rr_all['number of instances'].sum()
 
 # Filtered synapses
 allsynapses2 = allsynapses.query("SI_pre >= 0.1 and SI_post >= 0.1")
+allsynapses2 = allsynapses2[allsynapses2['pre'].isin(nodesG['neuron']) & allsynapses2['post'].isin(nodesG['neuron'])]   # the filtered curve: cells in nodesG above (intrinsic, with a cell type and both compartment flags); the 'All synapses' curve stays whole-brain
 r_filt = allsynapses2[['pre', 'post']].groupby(by=['pre', 'post']).size()
 r_filt = pd.DataFrame(r_filt, columns=['number of synapses'])
 rr_filt = r_filt.groupby(by=['number of synapses']).size()

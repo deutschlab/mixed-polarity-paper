@@ -119,11 +119,12 @@ print('4A diagonal (recall per type, %):', {t: round(share.at[t, t], 1) for t in
 
 #%% n values for reporting
 
-# Fig 4B majority-label model: directed neuron-neuron connections
+# majority label per directed neuron-neuron connection (the 4B 'neurons' dot)
 n_synapses_connection_model = int(connections['sum_syn'].sum())
 n_connections = len(connections)
 
-# Fig 4B majority-label model: primary-type pairs
+# majority label per primary-type pair, counted and scored on the same synapses (not drawn; 4B's cell-type bar is
+# the held-out model from fig4_heldout_models.py)
 n_synapses_primary_type_model = int(connections_agg['sum_syn'].sum())
 n_primary_type_pairs = len(connections_agg)
 
@@ -134,7 +135,7 @@ print(f'  n synapses = {n_synapses_connection_model:,}')
 print(f'  n directed connections = {n_connections:,}')
 print(f'  accuracy = {result_per_conneciton * 100:.1f}%; balanced accuracy = {balanced_per_neuron * 100:.1f}% (the dot)')
 
-print(f'\nPrimary-type pair majority label:')
+print(f'\nPrimary-type pair majority label (not drawn in 4B):')
 print(f'  n synapses = {n_synapses_primary_type_model:,}')
 print(f'  n primary-type pairs = {n_primary_type_pairs:,}')
 print(f'  accuracy = {result_per_conneciton_primary_type * 100:.1f}% (counted and scored on the same synapses)')

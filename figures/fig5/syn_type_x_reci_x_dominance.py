@@ -50,6 +50,7 @@ nodesG['root_id']=nodesG['root_id'].astype(np.int64)
 
 final_df=final_df.merge(nodesG[['root_id','super_class']],left_on='Node A',right_on='root_id',how='left')
 final_df=final_df.merge(nodesG[['root_id','super_class']],left_on='Node B',right_on='root_id',how='left')
+final_df=final_df.dropna(subset=['super_class_x','super_class_y'])   # keep pairs of the four intrinsic super-classes (the left merges alone keep every row)
 #%%
 final_df=final_df.dropna(subset=['primary_type_A','primary_type_B'])
 #%%
@@ -57,6 +58,15 @@ final_df=final_df.dropna(subset=['primary_type_A','primary_type_B'])
 final_df['same_type']=(final_df['primary_type_A']==final_df['primary_type_B']).astype(int)
 #%%
 final_df=final_df[(final_df['SI_A']>=0.1)&(final_df['SI_B']>=0.1)]
+#%% the shares' denominator: pairs with one dominant synapse type (more than half of the synapses) in each direction;
+# pairs without one are left out, as the Methods say, so each panel's cells sum to 100%
+_types = ['AD', 'DA', 'AA', 'DD']
+_dominant = (final_df[[f'node_A_pre_{t}' for t in _types]].gt(final_df['dim_A->B'] / 2, axis=0).any(axis=1)
+             & final_df[[f'node_B_pre_{t}' for t in _types]].gt(final_df['dim_B->A'] / 2, axis=0).any(axis=1))
+n_same_dominant = int((_dominant & (final_df['same_type'] == 1)).sum())
+n_not_same_dominant = int((_dominant & (final_df['same_type'] == 0)).sum())
+print(f"pairs with a dominant type each way: same type {n_same_dominant:,} of {int((final_df['same_type'] == 1).sum()):,}, "
+      f"not same type {n_not_same_dominant:,} of {int((final_df['same_type'] == 0).sum()):,}")
 #%%
 
 
@@ -80,8 +90,8 @@ for type_1 in ['AD','DA','AA','DD']:
             
             total_same=len(c1_same)
             total_not_same=len(c1_not_same)
-            prop_same=total_same/len(final_df[final_df['same_type']==1])
-            prop_not_same=total_not_same/len(final_df[final_df['same_type']==0])
+            prop_same=total_same/n_same_dominant
+            prop_not_same=total_not_same/n_not_same_dominant
             
             d_non_diagonal[str(type_1)+'_'+str(type_2)]=[total_same,total_not_same,prop_same,prop_not_same]
 
@@ -103,8 +113,8 @@ for type_ in ['AD','DA','AA','DD']:
         
         
         
-    prop_same = total_same / len(final_df[final_df['same_type'] == 1])
-    prop_not_same = total_not_same / len(final_df[final_df['same_type'] == 0])
+    prop_same = total_same / n_same_dominant
+    prop_not_same = total_not_same / n_not_same_dominant
       
     d_diagonal[type_]=[total_same,total_not_same,prop_same,prop_not_same]
 #%%# Define types
@@ -159,6 +169,9 @@ not_same_total_lower_sum = sum_lower_triangle_counts(not_same_total)
 
 print(f"Total SAME TYPE connections (lower triangle including diag): {same_total_lower_sum}")
 print(f"Total NOT SAME TYPE connections (lower triangle including diag): {not_same_total_lower_sum}")
+# every pair with a dominant type each way falls in exactly one lower-triangle cell, so the cells sum to 100%
+assert same_total_lower_sum == n_same_dominant and not_same_total_lower_sum == n_not_same_dominant, \
+    (same_total_lower_sum, n_same_dominant, not_same_total_lower_sum, n_not_same_dominant)
 #%%
 
 # New heatmap plotting function with n=xxx in the title

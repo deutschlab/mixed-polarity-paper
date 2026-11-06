@@ -37,6 +37,7 @@ allsynapses=allsynapses.merge(nodesG[['neuron','primary_type']],left_on='pre',ri
 allsynapses=allsynapses.merge(nodesG[['neuron','primary_type']],left_on='post',right_on='neuron',how='left')
 #%%
 allsynapses=allsynapses.merge(nodesG[['neuron','nt_type']],left_on='pre',right_on='neuron',how='left')
+allsynapses=allsynapses.dropna(subset=['neuron_x','neuron_y'])   # keep synapses whose two cells are in the filtered table (the left merges alone keep every row)
 
 #%%
 allsynapses=allsynapses.dropna(subset='nt_type')

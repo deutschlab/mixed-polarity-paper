@@ -8,12 +8,15 @@
 # neurons the model never saw (synapses between a training and a test cell are left out). Training is balanced as the
 # published scripts balance it (each type drawn to the DA count, with replacement); the test synapses keep the real
 # mix of types, so each model is scored by balanced accuracy, the mean of the four types' recalls (chance 0.25).
-# Models, each trained on the same balanced synapses of a split:
+# Models (the three forests are trained on the same balanced synapses of a split; the cell-type lookup on all of the
+# split's training synapses, weighted as below):
 #   pc1              PC1 of the two cells, random forest of 100 trees with at most 100 leaves each (Fig 4A, 4D)
 #   features         the eight features of the two cells (as Fig 3J), random forest of 100 trees, default settings
 #   pc1_superclass   PC1 and super-class of the two cells, the capped forest
-#   cell_types       for each pair of cell types, the synapse type most common among the training synapses; a test
-#                    synapse whose type pair has no training synapse, or a cell with no cell type, counts as wrong
+#   cell_types       for each pair of cell types, the synapse type with the largest share of its own type's training
+#                    synapses (each training synapse weighted by 1 / the number of training synapses of its type), the
+#                    rule that maximises balanced accuracy on the training synapses; a test synapse whose type pair has no training synapse, or a
+#                    cell with no cell type, counts as wrong
 # Outputs:
 #   FIG4_HELDOUT_MODELS_FTR   one row per model and split: balanced accuracy, plain accuracy, the four recalls, the
 #                             number of test synapses, test cells and their cell types, and the share of test
@@ -90,7 +93,9 @@ def forest_predict(X_train, y_train, X_test, **settings):
 
 
 def type_lookup(train, test):
-    counts = (train.dropna(subset=["type_x", "type_y"]).groupby(["type_x", "type_y", "comp"]).size()
+    w = 1.0 / train["comp"].map(train["comp"].value_counts())   # each type's training synapses weigh 1 in all
+    t = train.assign(w=w).dropna(subset=["type_x", "type_y"])
+    counts = (t.groupby(["type_x", "type_y", "comp"])["w"].sum()
               .unstack(fill_value=0).reindex(columns=TYPES, fill_value=0))
     key = pd.MultiIndex.from_arrays([test["type_x"], test["type_y"]])
     return counts.idxmax(axis=1).reindex(key).to_numpy()
