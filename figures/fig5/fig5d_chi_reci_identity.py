@@ -7,8 +7,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from methods.figure_text import use_arial_8
 use_arial_8()   # every text in Arial 8 pt when a figure is saved
 from config import (
-    FULL_RECI_CONNECTIONS_FTR, CONNECTIONS_TABLE_FTR, CONNECTIONS_TABLE_NONP_FTR,
-    NEURON_TABLE_FTR, NEURON_TABLE_NONP_FTR, OUTPUT_DIR, METHODS_DIR,
+    FULL_RECI_CONNECTIONS_FTR, CONNECTIONS_TABLE_FTR,
+    NEURON_TABLE_FTR, OUTPUT_DIR, METHODS_DIR,
 )
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
@@ -533,55 +533,7 @@ plt.show()
 
 print(fig1_path)
 print(fig2_path)
-#%%
-
-
-
-#reciprocity 5+
-
-
-
-
-
-sys.path.insert(0, str(METHODS_DIR))
-from methods_all import *
-import os
-import seaborn as sns
-import pickle
-
-from scipy.stats import gaussian_kde
-#%%
-
-
-nodesG=pd.read_feather(NEURON_TABLE_NONP_FTR)
-nodesG=nodesG[nodesG['super_class'].isin(['central','optic','visual_centrifugal','visual_projection'])]
-nodesG['root_id']=nodesG['root_id'].astype(np.int64)
-
-#%%
-connections=pd.read_feather(CONNECTIONS_TABLE_NONP_FTR)
-#%%
-connections5=connections[connections['sum_syn']>=5]
-#%%
-rc5=connections5[connections5['reciprocal']==1]
-
-#%%
-rc5=len(connections5[connections5['reciprocal']==1])/len(connections5)
-#%%
-rc=len(connections[connections['reciprocal']==1])/len(connections)
-#%%
-# Create a set of all (pre, post) pairs in the data
-pairs_set = set(zip(connections5['pre'], connections5['post']))
-
-# Check if the reverse (post, pre) exists for each row
-connections5['reciprocal'] = connections5.apply(
-    lambda row: int((row['post'], row['pre']) in pairs_set),
-    axis=1
-)
-
-#%%
-
-len(connections5[connections5['reciprocal']==1])/len(connections5)
-#%%
+#%% chi-square result and effect size (the test of the cells above)
 # Sample size (total observations)
 n = contingency_table.sum()
 r, c = contingency_table.shape

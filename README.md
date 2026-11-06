@@ -212,6 +212,7 @@ Run these from the repository root with the environment active. [docs/tools.md](
 | [`compare_outputs.py`](docs/tools.md#checking-that-a-figure-reproduces) | Compares the output folders of two runs | Two `run_figure.py` runs | Printed |
 | [`run_all_figures.py`](docs/tools.md#checking-that-a-figure-reproduces) | Runs every figure script, one after another | Every script's inputs | Several hours; `--out`. Scripts that write tables still replace them in their usual place |
 | [`compare_runs.py`](docs/tools.md#checking-that-a-figure-reproduces) | Compares two full runs script by script | Two `run_all_figures.py` runs | Printed, or `--report FILE` |
+| [`compare_split_figures.py`](docs/tools.md#checking-that-a-figure-reproduces) | The numbers each figure draws in two full runs on different splits, panel by panel | Two `run_all_figures.py` runs | Under a second; `outputs/tools/compare_split_figures/` |
 | [`check_raw_synapse_table.py`](docs/tools.md#checking-that-a-figure-reproduces) | The two raw synapse tables after building them | Step 04's table, about 10 GB | One to two minutes |
 | [`check_step05_root_id.py`](docs/tools.md#checking-that-a-figure-reproduces) | That step 05 writes `root_id` as exact cell IDs | Step 05's outputs, about 5 GB | A few seconds |
 | [`check_fig6_logic.py`](docs/tools.md#checking-that-a-figure-reproduces) | The Figure 6 script's calculations on a made-up connectome | No data | A few seconds |

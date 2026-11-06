@@ -126,7 +126,7 @@ Inputs read by the code but not written by any script in this repository:
 - the Fig 7 bouton tables (`b_table_full_prince(new)_filtered.ftr`, `bwf_table_full_prince(new)_filtered.ftr`, `filopodia_reciprocal.ftr`, `filopodia_filtered.ftr`, `inertia_all.ftr`), `neuron_data.ftr` and `t2.ftr`, read by the `figures/fig7/fig7*.py` scripts (Fig 7 section below)
 - `ex_table_npil_comp_pre_post_hiSI_PerTypeSummary.csv` and `Olfactory_ClassNeuropilStats.csv`, read by `figures/fig4/syntype_x_pathway_layers.py` (the revised Fig 4E). The first is the authors' per-type table (one row per pre type, post type and connection type, with its synapse count and one neuropil label, kept where the mean SI over the row's records, and over its two types' records, is at least 0.1); with `DATA_SOURCE = 'princeton'` or `'buhmann'` the script rebuilds a stand-in from the synapse tables instead, which does not give the revised panel's values. The second is only printed. The script also reads `neuron_data.ftr` (above) in place of the authors' neuron_data table, for the olfactory cell classes
 - `swc_data.ftr`, read by `05_build_neuron_metadata_table.py` (the only code that writes it is commented out)
-- three tables from the earlier, non-Princeton synapse detection: `neuron_data_full_article.ftr` (read by `figures/fig2/si_comparisons.py`, `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py`, `figures/fig5/fig5d_chi_reci_identity.py` and `figures/fig6/aadd_specific_circuits.py`), `synapses_783_article.ftr` (read by `figures/fig2/si_comparisons.py`, `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py`, `figures/fig3/si_x_npil_x_synapse_detection.py` and `figures/fig6/aadd_specific_circuits.py`) and `connections_by_syn_type_reciprocal_types_filtered_article.ftr` (read by `figures/fig5/fig5d_chi_reci_identity.py`)
+- three tables from the earlier, non-Princeton synapse detection: `neuron_data_full_article.ftr` (read by `figures/fig2/si_comparisons.py`, `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` and `figures/fig6/aadd_specific_circuits.py`), `synapses_783_article.ftr` (read by `figures/fig2/si_comparisons.py`, `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py`, `figures/fig3/si_x_npil_x_synapse_detection.py` and `figures/fig6/aadd_specific_circuits.py`) and `connections_by_syn_type_reciprocal_types_filtered_article.ftr` (named in `config.py` as `CONNECTIONS_TABLE_NONP_FTR`; no script reads it)
 
 None of these files is deposited with this repository. Those scripts cannot run until the files are supplied. Because step 05 needs `swc_data.ftr`, the neuron table, and every step and figure that reads it, cannot be rebuilt from the downloads alone.
 
@@ -159,11 +159,6 @@ Whether the Buhmann run differed in anything else is not recorded here.
 | Fig 3 Supp 2A/B | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `synapses_783_article.ftr` |
 | Fig 3 Supp 2C | `figures/fig3/si_x_npil_x_synapse_detection.py` | `synapses_783_article.ftr` |
 | Fig 6A–D, Supp 6-S1, 6-S2A, 6-S3, as submitted | `figures/fig6/aadd_specific_circuits.py` with `DATA_SOURCE = 'buhmann'` (its default is `'princeton'`, the tables of the rest of the paper) | `neuron_data_full_article.ftr`, `synapses_783_article.ftr` |
-
-`figures/fig5/fig5d_chi_reci_identity.py` also reads the Buhmann neuron and connection tables, from
-line 554, after it has saved all its figures. Nothing from them is saved or printed: the reciprocal
-fractions there are bare expressions, shown only when the script is run cell by cell. Without those
-files the script stops at line 554, with its figures already written.
 
 ---
 

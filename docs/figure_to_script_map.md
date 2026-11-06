@@ -166,7 +166,7 @@ reciprocity prediction.
 |-------|--------|-------------|-------------|
 | Fig 5A-C / Supp | `figures/fig5/reciprocal_fraction.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/reciprocal_fraction/`; writes `RECI_PROP_FTR` |
 | Not a panel of the submitted paper (per super-class correlations of `filopodia_fraction` with the reciprocal ratio and with SI) | `figures/fig5/reciprocal_fraction_x_bwf.py` | `CONNECTIONS_TABLE_FTR`, `NEURONS_NT_BWF_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/reciprocal_fraction_x_bwf/` |
-| Fig 5D | `figures/fig5/fig5d_chi_reci_identity.py` | `CONNECTIONS_TABLE_FTR`, `CONNECTIONS_TABLE_NONP_FTR`, `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR`, `NEURON_TABLE_NONP_FTR` | `outputs/fig5/chi_reci_identity/` |
+| Fig 5D | `figures/fig5/fig5d_chi_reci_identity.py` | `CONNECTIONS_TABLE_FTR`, `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/chi_reci_identity/` |
 | Fig 5E, 5F | No script: example reciprocal pairs (tables of synapse counts, an EM cross-section) | — | — |
 | Fig 5G (All) | `figures/fig5/syn_type_x_reci_x_dominance.py` | `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_x_reci_x_dominance/` |
 | Fig 5G (Ipsilateral, Contralateral) | `figures/fig5/syn_type_x_reci_x_dominance_x_sides.py` | `CLASSIFICATION_CSV`, `FULL_RECI_CONNECTIONS_FTR`, `NEURON_TABLE_FTR` | `outputs/fig5/syn_type_x_reci_x_dominance_x_sides/` |
@@ -189,9 +189,6 @@ reciprocity prediction.
 > (`fig4_heldout_models.py`) picks, for each pair of cell types, the synapse type with the largest share of its own
 > type's training synapses (each synapse weighted by 1 / its type's training count), the rule that maximises balanced
 > accuracy on the training synapses; the three forests are trained on the balanced resample.
-
-> `fig5d_chi_reci_identity.py` reads the Buhmann tables (`*_NONP_FTR`) from line 554, after all its figures are
-> saved; nothing from them is saved or printed. See the Buhmann section of [data_availability.md](data_availability.md).
 
 > `reciprocal_fraction.py` also generates `RECI_PROP_FTR` as a side output, which is required
 > by `reciprocal_fraction_model.py`. Run `reciprocal_fraction.py` before `reciprocal_fraction_model.py`.
