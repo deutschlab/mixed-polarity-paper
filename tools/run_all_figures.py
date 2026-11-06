@@ -67,7 +67,7 @@ FIRST = ["figures/fig4/build_pc1_table.py", "figures/fig4/fig4_heldout_models.py
          "figures/fig7/si_sim_sampleout.py", "figures/fig7/fig7i_filopodia_fraction_x_nt.py"]
 SLOW = {"figures/fig3/syntype_x_features.py", "figures/fig4/syntype_x_pc1.py",
         "figures/fig4/build_pc1_table.py", "figures/fig3/fig3supp_ad_content_si_mixed.py",
-        "figures/fig4/fig4_heldout_models.py"}
+        "figures/fig4/fig4_heldout_models.py", "figures/fig5/reciprocal_fraction_model.py"}
 DONE = ("finished", "stopped with an error")
 
 
