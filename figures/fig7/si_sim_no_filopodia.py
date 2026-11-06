@@ -1,7 +1,8 @@
 # Fig 7J input, no filopodia condition: SI recomputed per neuron with incoming synapses that sit on a filopodium removed.
 # Ported from the authors' original script Fig 7/filapodia_extraction/SI_sim/si_sim_no_filopodia.py.
 # Paths come from config.py. SI_calc is the one in methods/methods_all.py (the same as the authors' altsi_methods_v2).
-# Reads the plain SYN_BOUTON_FTR, which gives the published 7J.
+# Reads the plain SYN_BOUTON_FTR, the table the published 7J was drawn from. Synapses without a flag (cells the
+# flag tables don't cover) are left out of every condition.
 # Writes filopodia_nodes_no_filopodia (FILOPODIA_NODES_NO_FILOPODIA_FTR), which figures/fig7/si_comb_analysis.py reads.
 # The compartments are not re-split: SI is recomputed on the existing A/D labels.
 # svg.fonttype='none' and Arial (repository convention): text in the saved SVGs is live Arial text, so text
@@ -45,6 +46,12 @@ allsynapses=allsynapses[allsynapses['comp'].isin(['AA','AD','DA','DD'])]
 #%%
 
 allsynapses=allsynapses.merge(df,on='synapse_id',how='left',validate='1:1')
+#%%
+# Majd's flags cover the published synapse table's synapses only: a synapse of another table without a flag is left out
+_no_flag = allsynapses['filopodia_on_post'].isna()
+print(f"synapses without a filopodium flag, left out: {int(_no_flag.sum()):,}")
+allsynapses = allsynapses[~_no_flag].copy()
+allsynapses['filopodia_on_post'] = allsynapses['filopodia_on_post'].astype('int64')
 #%%
 del df
 #%%

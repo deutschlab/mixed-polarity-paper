@@ -1,6 +1,7 @@
 # Fig 7J: mean SI with and without the incoming synapses that sit on filopodia.
 # Reads the three tables written by figures/fig7/si_sim_baseline.py, si_sim_no_filopodia.py
 # and si_sim_sampleout.py; run those first.
+# Cells: the four intrinsic super-classes, with SI >= 0.1 (NEURON_TABLE_FTR's SI), as the figure legend says.
 # Ported from the authors' original script Fig 7/filapodia_extraction/SI_sim/SI_comb_analysis.py.
 # Paths come from config.py. The "conditions on x-axis" cell picks its columns by name; it only shows a
 # figure, and the saved 7J panel (sim_results.svg) is drawn earlier.
@@ -57,9 +58,11 @@ df=nodesGb.merge(nodesGf,on='neuron',how='left')
 df=df.merge(nodesGs,on='neuron',how='left')
 #%%
 nodesG=pd.read_feather(NEURON_TABLE_FTR)
-df=df.merge(nodesG[['neuron','super_class']],validate='m:1')
+df=df.merge(nodesG[['neuron','super_class','SI']],validate='m:1')
 #%%
 df=df[df['super_class'].isin(['central','optic','visual_projection','visual_centrifugal'])]
+df=df[df['SI']>=0.1]
+print(f"cells: {len(df):,}")
 
 #%%
 
@@ -106,7 +109,9 @@ plt.bar(LABELS, means, yerr=ses, capsize=4)
 plt.ylabel("Mean SI")
 plt.title("Mean SI (global)")
 plt.tight_layout()
-plt.ylim(0.16,0.19)
+# the y-axis starts just below the lower bar (as the published panel's does) and ends just above the higher one,
+# rounded out to 0.01 from the means +- SE, plus 0.01
+plt.ylim(np.floor((means-ses).min()*100)/100-0.01, np.ceil((means+ses).max()*100)/100+0.01)
 plt.savefig(_out_dir / "sim_results.svg")
 plt.show()
 #%%

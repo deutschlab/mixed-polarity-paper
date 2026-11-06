@@ -281,3 +281,8 @@ repository writes `SYN_BOUTON_FTR`, `SYN_BOUTON_NEW_FTR` or the bouton tables (`
 > takes the compartment from the second letter of `comp`, so synapses from linker segments (LA, LD) are included.
 > Their pie and correctness plots are not panels. The saved 7J bar compares baseline with no-filopodia only; the
 > sample-out table is read by `si_comb_analysis.py` and used only in a figure it shows and does not save.
+> `si_comb_analysis.py` keeps the cells with SI >= 0.1 (`NEURON_TABLE_FTR`'s SI), as the 7J legend says; the submitted
+> 7J has no SI filter, so on the published tables its bar differs from the submitted one. The flag tables (`SYN_BOUTON_FTR`,
+> `SYN_BOUTON_NEW_FTR`) cover the published synapse table's synapses only and don't depend on the split, so they are
+> read under every `SPLIT_METHOD`; 7H and the three `si_sim_*.py` scripts leave out synapses without a flag (on
+> `data/derived_rebuild_maxsi`, the 760,723 synapses with an end in one of the 52 cells the published table lacks).

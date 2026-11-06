@@ -1,7 +1,8 @@
 # Fig 7H: mean fraction of incoming synapses that sit on a filopodium, axon vs dendrite.
 # Ported from the authors' original script Fig 7/filapodia_extraction/t/post_on_filo_ratio.py.
 # Paths come from config.py.
-# Reads SYN_BOUTON_NEW_FTR; the plain SYN_BOUTON_FTR does not give the published 7H.
+# Reads SYN_BOUTON_NEW_FTR; the plain SYN_BOUTON_FTR does not give the published 7H. Synapses without a flag (cells
+# the flag tables don't cover) are left out.
 # svg.fonttype='none' and Arial (repository convention): text in the saved SVGs is live Arial text, so text
 # and spacing differ from the authors' SVGs (drawn as DejaVu Sans paths); plotted values do not.
 import sys
@@ -34,6 +35,12 @@ allsynapses=pd.read_feather(SYNAPSE_TABLE_FTR)
 #%%
 #%%
 allsynapses=allsynapses.merge(df,on='synapse_id',how='left',validate='1:1')
+#%%
+# Majd's flags cover the published synapse table's synapses only: a synapse of another table without a flag is left out
+_no_flag = allsynapses['filopodia_on_post'].isna()
+print(f"synapses without a filopodium flag, left out: {int(_no_flag.sum()):,}")
+allsynapses = allsynapses[~_no_flag].copy()
+allsynapses['filopodia_on_post'] = allsynapses['filopodia_on_post'].astype('int64')
 #%%
 allsynapses=allsynapses[['post','comp','filopodia_on_post','SI_post']]
 #%%

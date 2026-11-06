@@ -36,7 +36,8 @@ OUTPUT_DIR = ROOT / "outputs"
 # data/derived_rebuild and data/intermediate_rebuild, figures in outputs_rebuild, so a fresh run can't write over a
 # published table. Inputs no script here builds stay where they are (REBUILD_KEEPS_PUBLISHED below); the co-authors'
 # tables, made from the published tables, have no rebuilt version, so their scripts stop (REBUILD_NOT_AVAILABLE;
-# neuron_data.ftr and the 4E olfactory table move too, and their only readers stop on the tables above anyway).
+# neuron_data.ftr and the 4E olfactory table move too, and their only readers stop on the tables above anyway),
+# except Majd's two per-synapse flag tables, which stay in data/raw (see MAXSI_NOT_AVAILABLE).
 # The split setting (SPLIT_METHOD, further down) applies on top: "rebuild" with "maxsi" gives data/derived_rebuild_maxsi
 # (data/derived_rebuild_minfisherp and data/derived_rebuild_maxphi for the other two cut rules).
 PIPELINE_RUN = "published"
@@ -96,7 +97,7 @@ FILOPODIA_DIR             = DERIVED_DATA_DIR / "filopodia"
 CLASSIFICATION_CSV        = RAW_DATA_DIR / "classification.csv"
 NEURONS_CSV               = RAW_DATA_DIR / "neurons.csv"
 SYN_BOUTON_FTR            = RAW_DATA_DIR / "syn_bouton_filopodia.ftr"
-SYN_BOUTON_NEW_FTR        = RAW_DATA_DIR / "syn_bouton_filopodia(new).ftr"   # SYN_BOUTON_FTR with bouton_on_pre set to 0 where the presynaptic cell is not in BOUTON_TABLE_FTR, and filopodia_on_post set to 0 where the postsynaptic cell is not; read by Fig 7H (the plain table gives the published 7J, this one the published 7H)
+SYN_BOUTON_NEW_FTR        = RAW_DATA_DIR / "syn_bouton_filopodia(new).ftr"   # SYN_BOUTON_FTR with bouton_on_pre set to 0 where the presynaptic cell is not in BOUTON_TABLE_FTR, and filopodia_on_post set to 0 where the postsynaptic cell is not; read by Fig 7H (the plain table is the one the published 7J was drawn from, this one gives the published 7H)
 # ── Additional intermediate/derived files ───────────────────────────────────
 SYNAPSE_NON_PROCESSED_FTR     = DERIVED_DATA_DIR / "synapses_783_non_processed_princeton.ftr"
 PRE_CONNECTORS_FTR            = CONNECTORS_DIR / "pre_connectors_princeton.ftr"
@@ -264,20 +265,24 @@ MAXSI_SWITCHED = [
     "LARVA_SI_FTR", "LARVA_SYNAPSES_FTR",
 ]
 # Tables that exist only for the SFC split (or for Buhmann's synapses): Majd's Fig 7 tables (bouton, filopodia,
-# inertia, per-synapse bouton flags, t2), Dudi's 4E table and the Buhmann tables (Fig 6 and some supplementary
-# panels). There is no MaxSI version, so under "maxsi" they point into the _maxsi folders too, where nothing writes
-# them: a script that reads one stops, instead of drawing an SFC panel among the MaxSI ones. Don't copy the SFC
-# files there to make such a script run. (neuron_data.ftr stays: its scripts use only cell-type columns.) The same
-# holds under "minfisherp" and "maxphi", with their folders.
+# inertia, t2), Dudi's 4E table and the Buhmann tables (Fig 6 and some supplementary panels). There is no MaxSI
+# version, so under "maxsi" they point into the _maxsi folders too, where nothing writes them: a script that reads one
+# stops, instead of drawing an SFC panel among the MaxSI ones. Don't copy the SFC files there to make such a script
+# run. Two tables stay where they are: neuron_data.ftr (its scripts use only cell-type columns) and Majd's two
+# per-synapse flag tables, SYN_BOUTON_FTR and SYN_BOUTON_NEW_FTR. A flag says whether a synapse's presynaptic end is in
+# a bouton and whether its postsynaptic end is on a filopodium; it comes from the skeleton and doesn't use the split.
+# The flags cover the published synapse table's synapses only, so Fig 7H and the three 7J si_sim scripts leave out the synapses
+# of any other table that have no flag (on data/derived_rebuild_maxsi, the 760,723 synapses with an end in one of the
+# 52 cells the published table lacks; their partners' counts lose those synapses too). The same holds under "minfisherp" and "maxphi", with their folders.
 MAXSI_NOT_AVAILABLE = [
     "BOUTON_TABLE_FTR", "BOUTON_FILOPODIA_TABLE_FTR", "FILOPODIA_FILTERED_FTR", "FILOPODIA_RECIPROCAL_FTR",
-    "BOUTON_INERTIA_FTR", "SYN_BOUTON_FTR", "SYN_BOUTON_NEW_FTR", "SYNAPSES_NO_SELF_FTR",
+    "BOUTON_INERTIA_FTR", "SYNAPSES_NO_SELF_FTR",
     "PER_TYPE_SUMMARY_CSV", "NEURON_TABLE_NONP_FTR", "SYNAPSE_TABLE_NONP_FTR", "CONNECTIONS_TABLE_NONP_FTR",
 ]
 # Under PIPELINE_RUN = "rebuild" the same co-authors' tables have no rebuilt version either (they were made from the
-# published tables). Those in data/derived already point into data/derived_rebuild, where nothing writes them; the
-# two in data/raw are moved into data/raw_rebuild here. So their scripts stop rather than mix published and
-# rebuilt tables.
+# published tables). Those in data/derived already point into data/derived_rebuild, where nothing writes them; any in
+# data/raw would be moved into data/raw_rebuild here (the list has none: the two flag tables in data/raw stay, as above).
+# So their scripts stop rather than mix published and rebuilt tables.
 REBUILD_NOT_AVAILABLE = MAXSI_NOT_AVAILABLE
 if PIPELINE_RUN == "rebuild":
     for _name in REBUILD_NOT_AVAILABLE:
