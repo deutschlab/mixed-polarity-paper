@@ -42,9 +42,9 @@ Usage:
     python tools/run_all_figures.py --out outputs/tools/run_all_figures/after --only fig4
     python tools/compare_runs.py outputs/tools/run_all_figures/before outputs/tools/run_all_figures/after
 
-Most scripts take seconds and syntype_x_features.py about an hour (36 GB Mac). si_x_primary_types.py
-(6 to 10 hours, its Games-Howell tests) and reciprocal_fraction_model.py take longer than the
-20-minute default and time out unless --timeout is raised.
+Most scripts take seconds and syntype_x_features.py about an hour (36 GB Mac); reciprocal_fraction_model.py
+is in SLOW, with the 3-hour limit. si_x_primary_types.py and filopodia_x_mirror_neurons.py take seconds with
+their default SLOW_STATS = False; set to True, their slow statistics take an estimated 4-5 days and need --timeout raised.
 """
 
 from __future__ import annotations

@@ -67,7 +67,7 @@ On macOS with pip, `xgboost` also needs `brew install libomp`. Conda takes care 
 | 07 | 0.5 GB | 2 seconds on each split |
 | 09 | 5.5 to 6.3 GB per labelling copy; at least 14.7 GB for the 5 together (sampled once a minute), at most 29.6 GB (the sum of the copies' peaks); 22.2 GB to build its tables | about 30 minutes to label the cells (each copy 28 to 29 minutes); 67.5 seconds to build the tables from the saved batches |
 
-Step 08 and `build_raw_synapse_table.py` are not in the table: `build_raw_synapse_table.py` is in the Memory row above. Step 08 has not been timed on the full set; a check of it on 1,144 neurons, with an older flow centrality, is under [Checking the split methods](docs/tools.md#checking-the-split-methods).
+Step 08 and `build_raw_synapse_table.py` are not in the table: `build_raw_synapse_table.py` is in the Memory row above. Step 08 has not been timed on the full set; a check of it on 1,144 neurons, with navis's own flow centrality, is under [Checking the split methods](docs/tools.md#checking-the-split-methods).
 
 **Planning a machine** (details in [docs/pipeline_overview.md](docs/pipeline_overview.md#running-on-your-own-machine)):
 
@@ -213,14 +213,14 @@ Run these from the repository root with the environment active. [docs/tools.md](
 | [`run_all_figures.py`](docs/tools.md#checking-that-a-figure-reproduces) | Runs every figure script, one after another | Every script's inputs | Several hours; `--out`. Scripts that write tables still replace them in their usual place |
 | [`compare_runs.py`](docs/tools.md#checking-that-a-figure-reproduces) | Compares two full runs script by script | Two `run_all_figures.py` runs | Printed, or `--report FILE` |
 | [`compare_split_figures.py`](docs/tools.md#checking-that-a-figure-reproduces) | The numbers each figure draws in two full runs on different splits, panel by panel | Two `run_all_figures.py` runs | Under a second; `outputs/tools/compare_split_figures/` |
-| [`check_raw_synapse_table.py`](docs/tools.md#checking-that-a-figure-reproduces) | The two raw synapse tables after building them | Step 04's table, about 10 GB | One to two minutes |
-| [`check_step05_root_id.py`](docs/tools.md#checking-that-a-figure-reproduces) | That step 05 writes `root_id` as exact cell IDs | Step 05's outputs, about 5 GB | A few seconds |
-| [`check_fig6_logic.py`](docs/tools.md#checking-that-a-figure-reproduces) | The Figure 6 script's calculations on a made-up connectome | No data | A few seconds |
-| [`check_fig4e_logic.py`](docs/tools.md#checking-that-a-figure-reproduces) | The revised Figure 4E script's calculations on a made-up table | No data | A few seconds |
+| [`check_raw_synapse_table.py`](docs/tools.md#checking-the-data-tables) | The two raw synapse tables after building them | Step 04's table, about 10 GB of memory | One to two minutes |
+| [`check_step05_root_id.py`](docs/tools.md#checking-the-data-tables) | That step 05 writes `root_id` as exact cell IDs | Step 05's outputs, about 5 GB of memory | A few seconds |
+| [`check_fig6_logic.py`](docs/tools.md#checking-scripts-on-made-up-data) | The Figure 6 script's calculations on a made-up connectome | No data | A few seconds |
+| [`check_fig4e_logic.py`](docs/tools.md#checking-scripts-on-made-up-data) | The revised Figure 4E script's calculations on a made-up table | No data | A few seconds |
 | [`check_figure_text.py`](docs/tools.md#checking-the-figure-text) | That `methods/figure_text.py` saves every text as Arial 8 pt and changes nothing else; with `--outputs`, the fonts in a run's saved files | No data, or a run's output folder | A few seconds, a few minutes with `--mutants`; `outputs/tools/check_figure_text/` |
-| [`make_fig7_ports.py`](docs/tools.md#checking-that-a-figure-reproduces) | Makes, or checks, the seven Fig 7 panel scripts from the authors' originals | The originals (maintainers) | Printed |
-| [`check_fig7_ports.py`](docs/tools.md#checking-that-a-figure-reproduces) | That each Fig 7 panel script draws what the original draws | The originals (maintainers) | About a minute, 5 with `--mutants` |
-| [`check_fig7_tables.py`](docs/tools.md#checking-that-a-figure-reproduces) | The Fig 7 input tables against a recorded reference | The undeposited tables (maintainers) | About a minute |
+| [`make_fig7_ports.py`](docs/tools.md#figure-7-ports) | Makes, or checks, the seven Fig 7 panel scripts from the authors' originals | The originals (maintainers) | Printed |
+| [`check_fig7_ports.py`](docs/tools.md#figure-7-ports) | That each Fig 7 panel script draws what the original draws | The originals (maintainers) | About a minute, 5 with `--mutants` |
+| [`check_fig7_tables.py`](docs/tools.md#figure-7-ports) | The Fig 7 input tables against a recorded reference | The undeposited tables (maintainers) | About a minute |
 | [`synapse_type_shares.py`](docs/tools.md#synapse-type-tools) | Share of each synapse type in a synapse table | Step 05's tables, about 4 GB | Printed |
 | [`split_agreement.py`](docs/tools.md#synapse-type-tools) | Agreement of synapse types between splits | About 12 GB, and a table with two synapse-type columns (none here has more than one) | Printed |
 | [`check_split_methods_on_subset.py`](docs/tools.md#checking-the-split-methods) | Runs step 08 on some neurons and compares with a reference table | Raw synapse table, local skeletons | 28 to 36 minutes for 1,144 neurons (macOS, with navis's own flow centrality); `--out` |
@@ -229,7 +229,7 @@ Run these from the repository root with the environment active. [docs/tools.md](
 | [`compare_split_runs.py`](docs/tools.md#comparing-two-runs-of-step-08) | The cuts of two step 08 runs on the same neurons | Two step 08 runs | `outputs/tools/compare_split_runs/` |
 | [`check_simple_pc1_model.py`](docs/tools.md#checking-the-simple-pc1-model) | Rebuilds the Fig 4 simple PC1 model and checks a run of its script | Steps 05 and 07, about 7 GB | About 8 minutes with `--variants` (measured once, macOS) |
 
-All tools are in `tools/`. Most check tools print PASS or FAIL. What a PASS covers differs by tool and is given for each in [docs/tools.md](docs/tools.md); none of them shows that an analysis is the right one.
+All tools are in `tools/`. Most check tools print PASS or FAIL. What a PASS covers differs by tool and is given for most of them in [docs/tools.md](docs/tools.md); none of them shows that an analysis is the right one.
 
 ## Main generated tables
 

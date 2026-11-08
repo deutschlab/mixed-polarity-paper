@@ -9,12 +9,12 @@ every script:
 - for every saved SVG, the numbers drawn in its text. With svg.fonttype 'none' every
   label is an SVG <text> element, so the numbers can be read back from the file. Each
   number falls in one of four classes:
-    n        a number right after "n=" or "n =" (sample sizes in titles and labels);
-    data     a number with decimals or a % sign, outside the axis ticks (data labels,
-             statistics, shares);
+    n        a number right after "n=" or "n =", in either case (sample sizes);
+    data     a number with decimals, a % sign or a k/K/M suffix ("4.65M" is read as
+             4,650,000), outside the axis ticks (data labels, statistics, shares);
     integer  any other whole number outside the ticks (counts written on bars, years);
     tick     any number inside a matplotlib tick group (xtick_N / ytick_N), whole or
-             not: these are the axes, reported separately and left out of the verdict.
+             not: these are the axes, compared apart from the other three classes.
   Within each class, the numbers are paired between the two sides by their position
   in document order, when both sides have the same count; the report then gives them
   side by side with the absolute difference. When the counts differ it says so and
@@ -22,8 +22,17 @@ every script:
   numbers are masked ("AD 12%" against "DD 12%"), or when the last text without a
   number before it differs (a pie wedge's name drawn before its share), because then
   position pairing has probably matched different things; such pairs are listed even
-  when the value is the same. It also says whether the files are
-  byte-identical. PDF and PNG files are listed (and checked for identical bytes), not read;
+  when the value is the same. A number is changed when its value changes or it gains or
+  loses its % sign. The texts that hold no number (cell-type names, category ticks,
+  legend entries) are compared too, as a sequence. It also says whether the files are
+  byte-identical. Each SVG gets one verdict, the first that applies: could not be read;
+  byte-identical; for a file with no number besides the ticks, "no drawn numbers besides
+  ticks" followed by what else changed (text, ticks) or "nothing else changed"; counts
+  differ (in n, data or integer); numbers changed (in n, data or integer); numbers
+  identical, followed by what else changed: labels differ (an equal value paired with
+  another label or wedge name), text changed, ticks changed. PDF and PNG files are
+  listed (and checked for identical bytes), not read: "byte-identical" or "listed only
+  (bytes differ)". A file found in one run only is "only in" that run;
 - the printed output in stdout.log: each line's numbers are masked, the masked lines
   of the two sides are aligned (difflib), and aligned lines whose numbers (or table
   checksums, as run_figure.py prints them) differ are listed, up to --max-lines per
@@ -34,10 +43,20 @@ be: a file named in a table row or in a note ("5H is `x.svg`") gets that panel; 
 a script listed under one panel gets that panel; a file of a script listed under several
 panels gets "one of: ..."; anything else is "not a mapped panel". This is best effort.
 
-The summary at the top gives the number of scripts per flag, the figure files whose
-numbers are the same on both sides (split-independent as drawn), those whose numbers
-changed, those whose counts differ, and the 20 largest absolute changes among the
-percentage labels (in percentage points).
+The summary at the top gives every line of each run's commit.txt (a resumed run has
+one per invocation), with a warning when the two runs were made on different commits
+(a script whose code changed between them then differs in code as well as in split). The
+files under figures/, processing/, methods/ and config.py that differ between any commit
+of one run and any commit of the other are named, from git diff; the scripts among them
+under figures/ are marked in the per-script part, while a listed file outside figures/
+may change any script and marks none. A file can be listed only because of a commit a
+given script did not run under, since commit.txt does not say which script ran under
+which commit. A second warning says when a run had uncommitted changes (commit.txt
+notes that there were some, not what they were). Then come the number of scripts per
+flag, the number of figure files of each verdict with each file listed, and the 20
+largest absolute changes among the percentage labels (in percentage points). "Numbers
+identical" and "nothing else changed" mean the drawn text is; neither says anything
+about a curve, bar or point without a label.
 
 Writes report.txt (readable) and cells.csv (one row per compared number) to --out,
 by default outputs/tools/compare_split_figures/<label_a>_vs_<label_b>/.
@@ -47,21 +66,34 @@ as its label (a bar of 41.96% labelled "42.0%" shows as 42.0), and a change in a
 height, point or curve with no label is not seen. Position pairing assumes both sides
 draw their labels in the same order; a panel whose groups are sorted by value can pair
 different groups, which the masked-label check catches only when the labels differ in
-their text. Mathematical text drawn with superscripts is read as plain digits.
+their text. Mathematical text drawn with superscripts is read as plain digits ("10" and
+"3" for 10 to the 3rd). A number glued to a unit other than k/K/M ("12ms") or written
+without its leading zero (".05") is not read; the text around it is then compared as
+text without numbers only if it holds no other number.
 It only reads files and never changes a run folder.
 
---selftest builds two small fake runs in a temporary folder with known differences,
-requires the comparison to report exactly those, and then requires six planted
-mistakes (wrong pairings, ticks not told apart, printed lines paired by index, a label
-check that misses a reordered pie) to fail.
+--selftest builds two small fake runs in a temporary folder with known differences
+(minus signs written as - and as U+2212, thousands separators, exponents, numbers
+inside <tspan>, an M suffix, "N =" in capitals, the same value written 0.50 and 0.5, a %
+sign lost with the value kept, ticks that change, a file with both a count difference
+and a changed number, a file with a number on one side only, reordered labels with an
+equal value, changed text with no number, reordered text, a category tick that changes,
+a "12k" count, a file whose shapes alone changed, commits that differ and two lines in
+commit.txt), requires the comparison to report exactly those, and then
+requires six planted mistakes (wrong pairings, ticks not told apart, printed lines
+paired by index, a label check that misses a reordered pie) to fail.
+--mutants copies this file, plants each bug of MUTANTS (below) in the copy, one at a
+time, and requires the copy's --selftest to fail; the unchanged copy must pass.
 
 Usage:
     python tools/compare_split_figures.py RUN_A RUN_B --labels SFC MaxSI
     python tools/compare_split_figures.py RUN_A RUN_B --labels SFC MaxSI --out outputs/tools/compare_split_figures/x
     python tools/compare_split_figures.py --selftest
+    python tools/compare_split_figures.py --mutants
 
-Exits with status 1 if the selftest fails, and stops with a usage error if a run folder
-does not exist; otherwise it exits with 0, whatever the differences.
+Exits with status 1 if the selftest fails or a planted bug is not caught, and stops with
+a usage error if a run folder does not exist; otherwise it exits with 0, whatever the
+differences.
 """
 
 from __future__ import annotations
@@ -85,14 +117,19 @@ CLASSES = ("n", "data", "integer", "tick")
 VERDICT_CLASSES = ("n", "data", "integer")
 
 NUMBER = re.compile(r"(?<![\w.])(?P<num>[-−]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:[eE][-+−]?\d+)?)"
-                    r"(?P<pct>\s?%)?(?![\w]|\.\d)")
+                    r"(?P<suf>[kKM])?(?P<pct>\s?%)?(?![\w]|\.\d)")
+SCALE = {"k": 1e3, "K": 1e3, "M": 1e6}   # "4.65M", "12k": counts written with a suffix
 CHECKSUM = re.compile(r"checksum [0-9a-f]{8,}")
 N_BEFORE = re.compile(r"\bn\s*=\s*$", re.IGNORECASE)
 TICK_GROUP = re.compile(r"^[xy]tick_\d+$")
+COMMIT = re.compile(r"\b[0-9a-f]{40}\b")
 
 
 def to_float(text: str) -> float:
-    return float(text.replace(",", "").replace("−", "-"))
+    text = text.replace(",", "").replace("−", "-")
+    if text[-1:] in SCALE:
+        return float(text[:-1]) * SCALE[text[-1]]
+    return float(text)
 
 
 # ----------------------------------------------------------------------------- run folders
@@ -160,12 +197,12 @@ class Number:
 def classify(text: str, in_tick: bool, tick_aware: bool = True) -> list[Number]:
     found = []
     for match in NUMBER.finditer(text):
-        num, pct = match.group("num"), match.group("pct")
+        num, pct = match.group("num") + (match.group("suf") or ""), match.group("pct")
         if in_tick and tick_aware:
             cls = "tick"
         elif N_BEFORE.search(text[:match.start()]):
             cls = "n"
-        elif pct or "." in num or "e" in num.lower():
+        elif pct or "." in num or "e" in num.lower() or num[-1] in SCALE:
             cls = "data"
         else:
             cls = "integer"
@@ -173,9 +210,11 @@ def classify(text: str, in_tick: bool, tick_aware: bool = True) -> list[Number]:
     return found
 
 
-def svg_numbers(path: Path, tick_aware: bool = True) -> dict[str, list[Number]]:
-    """The numbers of every <text> element, in document order, by class. Streams the file."""
+def svg_numbers(path: Path, tick_aware: bool = True) -> tuple[dict[str, list[Number]], list[str]]:
+    """The numbers of every <text> element, in document order, by class, and the texts that hold no
+    number (labels, category ticks, legend entries), in document order. Streams the file."""
     out: dict[str, list[Number]] = {c: [] for c in CLASSES}
+    words: list[str] = []
     groups: list[str] = []
     inside_text = 0
     before = ""
@@ -197,9 +236,10 @@ def svg_numbers(path: Path, tick_aware: bool = True) -> dict[str, list[Number]]:
                 out[number.cls].append(number)
             if not numbers and text.strip():
                 before = " ".join(text.split())
+                words.append(before)
         if not inside_text:
             elem.clear()
-    return out
+    return out, words
 
 
 # ----------------------------------------------------------------------------- pairing
@@ -227,7 +267,8 @@ class ClassResult:
 
     @property
     def changed(self) -> list[tuple[Number, Number]]:
-        return [(self.a[i], self.b[j]) for i, j in self.pairs or [] if self.a[i].value != self.b[j].value]
+        return [(self.a[i], self.b[j]) for i, j in self.pairs or []
+                if self.a[i].value != self.b[j].value or self.a[i].is_percent != self.b[j].is_percent]
 
 
 @dataclass
@@ -240,6 +281,8 @@ class FigureResult:
     read: bool = False
     error: str = ""
     classes: dict[str, ClassResult] = field(default_factory=dict)
+    text_a: list[str] = field(default_factory=list)   # the texts that hold no number, in document order
+    text_b: list[str] = field(default_factory=list)
 
     @property
     def verdict(self) -> str:
@@ -252,13 +295,20 @@ class FigureResult:
         if self.byte_identical:
             return "byte-identical"
         drawn = [self.classes[c] for c in VERDICT_CLASSES]
+        ticks = self.classes["tick"]
+        ticks_changed = not ticks.counts_match or bool(ticks.changed)
+        text_changed = self.text_a != self.text_b
         if not any(r.a or r.b for r in drawn):
-            return "no drawn numbers besides ticks"
+            others = [x for x, on in (("text changed", text_changed), ("ticks changed", ticks_changed)) if on]
+            return "no drawn numbers besides ticks; " + (", ".join(others) if others else "nothing else changed")
         if not all(r.counts_match for r in drawn):
             return "counts differ"
         if any(r.changed for r in drawn):
             return "numbers changed"
-        return "numbers identical"
+        labels_differ = any(r.a[i].context != r.b[j].context for r in drawn for i, j in r.pairs or [])
+        others = [x for x, on in (("labels differ", labels_differ), ("text changed", text_changed),
+                                  ("ticks changed", ticks_changed)) if on]
+        return "numbers identical" + ("; " + ", ".join(others) if others else "")
 
 
 def compare_figure(name: str, pa: Path | None, pb: Path | None, panel: str, pairing: Pairing,
@@ -271,7 +321,7 @@ def compare_figure(name: str, pa: Path | None, pb: Path | None, panel: str, pair
         return result
     result.read = True
     try:
-        na, nb = svg_numbers(pa, tick_aware), svg_numbers(pb, tick_aware)
+        (na, result.text_a), (nb, result.text_b) = svg_numbers(pa, tick_aware), svg_numbers(pb, tick_aware)
     except ET.ParseError as exc:
         result.error = str(exc)
         return result
@@ -291,7 +341,7 @@ def mask_line(line: str) -> tuple[str, list[str]]:
         return "<checksum>"
 
     def keep_number(m: re.Match) -> str:
-        values.append(m.group("num"))
+        values.append(m.group("num") + (m.group("suf") or ""))
         return "#" + ("%" if m.group("pct") else "")
     # checksums are taken out first, then numbers; both sides get the same order
     line = CHECKSUM.sub(keep_checksum, line)
@@ -470,15 +520,36 @@ def status_text(status: tuple[str, str]) -> str:
     return status[0] + (f" ({status[1]})" if status[1] else "")
 
 
-def first_line(path: Path, last: bool = False) -> str:
+def code_changed_between(commits_a: set[str], commits_b: set[str], repo: Path = REPO_ROOT) -> list[str] | None:
+    """Files under figures/, processing/, methods/ and config.py that differ between any commit of one run and
+    any commit of the other (git diff), or None when git cannot compare them (git missing, unknown commit)."""
+    import subprocess
+    changed: set[str] = set()
+    for x in sorted(commits_a):
+        for y in sorted(commits_b):
+            if x == y:
+                continue
+            try:
+                r = subprocess.run(["git", "-C", str(repo), "diff", "--name-only", x, y, "--",
+                                    "figures", "processing", "methods", "config.py"], capture_output=True, text=True)
+            except OSError:
+                return None
+            if r.returncode != 0:
+                return None
+            changed.update(line for line in r.stdout.split("\n") if line.strip())
+    return sorted(changed)
+
+
+def file_lines(path: Path) -> list[str]:
+    """The non-empty lines of a file, or one line saying it is missing or empty."""
     if not path.exists():
-        return "(none)"
+        return ["(none)"]
     lines = [x for x in path.read_text(encoding="utf-8", errors="replace").split("\n") if x.strip()]
-    return (lines[-1] if last else lines[0]) if lines else "(empty)"
+    return lines or ["(empty)"]
 
 
 def write_outputs(results: list[ScriptResult], run_a: Path, run_b: Path, labels: tuple[str, str], out: Path,
-                  max_lines: int, max_numbers: int) -> list[str]:
+                  max_lines: int, max_numbers: int, repo: Path = REPO_ROOT) -> list[str]:
     """Write report.txt and cells.csv; return the summary lines."""
     la, lb = labels
     out.mkdir(parents=True, exist_ok=True)
@@ -487,19 +558,30 @@ def write_outputs(results: list[ScriptResult], run_a: Path, run_b: Path, labels:
     groups: dict[str, list[str]] = {}
     percent_changes: list[tuple[float, str, Number, Number]] = []
     misaligned = 0
+    commits = [set(COMMIT.findall("\n".join(file_lines(run / "commit.txt")))) for run in (run_a, run_b)]
+    code_changed = code_changed_between(commits[0], commits[1], repo) if commits[0] != commits[1] else []
+    changed_stems = {Path(p).stem for p in code_changed or [] if p.startswith("figures/")}
     details: list[str] = []
     for res in results:
         flags.setdefault(res.flag, []).append(res.name)
-        details += ["", f"## {res.name}  [{res.flag}]",
+        details += ["", f"## {res.name}  [{res.flag}]"
+                    + ("  [script code differs between the runs' commits]" if res.name in changed_stems else ""),
                     f"status {la}: {status_text(res.status_a)}", f"status {lb}: {status_text(res.status_b)}"]
         for fig in res.figures:
             where = f"{res.name}/{fig.name}"
             verdict = {"only in A": f"only in {la}", "only in B": f"only in {lb}"}.get(fig.verdict, fig.verdict)
             groups.setdefault(fig.verdict, []).append(f"{where}  ({fig.panel})")
             details.append(f"- {fig.name}  ({fig.panel}): {verdict}"
-                           + ("" if fig.byte_identical is None or fig.byte_identical else "; bytes differ"))
+                           + ("; bytes differ" if fig.read and fig.byte_identical is False else ""))
             if fig.error:
                 details.append(f"    could not read the SVG: {fig.error}")
+            if fig.text_a != fig.text_b:
+                gone = [x for x in fig.text_a if x not in fig.text_b]
+                new = [x for x in fig.text_b if x not in fig.text_a]
+                details.append(f"    text without numbers: {len(fig.text_a)} in {la}, {len(fig.text_b)} in {lb}"
+                               + (f"; only in {la}: {', '.join(gone[:5])}" if gone else "")
+                               + (f"; only in {lb}: {', '.join(new[:5])}" if new else "")
+                               + ("" if gone or new else "; the same texts in another order"))
             for cls, cr in fig.classes.items():
                 if not (cr.a or cr.b):
                     continue
@@ -567,26 +649,41 @@ def write_outputs(results: list[ScriptResult], run_a: Path, run_b: Path, labels:
                     details.append(f"    lines with numbers only in {side}: {len(rest)}, first: {rest[0][:160]}")
 
     percent_changes.sort(key=lambda t: -t[0])
-    summary = [f"# {la}: {run_a}", f"#   commit: {first_line(run_a / 'commit.txt', last=True)}",
-               f"#   progress: {first_line(run_a / 'progress.txt', last=True)}",
-               f"# {lb}: {run_b}", f"#   commit: {first_line(run_b / 'commit.txt', last=True)}",
-               f"#   progress: {first_line(run_b / 'progress.txt', last=True)}", "",
-               f"Scripts: {len(results)} (script folders in either run)"]
+    summary = []
+    for label, run in ((la, run_a), (lb, run_b)):
+        summary += ([f"# {label}: {run}"] + [f"#   commit: {x}" for x in file_lines(run / "commit.txt")]
+                    + [f"#   progress: {file_lines(run / 'progress.txt')[-1]}"])
+    if commits[0] != commits[1]:
+        summary.append("# The two runs were not made on one commit: a script whose code differs between them "
+                       "differs in its code as well as in its split.")
+        if code_changed is None:
+            summary.append("#   could not compare the commits' code (git diff failed)")
+        else:
+            summary.append("#   files under figures/, processing/, methods/ and config.py that differ between any "
+                           "commit of one run and any commit of the other: "
+                           + (", ".join(code_changed) if code_changed else "none"))
+            if any(not p.startswith("figures/") for p in code_changed):
+                summary.append("#   a file outside figures/ may change any script; only the scripts under figures/ "
+                               "listed above are marked below")
+    if any("uncommitted" in x for run in (run_a, run_b) for x in file_lines(run / "commit.txt")):
+        summary.append("# At least one run had uncommitted changes; commit.txt notes that there were some, not what they were.")
+    summary += ["", f"Scripts: {len(results)} (script folders in either run)"]
     for flag in ("finished on both sides", "finished on one side only", "finished on neither side"):
         names = flags.get(flag, [])
         summary.append(f"  {flag}: {len(names)}" + (f" ({', '.join(names)})" if names and flag != "finished on both sides" else ""))
     nfig = sum(len(r.figures) for r in results)
-    summary += ["", f"Figure files: {nfig} (SVG read; PDF/PNG listed). Verdict counts tick labels out."]
-    order = ["numbers identical", "byte-identical", "numbers changed", "counts differ",
-             "no drawn numbers besides ticks", "could not be read", "listed only (bytes differ)", "only in A", "only in B"]
+    summary += ["", f"Figure files: {nfig} (SVG read; PDF/PNG listed). Ticks are compared apart from the drawn numbers."]
+    numbered = sorted(v for v in groups if v.startswith("numbers identical"))
+    numberless = sorted(v for v in groups if v.startswith("no drawn numbers"))
+    order = (numbered + ["byte-identical", "numbers changed", "counts differ"] + numberless
+             + ["could not be read", "listed only (bytes differ)", "only in A", "only in B"])
     for verdict in order + sorted(set(groups) - set(order)):
         items = groups.get(verdict, [])
         if not items:
             continue
         shown = verdict.replace("only in A", f"only in {la}").replace("only in B", f"only in {lb}")
         summary.append(f"  {shown}: {len(items)}")
-        if verdict in ("numbers identical", "byte-identical", "numbers changed", "counts differ"):
-            summary += [f"      {item}" for item in items]
+        summary += [f"      {item}" for item in items]
     summary.append(f"  paired numbers whose label, or the text before it, differs (check the pairing there): {misaligned}")
     summary += ["", f"Largest absolute changes in percentage labels (percentage points), "
                     f"top 20 of {len(percent_changes)}:"]
@@ -610,11 +707,12 @@ def write_outputs(results: list[ScriptResult], run_a: Path, run_b: Path, labels:
 SVG_HEAD = '<?xml version="1.0" encoding="utf-8" standalone="no"?>\n<svg xmlns="http://www.w3.org/2000/svg">\n'
 
 
-def fake_svg(texts: list[str], ticks: list[str] = ()) -> str:
+def fake_svg(texts: list[str], ticks: list[str] = (), path: str = "") -> str:
     body = "".join(f'  <g id="xtick_{k}"><g id="text_{k}"><text style="font: 8px \'Arial\'">{t}</text></g></g>\n'
                    for k, t in enumerate(ticks, 1))
     body += "".join(f'  <g id="text_l{k}"><text style="font: 8px \'Arial\'">{t}</text></g>\n'
                     for k, t in enumerate(texts))
+    body += f'  <path d="{path}"/>\n' if path else ""   # a drawn shape, so that the bytes can differ alone
     return SVG_HEAD + body + "</svg>\n"
 
 
@@ -629,11 +727,45 @@ def build_fake_runs(root: Path) -> tuple[Path, Path, Path]:
         b / "s_fig" / "swap.svg": fake_svg(["10.0%", "30.0%"]),
         a / "s_fig" / "pie.svg": fake_svg(["AA", "30.0%", "AD", "10.0%"]),
         b / "s_fig" / "pie.svg": fake_svg(["AD", "10.0%", "AA", "30.0%"]),
-        a / "s_fig" / "count.svg": fake_svg(["1.5", "2.5", "3.5"]),
-        b / "s_fig" / "count.svg": fake_svg(["1.5", "2.5"]),
-        a / "s_fig" / "stdout.log": "start\ntotal synapses: 500\nmean SI 0.42\n[4 rows, checksum 691bd66a8dd67f70]\n",
-        b / "s_fig" / "stdout.log": "start\nloading extra\ntotal synapses: 520\nmean SI 0.42\n"
+        a / "s_fig" / "count.svg": fake_svg(["n=5", "1.5", "2.5", "3.5"]),
+        b / "s_fig" / "count.svg": fake_svg(["n=6", "1.5", "2.5"]),
+        # minus signs both ways, a thousands separator, an exponent, the same value written two ways,
+        # numbers inside <tspan> (as mathtext writes them), a count with an M suffix, a % sign that goes away
+        # with the value kept, and "N =" in capitals; each but "0.50" changes
+        a / "s_fig" / "edge.svg": fake_svg(["−0.25", "-1.5", "n = 117,490", "1.2e-05", "0.50",
+                                            "<tspan>10</tspan> <tspan>4</tspan>", "4.65M", "10%", "N = 9", "12k"]),
+        b / "s_fig" / "edge.svg": fake_svg(["0.25", "1.5", "n = 117,444", "1.2e-06", "0.5",
+                                            "<tspan>10</tspan> <tspan>5</tspan>", "6.03M", "10.0", "N = 10", "15k"]),
+        a / "s_fig" / "ticks.svg": fake_svg(["n = 3"], ["0", "50", "100"]),     # only the ticks change
+        b / "s_fig" / "ticks.svg": fake_svg(["n = 3"], ["0", "50"]),
+        a / "s_fig" / "axes.svg": fake_svg(["SD of SI"], ["0", "0.1"]),       # no drawn number; a tick changes
+        b / "s_fig" / "axes.svg": fake_svg(["SD of SI"], ["0", "0.2"]),
+        a / "s_fig" / "pcttick.svg": fake_svg([], ["0%", "50%"]),             # a percentage tick changes
+        b / "s_fig" / "pcttick.svg": fake_svg([], ["0%", "60%"]),
+        a / "s_fig" / "flat.svg": fake_svg(["title"], ["0", "1"], "M 0 0 L 1 1"),   # only a shape changes
+        b / "s_fig" / "flat.svg": fake_svg(["title"], ["0", "1"], "M 0 0 L 2 2"),
+        a / "s_fig" / "names.svg": fake_svg(["SFC SI", "LO"], ["0", "1"]),     # no drawn number; text changes
+        b / "s_fig" / "names.svg": fake_svg(["MaxSI SI", "LO"], ["0", "1"]),
+        a / "s_fig" / "reord.svg": fake_svg(["AA", "5.0%"]),                  # equal value, another wedge
+        b / "s_fig" / "reord.svg": fake_svg(["AD", "5.0%"]),
+        a / "s_fig" / "both.svg": fake_svg(["AA", "5.0%"], ["0", "1"]),       # the same, and a tick changes
+        b / "s_fig" / "both.svg": fake_svg(["AD", "5.0%"], ["0", "2"]),
+        a / "s_fig" / "order.svg": fake_svg(["LO", "ME"]),                    # the same texts, reordered
+        b / "s_fig" / "order.svg": fake_svg(["ME", "LO"]),
+        a / "s_fig" / "cat.svg": fake_svg([], ["AA", "AD"]),                  # a category tick changes
+        b / "s_fig" / "cat.svg": fake_svg([], ["AA", "DD"]),
+        a / "s_fig" / "words.svg": fake_svg(["0.42", "SFC SI"]),              # text after the last number
+        b / "s_fig" / "words.svg": fake_svg(["0.42", "MaxSI SI"]),
+        a / "s_fig" / "plain.svg": fake_svg(["n = 7", "note"], [], "M 0 0 L 1 1"),   # numbers and text the same
+        b / "s_fig" / "plain.svg": fake_svg(["n = 7", "note"], [], "M 0 0 L 2 2"),
+        a / "s_fig" / "oneside.svg": fake_svg(["x 1.5"]),                     # a number on one side only
+        b / "s_fig" / "oneside.svg": fake_svg(["x"]),
+        a / "s_fig" / "stdout.log": "start\ntotal synapses: 500\nmean SI 0.42\nbetween SD 0.50\n"
                                     "[4 rows, checksum 691bd66a8dd67f70]\n",
+        b / "s_fig" / "stdout.log": "start\nloading extra\ntotal synapses: 520\nmean SI 0.42\nbetween SD 0.5\n"
+                                    "[4 rows, checksum 691bd66a8dd67f70]\n",
+        a / "commit.txt": f"2026-01-01 10:00:00 {'a' * 40} (uncommitted changes)\n2026-01-01 12:00:00 {'b' * 40}\n",
+        b / "commit.txt": f"2026-01-02 10:00:00 {'b' * 40}\n",   # run A's last commit, not its first
         a / "s_fig" / "run_status.txt": "finished\n",
         b / "s_fig" / "run_status.txt": "finished\n",
         a / "s_one" / "run_status.txt": "finished\n",
@@ -672,18 +804,50 @@ def check_fake(results: list[ScriptResult], out: Path) -> list[str]:
     expect(by["s_gone"].status_b[0] == "missing" and by["s_gone"].flag == "finished on one side only",
            "s_gone missing on B")
     figs = {f.name: f for f in by["s_fig"].figures}
-    names = ["count.svg", "fig_n.svg", "pie.svg", "plot.pdf", "same.svg", "swap.svg"]
-    expect(sorted(figs) == names, "six figure files")
+    names = ["axes.svg", "both.svg", "cat.svg", "count.svg", "edge.svg", "fig_n.svg", "flat.svg", "names.svg",
+             "oneside.svg", "order.svg", "pcttick.svg", "pie.svg", "plain.svg", "plot.pdf", "reord.svg", "same.svg",
+             "swap.svg", "ticks.svg", "words.svg"]
+    expect(sorted(figs) == names, "nineteen figure files")
     if sorted(figs) != names:
         return fails
     changed = {(f.name, cls, na.raw, nb.raw) for f in figs.values() for cls, cr in f.classes.items()
                for na, nb in cr.changed}
     expect(changed == {("fig_n.svg", "n", "100", "120"), ("swap.svg", "data", "30.0%", "10.0%"),
                        ("swap.svg", "data", "10.0%", "30.0%"), ("pie.svg", "data", "30.0%", "10.0%"),
-                       ("pie.svg", "data", "10.0%", "30.0%")}, f"exactly the planted changes, got {sorted(changed)}")
+                       ("pie.svg", "data", "10.0%", "30.0%"), ("count.svg", "n", "5", "6"),
+                       ("edge.svg", "data", "−0.25", "0.25"), ("edge.svg", "data", "-1.5", "1.5"),
+                       ("edge.svg", "n", "117,490", "117,444"), ("edge.svg", "data", "1.2e-05", "1.2e-06"),
+                       ("edge.svg", "integer", "4", "5"), ("edge.svg", "data", "4.65M", "6.03M"),
+                       ("edge.svg", "data", "10%", "10.0"), ("edge.svg", "n", "9", "10"),
+                       ("edge.svg", "data", "12k", "15k"),
+                       ("axes.svg", "tick", "0.1", "0.2"), ("pcttick.svg", "tick", "50%", "60%"),
+                       ("both.svg", "tick", "1", "2")},
+           f"exactly the planted changes, got {sorted(changed)}")
     flagged = {(f.name, cr.a[i].raw) for f in figs.values() for cr in f.classes.values() for i, j in cr.pairs or []
                if cr.a[i].context != cr.b[j].context}
-    expect(flagged == {("pie.svg", "30.0%"), ("pie.svg", "10.0%")}, f"only the reordered pie flagged, got {flagged}")
+    expect(flagged == {("pie.svg", "30.0%"), ("pie.svg", "10.0%"), ("reord.svg", "5.0%"), ("both.svg", "5.0%")},
+           f"only the reordered pie and wedges flagged, got {flagged}")
+    verdicts = {name: figs[name].verdict for name in names}
+    expect(verdicts == {"axes.svg": "no drawn numbers besides ticks; ticks changed",
+                        "both.svg": "numbers identical; labels differ, text changed, ticks changed",
+                        "cat.svg": "no drawn numbers besides ticks; text changed",
+                        "order.svg": "no drawn numbers besides ticks; text changed",
+                        "count.svg": "counts differ", "edge.svg": "numbers changed", "fig_n.svg": "numbers changed",
+                        "flat.svg": "no drawn numbers besides ticks; nothing else changed",
+                        "names.svg": "no drawn numbers besides ticks; text changed",
+                        "oneside.svg": "counts differ",
+                        "pcttick.svg": "no drawn numbers besides ticks; ticks changed",
+                        "pie.svg": "numbers changed", "plain.svg": "numbers identical", "plot.pdf": "byte-identical",
+                        "reord.svg": "numbers identical; labels differ, text changed", "same.svg": "byte-identical",
+                        "swap.svg": "numbers changed", "ticks.svg": "numbers identical; ticks changed",
+                        "words.svg": "numbers identical; text changed"},
+           f"one verdict per file, got {verdicts}")
+    edge = figs["edge.svg"].classes
+    data_a = [n.value for n in edge["data"].a]
+    expect(len(data_a) == 7 and data_a[:4] == [-0.25, -1.5, 1.2e-05, 0.5] and abs(data_a[4] - 4.65e6) < 1e-3
+           and data_a[5] == 10 and data_a[6] == 12000 and [n.value for n in edge["n"].a] == [117490, 9]
+           and [n.value for n in edge["integer"].a] == [10, 4],
+           "edge.svg values read with their sign, separator, exponent, tspans, suffix and N =")
     fn = figs["fig_n.svg"]
     expect(fn.verdict == "numbers changed" and fn.byte_identical is False, "fig_n changed, bytes differ")
     expect([n.raw for n in fn.classes["n"].a] == ["100"] and [n.raw for n in fn.classes["data"].b] == ["12.5%"],
@@ -700,7 +864,7 @@ def check_fake(results: list[ScriptResult], out: Path) -> list[str]:
     expect(figs["same.svg"].panel.startswith("one of:"), "unnamed file of a two-panel script")
     expect(by["s_one"].figures == [] and all(f.panel != "not a mapped panel" for f in figs.values()), "panel map")
     so = by["s_fig"].stdout
-    expect([d for _, _, d in so.changed] == [[("500", "520")]], f"one changed printed line, got {so.changed}")
+    expect([d for _, _, d in so.changed] == [[("500", "520")]], f"one changed printed line (0.50 = 0.5), got {so.changed}")
     expect(so.only_b == 1 and so.only_a == 0, "one printed line only in B")
     expect(not by["s_one"].stdout.changed, "no printed change in s_one")
     report = (out / "report.txt").read_text(encoding="utf-8")
@@ -708,6 +872,17 @@ def check_fake(results: list[ScriptResult], out: Path) -> list[str]:
     expect('"AD n=100" -> "AD n=120"' in report, "report shows the n change")
     expect("same.svg  (one of:" in report and "33.3%" not in report, "report lists nothing from same.svg")
     expect("counts differ, 3 in A and 2 in B" in report, "report says counts differ")
+    head = report.split("\nScripts:")[0]
+    expect(f"#   commit: 2026-01-01 10:00:00 {'a' * 40} (uncommitted changes)" in head
+           and f"#   commit: 2026-01-01 12:00:00 {'b' * 40}" in head and f"#   commit: 2026-01-02 10:00:00 {'b' * 40}" in head,
+           "report header gives every commit line of both runs")
+    expect("not made on one commit" in head and "uncommitted changes; commit.txt notes" in head
+           and "could not compare the commits' code" in head,
+           "report header warns of different commits and uncommitted changes")
+    expect("numbers identical; ticks changed: 1\n      s_fig/ticks.svg" in report
+           and "nothing else changed: 1\n      s_fig/flat.svg" in report, "report lists the files of every verdict")
+    expect("text without numbers: 2 in A, 2 in B; only in A: SFC SI; only in B: MaxSI SI" in report,
+           "report shows the changed text")
     with open(out / "cells.csv", encoding="utf-8") as fh:
         cells = list(csv.DictReader(fh))
     pct = [c for c in cells if c["file"] == "swap.svg"]
@@ -768,7 +943,161 @@ def selftest() -> bool:
                 Number.context = real_context
             print(f"{'PASS' if caught else 'FAIL'}: planted mistake caught: {name}")
             ok = ok and caught
+    ok = check_code_changed() and ok
     print("selftest " + ("passed" if ok else "FAILED"))
+    return ok
+
+
+def check_code_changed() -> bool:
+    """code_changed_between on a small git repository made here: two commits, one changing a figure script and a
+    methods file, one changing a file it must ignore; then an unknown commit."""
+    import subprocess
+    with tempfile.TemporaryDirectory() as tmp:
+        repo = Path(tmp)
+
+        def git(*args: str) -> str:
+            return subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True,
+                                  check=True).stdout.strip()
+        try:
+            git("init", "-q")
+        except (OSError, subprocess.CalledProcessError):
+            print("FAIL: git is needed for this check")
+            return False
+        git("config", "user.email", "check@example.org")
+        git("config", "user.name", "check")
+        for path in ("figures/fig9/s_fig.py", "methods/m.py", "notes/n.txt"):
+            (repo / path).parent.mkdir(parents=True, exist_ok=True)
+            (repo / path).write_text("1\n")
+        git("add", "-A")
+        git("-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null", "commit", "-q", "-m", "one")
+        first = git("rev-parse", "HEAD")
+        for path in ("figures/fig9/s_fig.py", "methods/m.py", "notes/n.txt"):
+            (repo / path).write_text("2\n")
+        git("-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null", "commit", "-q", "-am", "two")
+        second = git("rev-parse", "HEAD")
+        fails = []
+        if code_changed_between({first}, {second}, repo) != ["figures/fig9/s_fig.py", "methods/m.py"]:
+            fails.append("the files that differ between two commits")
+        if code_changed_between({first, second}, {second}, repo) != ["figures/fig9/s_fig.py", "methods/m.py"]:
+            fails.append("a run with two commits against one of them")
+        if code_changed_between({second}, {second}, repo) != []:
+            fails.append("the same commit on both sides")
+        if code_changed_between({first}, {"f" * 40}, repo) is not None:
+            fails.append("an unknown commit")
+        # the report made from two fake runs on these commits marks s_fig and says methods/ may change any script
+        run_a, run_b, doc = build_fake_runs(repo / "runs")
+        (run_a / "commit.txt").write_text(f"2026-01-01 10:00:00 {first}\n", encoding="utf-8")
+        (run_b / "commit.txt").write_text(f"2026-01-02 10:00:00 {second}\n", encoding="utf-8")
+        write_outputs(compare_runs(run_a, run_b, PanelMap(doc)), run_a, run_b, ("A", "B"), repo / "out", 25, 30, repo)
+        report = (repo / "out" / "report.txt").read_text(encoding="utf-8")
+        if "## s_fig  [finished on both sides]  [script code differs between the runs' commits]" not in report:
+            fails.append("the report marks the script whose code differs")
+        if "## s_one  [finished on one side only]\n" not in report:
+            fails.append("the report leaves the other scripts unmarked")
+        if "a file outside figures/ may change any script" not in report:
+            fails.append("the report says a file outside figures/ may change any script")
+    print(("PASS" if not fails else "FAIL") + ": the files that differ between two runs' commits")
+    for f in fails:
+        print(f"    failed: {f}")
+    return not fails
+
+
+# ---- planted bugs for --mutants; nothing below this line is changed by them ----
+
+MUTANTS = [
+    ("verdict ignores the n class",
+     'VERDICT_CLASSES = ("n", "data", "integer")', 'VERDICT_CLASSES = ("data", "integer")'),
+    ("minus sign - not read", r'(?P<num>[-−]?', r'(?P<num>[−]?'),
+    ("minus sign U+2212 not read", r'(?P<num>[-−]?', r'(?P<num>[-]?'),
+    ("thousands separator splits a number", r'(?:\d{1,3}(?:,\d{3})+|\d+)', r'(?:\d+)'),
+    ("counts-differ line names the runs the wrong way round",
+     '{len(cr.a)} in {la} and {len(cr.b)} in {lb}', '{len(cr.a)} in {lb} and {len(cr.b)} in {la}'),
+    ("numbers compared as written, not by value",
+     "if self.a[i].value != self.b[j].value or", "if self.a[i].raw != self.b[j].raw or"),
+    ("% not read", r'(?P<pct>\s?%)?', r'(?P<pct>(?!))?'),
+    ('"n =" with spaces not read as n', r'N_BEFORE = re.compile(r"\bn\s*=\s*$"', r'N_BEFORE = re.compile(r"\bn=$"'),
+    ("text inside <tspan> dropped", "        if not inside_text:\n            elem.clear()", "        elem.clear()"),
+    ("changed numbers checked before counts",
+     '        if not all(r.counts_match for r in drawn):\n            return "counts differ"\n'
+     '        if any(r.changed for r in drawn):\n            return "numbers changed"\n',
+     '        if any(r.changed for r in drawn):\n            return "numbers changed"\n'
+     '        if not all(r.counts_match for r in drawn):\n            return "counts differ"\n'),
+    ("byte check always false", "def same_bytes(a: Path, b: Path) -> bool:\n",
+     "def same_bytes(a: Path, b: Path) -> bool:\n    return False\n"),
+    ("printed values compared as text", "        return to_float(x) == to_float(y)", "        return x == y"),
+    ("header shows only the last commit line",
+     '[f"#   commit: {x}" for x in file_lines(run / "commit.txt")]',
+     '[f"#   commit: {file_lines(run / \'commit.txt\')[-1]}"]'),
+    ("exponent not read", r'(?:\.\d+)?(?:[eE][-+−]?\d+)?)"', r'(?:\.\d+)?)"'),
+    ("ticks left out of the verdict",
+     "ticks_changed = not ticks.counts_match or bool(ticks.changed)", "ticks_changed = False"),
+    ("equal values with another label called identical",
+     "labels_differ = any(r.a[i].context != r.b[j].context for r in drawn for i, j in r.pairs or [])",
+     "labels_differ = False"),
+    ("count with an M or k suffix not read", r"(?P<suf>[kKM])?", r"(?P<suf>(?!))?"),
+    ("a % sign that goes away with the value kept not seen",
+     " or self.a[i].is_percent != self.b[j].is_percent]", "]"),
+    ("text without numbers not compared", "text_changed = self.text_a != self.text_b", "text_changed = False"),
+    ('"N =" in capitals not read as n', r'N_BEFORE = re.compile(r"\bn\s*=\s*$", re.IGNORECASE)',
+     r'N_BEFORE = re.compile(r"\bn\s*=\s*$")'),
+    ("a file with numbers on one side only called numberless",
+     "if not any(r.a or r.b for r in drawn):", "if not any(r.a and r.b for r in drawn):"),
+    ("percentage ticks counted among the percentage labels",
+     'and cls != "tick" and na.is_percent', "and na.is_percent"),
+    ("no warning when the runs were made on different commits",
+     "if commits[0] != commits[1]:", "if False:"),
+    ("texts compared as a set, so a reorder is not seen", "text_changed = self.text_a != self.text_b",
+     "text_changed = sorted(set(self.text_a)) != sorted(set(self.text_b))"),
+    ("category tick labels left out of the texts", "if not numbers and text.strip():",
+     "if not numbers and text.strip() and not in_tick:"),
+    ("commit warning reads only the last commit line",
+     r'COMMIT.findall("\n".join(file_lines(run / "commit.txt")))', r'COMMIT.findall(file_lines(run / "commit.txt")[-1])'),
+    ("whole numbers with a suffix classed as integer", " or num[-1] in SCALE:", ":"),
+    ("scripts whose code differs not marked",
+     """+ ("  [script code differs between the runs' commits]" if res.name in changed_stems else "")""",
+     """+ ("" if res.name in changed_stems else "")"""),
+    ("no line saying a file outside figures/ may change any script",
+     'if any(not p.startswith("figures/") for p in code_changed):', "if False:"),
+    ("methods/ left out of the code comparison", '"figures", "processing", "methods", "config.py"]',
+     '"figures", "processing", "config.py"]'),
+    ("files with nothing else changed left out of the summary",
+     'summary += [f"      {item}" for item in items]',
+     'summary += [f"      {item}" for item in items if "nothing else" not in verdict]'),
+]
+MUTANT_MARKER = "# ---- planted bugs for --mutants; nothing below this line is changed by them ----"
+
+
+def run_mutants() -> bool:
+    """Plant each bug of MUTANTS in a copy of this file and require the copy's --selftest to fail."""
+    import subprocess
+    source = Path(__file__).read_text(encoding="utf-8")
+    head, marker, tail = source.partition(MUTANT_MARKER)
+    if not marker:
+        print("FAIL: marker line not found")
+        return False
+    ok = True
+    with tempfile.TemporaryDirectory() as tmp:
+        copy = Path(tmp) / "tools" / Path(__file__).name
+        copy.parent.mkdir()
+
+        def selftest_passes(text: str) -> bool:
+            copy.write_text(text, encoding="utf-8")
+            return subprocess.run([sys.executable, str(copy), "--selftest"], capture_output=True).returncode == 0
+
+        if not selftest_passes(source):
+            print("FAIL: the unchanged copy does not pass its selftest")
+            return False
+        print("PASS: the unchanged copy passes its selftest")
+        for name, old, new in MUTANTS:
+            count = head.count(old)
+            if count != 1:
+                print(f"FAIL: planted bug not applied ({count} matches): {name}")
+                ok = False
+                continue
+            caught = not selftest_passes(head.replace(old, new) + marker + tail)
+            print(f"{'PASS' if caught else 'FAIL'}: planted bug caught: {name}")
+            ok = ok and caught
+    print(f"mutants: {len(MUTANTS)} planted, " + ("all caught" if ok else "NOT all caught"))
     return ok
 
 
@@ -786,9 +1115,13 @@ def main() -> None:
     parser.add_argument("--max-numbers", type=int, default=30,
                         help="changed numbers shown per figure and class in report.txt (default: 30)")
     parser.add_argument("--selftest", action="store_true", help="run the selftest on two fake runs and exit")
+    parser.add_argument("--mutants", action="store_true",
+                        help="plant each known bug in a copy of this file, require its selftest to fail, and exit")
     args = parser.parse_args()
     if args.selftest:
         sys.exit(0 if selftest() else 1)
+    if args.mutants:
+        sys.exit(0 if run_mutants() else 1)
     if args.run_a is None or args.run_b is None:
         parser.error("give two run folders, or --selftest")
     for folder in (args.run_a, args.run_b):
