@@ -434,7 +434,11 @@ def main() -> None:
             results.append((bars_ok, "the summary plot: each population's within-type bar and stacked shares sit at its "
                                      "own x label (" + "; ".join(f"{k} " + " ".join(f"{h:.4f}" for h, _ in v)
                                                                  for k, v in bars.items()) + ")"))
-            svgs = sorted(p.name for p in (config.OUTPUT_DIR / "fig6" / "aadd_specific_circuits").glob("*.svg"))
+            # with DATA_SOURCE = 'buhmann' the script writes to its own folder (older versions wrote to the plain one)
+            fig6_dir = config.OUTPUT_DIR / "fig6" / "aadd_specific_circuits_buhmann"
+            if not fig6_dir.exists():
+                fig6_dir = config.OUTPUT_DIR / "fig6" / "aadd_specific_circuits"
+            svgs = sorted(p.name for p in fig6_dir.glob("*.svg"))
             want_svgs = sorted([f"{p}_{k}.svg" for p in GRAPH_POPULATIONS
                                 for k in ("conn_SameType", "SynapsesPerSameConnection", "conn_BetweenTypes")]
                                + ["SummaryPlot.svg"])

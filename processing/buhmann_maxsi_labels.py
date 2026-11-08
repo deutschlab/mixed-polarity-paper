@@ -323,7 +323,7 @@ print(f"cells labelled {len(summary):,}, failed {len(failures):,}; Princeton cou
       f"all equal to step 09's")
 print(f"synapse ends: {int(summary['n_buhmann'].sum()):,} attached-or-not, {int(summary['n_attached'].sum()):,} "
       f"attached, {int(summary['n_labelled'].sum()):,} labelled, {int(summary['on_cut_node'].sum()):,} on a cut node")
-print(f"labelled cells with no Buhmann synapse on either side (SI_buhmann empty): "
+print(f"labelled cells with an empty SI_buhmann (every labelled Buhmann synapse on one side, or none): "
       f"{int(summary['SI_buhmann'].isna().sum()):,}")
 if len(failures):
     print("failures:", failures["error"].str.split(":").str[0].value_counts().to_dict())

@@ -231,7 +231,8 @@ if `SI_SOURCE = 'SI_updated'`). The submitted Figure 6 was made from the Buhmann
 reproduces it: every Fig 6D box and whisker exactly, Fig 6A–C and the per-type bars of Supp 6-S1/S2 closely
 (the Buhmann table's `primary_type` is not the Codex consolidated cell types the MATLAB script read), and the
 Supp 6-S3 graphs with the same edges. This repository does not build the published Buhmann tables; it builds MaxSI versions of them
-(`processing/buhmann_maxsi_labels.py`; see `docs/data_availability.md`).
+(`processing/buhmann_maxsi_labels.py`; see `docs/data_availability.md`). `FIG6_DATA_SOURCE=buhmann` in the environment
+sets `DATA_SOURCE`; with `'buhmann'` the figures go to `outputs/fig6/aadd_specific_circuits_buhmann/` instead.
 
 | Panel | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|

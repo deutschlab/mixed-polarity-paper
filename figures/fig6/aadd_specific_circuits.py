@@ -34,6 +34,7 @@
 #   - the population summary is written as CSV (the MATLAB script wrote .xlsx; openpyxl is not
 #     part of the environment), and the spoken "Done" at the end is left out.
 # svg.fonttype='none' and Arial (repository convention).
+import os
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -52,9 +53,6 @@ mpl.rcParams['font.family'] = 'Arial'
 from methods.figure_text import use_arial_8
 use_arial_8()   # every text in Arial 8 pt when a figure is saved
 
-_out_dir = OUTPUT_DIR / "fig6" / "aadd_specific_circuits"
-_out_dir.mkdir(parents=True, exist_ok=True)
-
 #%% parameters
 SI_threshold = 0.1
 # Which synapse detection the tables come from: 'buhmann' (NEURON_TABLE_NONP_FTR and
@@ -67,12 +65,18 @@ SI_threshold = 0.1
 # 'princeton' the numbers differ more (e.g. ALPN AA 0.43 instead of 0.59).
 # With 'buhmann', SI and primary_type come from the Buhmann neuron table and SI_SOURCE is
 # ignored. The revised paper uses the Princeton tables everywhere, Figure 6 included, so
-# 'princeton' is the default; 'buhmann' reproduces the submitted panels.
+# 'princeton' is the default; 'buhmann' reproduces the submitted panels. FIG6_DATA_SOURCE in the environment
+# overrides the setting.
 DATA_SOURCE = 'princeton'
+DATA_SOURCE = os.environ.get('FIG6_DATA_SOURCE', DATA_SOURCE)
 # Which SI stands in for the SI column of the MATLAB script's neuron_data.csv:
 # 'neuron_table' (NEURON_TABLE_FTR SI, the SI most figure scripts use) or 'SI_updated'.
 SI_SOURCE = 'neuron_table'
 assert DATA_SOURCE in ('buhmann', 'princeton'), DATA_SOURCE
+_out_dir = OUTPUT_DIR / "fig6" / "aadd_specific_circuits"
+if DATA_SOURCE == 'buhmann':
+    _out_dir = OUTPUT_DIR / "fig6" / "aadd_specific_circuits_buhmann"
+_out_dir.mkdir(parents=True, exist_ok=True)
 assert SI_SOURCE in ('neuron_table', 'SI_updated'), SI_SOURCE
 COMP_TYPES = ['AA', 'DD', 'AD', 'DA']
 COMP_COLORS = [np.array(c) / 255 for c in ([120, 80, 161], [243, 185, 91], [159, 75, 35], [180, 180, 180])]
