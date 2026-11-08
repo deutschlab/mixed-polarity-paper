@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 import matplotlib as mpl
 mpl.rcParams['svg.fonttype'] = 'none'
+mpl.rcParams['pdf.fonttype'] = 42   # TrueType in the PDF, so Illustrator opens the text as editable Arial
 mpl.rcParams['font.family'] = 'Arial'
 
 import time
@@ -320,7 +321,7 @@ npil_colors = {
 }
 
 # --- Setup plot ---
-fig, ax = plt.subplots(figsize=(4.5, 1.8))
+fig, ax = plt.subplots(figsize=(7.5, 2.6))   # the published 5I's width; at 8 pt the 48 labels need it
 
 labels = com_df_sorted['npil']
 bottom = [0] * len(com_df_sorted)
@@ -353,7 +354,7 @@ for i, row in com_df_raw.set_index('npil').loc[com_df_sorted['npil'].values].res
     ax.text(
         i + 0.4,
         bottom[i] + 1,
-        f"{int(total_syns/1000):,}k",
+        f"{round(total_syns/1000)}K",   # thousands of synapses, rounded, written as in the published 5I ("5084K")
         ha='right',
         va='bottom',
         fontsize=4,
@@ -380,7 +381,7 @@ plt.tight_layout()
 _out_dir = OUTPUT_DIR / "fig5" / "syn_type_x_reci_x_npil"
 _out_dir.mkdir(parents=True, exist_ok=True)
 plt.savefig(
-    _out_dir / "syn_type_npil_reci_princeton_non_filtered.pdf"
+    _out_dir / "syn_type_npil_reci_princeton_non_filtered.pdf", bbox_inches='tight'   # keeps the totals and the long neuropil names inside the file
 )
 plt.show()
 

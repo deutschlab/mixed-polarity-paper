@@ -68,15 +68,13 @@ plt.xticks([0,0.1,0.2,0.3],size=4)
 plt.axvline(x=between_std, color='black', linestyle='--', label='Between-group std',linewidth=0.4)
 
 plt.xlim(0, 0.3)
-plt.text(0.49, plt.ylim()[1] * 0.9, f'n = {len(var)} primary types',
-         fontsize=8, color='black', ha='right')
 
 plt.xlabel('std(SI) within group')
 #plt.title('Distribution of within-group std(SI) across primary types')
-plt.legend()
+plt.legend(loc='upper right', title=f'n = {len(var)} primary types')
 sns.despine(right=True, top=True)
 plt.xlabel('SD of SI', size=8)
-plt.ylabel('Neurons', size=8)
+plt.ylabel('Primary types', size=8)   # one count per primary type
 plt.xticks(size=8)
 plt.yticks(size=8)
 plt.tight_layout()

@@ -187,25 +187,26 @@ df_plot = df_plot.sort_values('SI_point').reset_index(drop=True)
 x = df_plot['SI_point']
 y = df_plot['AD_ratio']
 
-plt.figure(figsize=(8,5))
+print(df_plot)   # the curve as drawn: the AD fraction of all synapses at each SI cut-off
 
-# dashed part: SI <= 0.10
-mask = x <= 0.10
-plt.plot(x[mask], y[mask], linestyle='--', marker='o', color='grey')
+shown = x <= 0.6 + 1e-9   # the axis ends at 0.6, as published; beyond it the fraction is below 0.002 (printed above)
+x, y = x[shown], y[shown]
+fig, ax = plt.subplots(figsize=(3.0, 1.6))   # about the published 3D line's printed size and shape, with 8 pt text
+ax.plot(x, y, marker='o', color='#3A54A5', markersize=3, linewidth=1, clip_on=False)   # one line, in the published 3D's blue
+at_cutoff = np.isclose(x, 0.1)
+ax.plot(x[at_cutoff], y[at_cutoff], marker='o', linestyle='none', color='black', markersize=3.5, clip_on=False,
+        zorder=3)   # SI 0.1, the cut-off of the 3D pie
 
-# solid part: from last dashed point onward
-if mask.any():
-    idx = x[mask].index[-1]
-    plt.plot(x.loc[idx:], y.loc[idx:], marker='o', color='blue')
-else:
-    plt.plot(x, y, marker='o', color='blue')
+ax.set_xlim(0, 0.6)
+ax.set_ylim(0, 0.6)
+assert y.max() <= 0.6, f"the curve reaches {y.max():.3f}, above the y-axis limit of 0.6"
+ax.set_xticks(np.arange(0, 0.61, 0.1))
+ax.set_yticks([0, 0.2, 0.4, 0.6])
+ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%g'))   # "0" and "0.1", as published
+ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%g'))
 
-plt.xlim(0, 0.7)
-plt.ylim(0, 1)
-
-plt.xlabel("SI th")
-plt.ylabel("AD proportion")
-plt.title("AD proportion vs SI threshold")
+ax.set_xlabel("SI threshold")
+ax.set_ylabel("AD fraction")
 plt.grid(False)
 sns.despine(top=True, right=True)
 plt.tight_layout()

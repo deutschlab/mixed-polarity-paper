@@ -258,12 +258,18 @@ rr_all['cdf'] = rr_all['rolling sum'] / rr_all['number of instances'].sum()
 # Filtered synapses
 allsynapses2 = allsynapses.query("SI_pre >= 0.1 and SI_post >= 0.1")
 allsynapses2 = allsynapses2[allsynapses2['pre'].isin(nodesG['neuron']) & allsynapses2['post'].isin(nodesG['neuron'])]   # the filtered curve: cells in nodesG above (intrinsic, with a cell type and both compartment flags); the 'All synapses' curve stays whole-brain
+allsynapses2 = allsynapses2[allsynapses2['comp'].isin(['AA', 'AD', 'DA', 'DD'])]   # the four synapse types only, as in the other synapse-level panels (comp has nine values)
 r_filt = allsynapses2[['pre', 'post']].groupby(by=['pre', 'post']).size()
 r_filt = pd.DataFrame(r_filt, columns=['number of synapses'])
 rr_filt = r_filt.groupby(by=['number of synapses']).size()
 rr_filt = pd.DataFrame(rr_filt, columns=['number of instances'])
 rr_filt['rolling sum'] = rr_filt['number of instances'].cumsum()
 rr_filt['cdf'] = rr_filt['rolling sum'] / rr_filt['number of instances'].sum()
+# the two curves as drawn, at the x-axis range of the plot (1 to 11 synapses)
+print("All synapses:", len(r_all), "connected pairs")
+print(rr_all.loc[rr_all.index <= 11, ['number of instances', 'cdf']])
+print("Filtered synapses:", len(r_filt), "connected pairs")
+print(rr_filt.loc[rr_filt.index <= 11, ['number of instances', 'cdf']])
 #%%
 # Plot
 plt.figure(figsize=(1.3,1))
