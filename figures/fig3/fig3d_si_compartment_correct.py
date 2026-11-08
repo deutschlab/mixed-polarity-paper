@@ -296,13 +296,13 @@ wedges, texts, autotexts = ax.pie(
     counterclock=False,
     wedgeprops={'linewidth': 2, 'edgecolor': 'white'}  # thicker white lines between slices
 )
-for label, pct in zip(comp_counts.index, autotexts):
-    if label == 'Mixed':
-        pct.set_color('white')   # readable on the black slice
-plt.xlim(0,0.6)
-ax.set_title('Distribution of comp2 combinations')
-plt.tight_layout()
-plt.savefig(_out_dir / "synaptic_type_pie2_v2.svg")
+for label, txt, pct in zip(comp_counts.index, texts, autotexts):
+    if label in ('Mixed', 'AA', 'AD'):
+        pct.set_color('white')   # readable on the dark slices
+    elif label == 'DA':
+        txt.set_text(f'DA {pct.get_text()}')   # thin slice: the percentage goes beside its label
+        pct.set_visible(False)
+plt.savefig(_out_dir / "synaptic_type_pie2_v2.svg", bbox_inches='tight')
 
 plt.show()
 
