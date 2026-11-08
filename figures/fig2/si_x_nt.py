@@ -199,8 +199,9 @@ else:
     print(posthoc)
 
 
-# Kruskal–Wallis effect size (eta squared)
-H = 15070.808
+# Kruskal–Wallis effect size (eta squared), from the H of this data
+from scipy.stats import kruskal
+H = kruskal(*(df_nt.loc[df_nt["nt_type"] == g, "SI"] for g in main_nt)).statistic
 n_total = len(df_nt)
 eta_sq = (H - len(main_nt) + 1) / (n_total - len(main_nt))
 print(f"η² (eta squared) = {eta_sq:.3f}")
