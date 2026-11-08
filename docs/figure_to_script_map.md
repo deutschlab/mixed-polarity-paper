@@ -132,12 +132,12 @@ multiple classification models.
 |-------|--------|-------------|-------------|
 | (table for Fig 4A / 4C) | `figures/fig4/build_pc1_table.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `PCA_TABLE_FTR` | writes `PC1_TABLE_CSV` (`data/derived/PC1_table.csv`); run before `syntype_x_pc1.py` |
 | (tables for Fig 4A and 4B) | `figures/fig4/fig4_heldout_models.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | writes `FIG4_HELDOUT_MODELS_FTR` and `FIG4_HELDOUT_CONFUSION_FTR`: each model scored on neurons it never saw (five cell splits); run before `models_comparison.py`; about 25 minutes |
-| Fig 4C, 4D (super-class densities) / Supp; the published 4A and 4D | `figures/fig4/syntype_x_pc1.py` | `NEURON_TABLE_FTR`, `PC1_TABLE_CSV`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/syntype_x_pc1/`, where it also saves and reloads the model `rf_pc1_model.joblib`; writes `PC1_TABLE_PREDICTIONS_CSV` |
+| Fig 4C, 4D-2 (cells of each super-class per 0.1 of PC1, `kde_sclass.svg`) / Supp; the published 4A and 4D | `figures/fig4/syntype_x_pc1.py` | `NEURON_TABLE_FTR`, `PC1_TABLE_CSV`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/syntype_x_pc1/`, where it also saves and reloads the model `rf_pc1_model.joblib`; writes `PC1_TABLE_PREDICTIONS_CSV` |
 | Fig 4D, larval version (proposed) | `figures/fig4/larva_syntype_x_pc1_map.py` | `LARVA_MAXSI_SYNAPSES_FTR`, `LARVA_MAXSI_SUMMARY_FTR`, `LARVA_MAXSI_PC1_FTR`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/larva_syntype_x_pc1_map/`: `decision_map_pc1_percentile_adult.svg`, `decision_map_pc1_percentile_larva.svg`, both side by side (`decision_map_pc1_percentile_adult_larva.svg`) and `recall_unseen_cells_adult_larva.svg`; writes `LARVA_4D_RESULTS_FTR` and `LARVA_4D_CONFUSION_FTR`. Runs under `SPLIT_METHOD = "maxsi"` only, after `processing/larva/larva_maxsi_labels.py` and `processing/larva/larva_pc1.py`; about 8 minutes |
 | Fig 4A, 4B | `figures/fig4/models_comparison.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `FIG4_HELDOUT_MODELS_FTR`, `FIG4_HELDOUT_CONFUSION_FTR` | `outputs/fig4/models_comparison/`: `confusion_matrix_pc1_unseen_neurons.svg` (4A) and `accuracy_values.svg` (4B) |
 | Fig 4E (revision) | `figures/fig4/syntype_x_pathway_layers.py` | `PER_TYPE_SUMMARY_CSV` (not deposited; or a stand-in rebuilt from `SYNAPSE_TABLE_FTR` and `NEURON_TABLE_FTR`, or the Buhmann tables, which need `NEURON_TABLE_NONP_FTR` and `SYNAPSE_TABLE_NONP_FTR` in `data/derived/` and are not deposited; see `DATA_SOURCE`), `NEURON_DATA_FTR`, `SI_UPDATED_FTR` (with `DATA_SOURCE = 'princeton'` and `SI_SOURCE = 'SI_updated'`), `OLFACTORY_CLASS_NEUROPIL_CSV` (printed only, optional) | `outputs/fig4/syntype_x_pathway_layers/`: the four panels of the revised 4E are `LayerComposition_AllSynapses_collapsed_lines.svg`, `LayerComposition_WithinType_collapsed_lines.svg`, `LayerComposition_Olfactory_AllSynapses_lines.svg` and `LayerComposition_Olfactory_WithinType_lines.svg`; also two stacked-bar plots and the tables as CSV |
 | Fig 4D check, revision (planned): most common type on 4D's PC1 axes; new Fig 4 supplement panel: the steps of two-step AD chains, against PC1 shuffled across all cells (the CSV also holds PC1 shuffled within super-class) | `figures/fig4/ad_chains_x_pc1.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/ad_chains_x_pc1/`: `ad_chains_most_common_type.svg` and `ad_chains_steps.svg`, each with a CSV of its numbers |
-| Fig 4D (the map) | `figures/fig4/syntype_x_pc1_simple_model.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/syntype_x_pc1_simple_model/` |
+| Fig 4D-1 (the map, with the four numbered examples of the legend) | `figures/fig4/syntype_x_pc1_simple_model.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig4/syntype_x_pc1_simple_model/` |
 
 > `syntype_x_pc1_simple_model.py` saves a feature-importance plot, a confusion matrix and a decision surface
 > for a model on PC1, the same kinds of plot as Fig 4A and 4D. It reads the PCA table step 07 writes
@@ -185,8 +185,8 @@ reciprocity prediction.
 > each cell as a share of the pairs with one dominant synapse type (more than half of the synapses) in each direction,
 > so each panel sums to 100%; the script asserts it. 3G (`nt_syn_type_same_not_same.py`) keeps synapses whose two cells
 > are in its filtered neuron table. 3H's inset, the cumulative curve for SI >= 0.1 (`syntype_x_strength_x_identity.py`),
-> is on synapses between intrinsic cells with a cell type and both compartment flags, as the main panel; its "All
-> synapses" curve is whole-brain. 4B's cell-type model
+> is on AA, AD, DA and DD synapses between intrinsic cells with a cell type and both compartment flags, as the main
+> panel; its "All synapses" curve is every row of the synapse table (every super-class, any SI, all nine comp values). 4B's cell-type model
 > (`fig4_heldout_models.py`) picks, for each pair of cell types, the synapse type with the largest share of its own
 > type's training synapses (each synapse weighted by 1 / its type's training count), the rule that maximises balanced
 > accuracy on the training synapses; the three forests are trained on the balanced resample.
@@ -243,7 +243,7 @@ Supp 6-S3 graphs with the same edges. This repository does not build the Buhmann
 > of the olfactory and Kenyon-cell populations (not panels of the submitted paper), and `PopulationSummary.csv`.
 > With `DATA_SOURCE = 'princeton'` on the published SFC tables (`SI_SOURCE = 'neuron_table'`, the SI computed with self-synapses kept), almost no Kenyon cell has
 > SI ≥ 0.1, so that population is skipped and writes no figures; on the MaxSI tables 1,327 Kenyon cells pass and it is drawn. `tools/check_fig6_logic.py` checks the script's
-> calculations on a made-up connectome, without the Buhmann tables ([docs/tools.md](tools.md#checking-that-a-figure-reproduces)).
+> calculations on a made-up connectome, without the Buhmann tables ([docs/tools.md](tools.md#checking-scripts-on-made-up-data)).
 
 ## Figure 7 — Postsynaptic terminals on multisynaptic boutons
 

@@ -307,16 +307,59 @@ Z_idx = np.vectorize(class_to_idx.get)(Z).reshape(xx.shape)
 # stays editable. The four type names above the plot are the key, as in the published panel.
 from matplotlib.colors import BoundaryNorm
 norm = BoundaryNorm(np.arange(-0.5, len(classes)), cmap.N)
-fig, ax = plt.subplots(figsize=(2.4, 2.6))
+# The page is 2.4 x 2.6 inches with the axes 1.75 x 1.75 inches, 0.5 inches from its foot, as the side plot's page
+# and axes (Fig 4D-2, syntype_x_pc1.py), so the two line up when the panel is put together.
+fig = plt.figure(figsize=(2.4, 2.6))
+ax = fig.add_axes([0.6 / 2.4, 0.5 / 2.6, 1.75 / 2.4, 1.75 / 2.6])
 ax.pcolormesh(xx, yy, Z_idx, cmap=cmap, norm=norm, shading='auto', rasterized=True)
 ax.set_xlabel("PC1 pre neuron")
 ax.set_ylabel("PC1 post neuron")
 ax.set_xlim(x_min, x_max); ax.set_ylim(y_min, y_max); ax.set_aspect('equal')
+ax.set_xticks(range(x_min, x_max + 1)); ax.set_yticks(range(y_min, y_max + 1))
 for k, t in enumerate(['AD', 'AA', 'DD', 'DA']):
     ax.text(0.2 + 0.2 * k, 1.03, t, color=class_colors[t], transform=ax.transAxes, ha='center', va='bottom')
 sns.despine(ax=ax, right=True, top=True)
-plt.tight_layout()
+
+# The four numbered examples of the legend, drawn in Supp 4-S1: each a connection from a presynaptic to a
+# postsynaptic cell, placed at the two cells' PC1 (PCA_TABLE_FTR) and filled with the colour of its synapse type.
+# For the reciprocal pairs 1 and 2 both directions are drawn, joined by an arrow; for the reciprocal AA pair 3 one
+# direction is drawn, as the other lies next to it.
+#   1: T3 and LC11 (T3 to LC11 AD, LC11 to T3 DA)    2: Tm4 and C2 (Tm4 to C2 AD, C2 to Tm4 DA)
+#   3: AVLP046 to PS096 (AA)                          4: Tm2 to L5 (DD)
+EXAMPLE_CELLS = {'T3': 720575940618929477, 'LC11': 720575940604601022, 'Tm4': 720575940618081286,
+                 'C2': 720575940617954260, 'AVLP046': 720575940621448357, 'PS096': 720575940623501129,
+                 'L5': 720575940640137048, 'Tm2': 720575940603314656}
+EXAMPLES = [(1, [('T3', 'LC11', 'AD'), ('LC11', 'T3', 'DA')]),
+            (2, [('Tm4', 'C2', 'AD'), ('C2', 'Tm4', 'DA')]),
+            (3, [('AVLP046', 'PS096', 'AA')]),
+            (4, [('Tm2', 'L5', 'DD')])]
+pc1_of = pcadf.set_index('neuron')['PC1']
+assert pc1_of.index.is_unique and pc1_of.index.dtype == np.int64
+cell_pc1 = {t: float(pc1_of.loc[np.int64(i)]) for t, i in EXAMPLE_CELLS.items()}
+for num, directions in EXAMPLES:
+    points = [(cell_pc1[pre], cell_pc1[post], syn) for pre, post, syn in directions]
+    for x, y, syn in points:
+        predicted = rf_clf.predict(pd.DataFrame({f1: [x], f2: [y]}))[0]
+        print(f"example {num}: ({x:.3f}, {y:.3f}) {syn}, the map predicts {predicted}")
+        ax.plot(x, y, 'o', markersize=8, color='white', zorder=4, clip_on=False)   # a white ring, so the circle shows on a region of its own colour
+        ax.plot(x, y, 'o', markersize=6, markerfacecolor=class_colors[syn], markeredgecolor='black',
+                markeredgewidth=0.6, zorder=4, clip_on=False)
+    if len(points) == 2:
+        (x0, y0, _), (x1, y1, _) = points
+        ax.annotate('', xy=(x1, y1), xytext=(x0, y0), zorder=3,
+                    arrowprops=dict(arrowstyle='<->', color='black', lw=0.6, shrinkA=4, shrinkB=4,
+                                    connectionstyle='arc3,rad=0' if num == 1 else 'arc3,rad=-0.5'))
+        lx, ly = (x0 + x1) / 2, (y0 + y1) / 2
+        if num == 2:
+            lx, ly = lx - 0.55, ly - 0.55   # beside the curved arrow, on its outer side
+        else:
+            lx, ly = lx + 0.25, ly + 0.25
+    else:
+        lx, ly = points[0][0] + 0.40, points[0][1] + 0.40
+    # a white disc behind the number keeps it readable and keeps it text in the SVG (a path effect would not)
+    ax.text(lx, ly, str(num), ha='center', va='center', color='black', zorder=5,
+            bbox=dict(boxstyle='circle,pad=0.12', fc='white', ec='none', alpha=0.85))
 
 
-plt.savefig(_out_dir / "surface_desicion_map_not_simpler_princeton.svg", dpi=600, bbox_inches='tight')
+plt.savefig(_out_dir / "surface_desicion_map_not_simpler_princeton.svg", dpi=600)   # not cropped: the page is 2.6 in tall with the axes 0.5 in from its foot, as in 4D-2, so the two line up edge to edge
 plt.show()

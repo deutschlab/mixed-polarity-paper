@@ -49,18 +49,39 @@ pcadf=pd.read_feather(PCA_TABLE_FTR)
 
 nodesG=nodesG.merge(pcadf,on='neuron',how='left')
 #%%
-plt.figure(figsize=(6,2))
+# Fig 4D-2: how many cells of each super-class have each PC1, drawn upright beside the map of Fig 4D-1 (its axes
+# have the same 1.75-inch height and the same PC1 range, -2 to 5). Each line is the class's number of cells in each
+# 0.1-wide bin of PC1, not scaled in any way. Cells outside -2 to 5 are not shown; their share is printed.
 custom_palette = {
-    'visual_projection': '#D5A848',
     'central': '#F9574E',
     'optic': '#F4D826',
+    'visual_projection': '#D5A848',
     'visual_centrifugal': '#44733B'
 }
-sns.kdeplot(nodesG,x='PC1',hue='super_class',   palette=custom_palette)
-plt.xlim(-2,5)
+side_names = {'central': 'central', 'optic': 'optic', 'visual_projection': 'visual projection',
+              'visual_centrifugal': 'visual centrifugal'}
+pc1_bins = np.round(np.arange(-2, 5.05, 0.1), 10)   # 70 bins of 0.1, from -2 to 5
+fig = plt.figure(figsize=(2.4, 2.6))
+ax = fig.add_axes([0.35 / 2.4, 0.5 / 2.6, 0.8 / 2.4, 1.75 / 2.6])
+for k, (sc, colour) in enumerate(custom_palette.items()):
+    pc1 = nodesG.loc[nodesG['super_class'] == sc, 'PC1'].dropna().to_numpy()
+    counts, _ = np.histogram(pc1, bins=pc1_bins)
+    top = counts.argmax()
+    assert counts.max() <= 10000, 'a bin is above the x-axis limit of 10,000 cells'
+    print(f"{sc}: {len(pc1):,} cells, {np.mean((pc1 < -2) | (pc1 > 5)):.1%} outside -2 to 5; "
+          f"highest bin {counts[top]:,} cells, PC1 {pc1_bins[top]:.1f} to {pc1_bins[top + 1]:.1f}")
+    ax.stairs(counts, pc1_bins, orientation='horizontal', color=colour, lw=0.8, baseline=None, zorder=3)
+    ax.text(1.08, 1.0 - 0.09 * k, side_names[sc], color=colour, transform=ax.transAxes, ha='left', va='top')
+ax.set_ylim(-2, 5)
+ax.set_xlim(0, 10000)
+ax.set_xticks([0, 5000, 10000]); ax.set_xticklabels(['0', '5', '10'])
+ax.set_xlabel("Neurons (thousands)\nper 0.1 PC1")
+ax.set_yticks(range(-2, 6)); ax.set_yticklabels([])
+ax.spines['left'].set_position(('outward', 3))   # so the classes with few cells don't sit on the axis line
+sns.despine(ax=ax, right=True, top=True)
 _out_dir = OUTPUT_DIR / "fig4" / "syntype_x_pc1"
 _out_dir.mkdir(parents=True, exist_ok=True)
-plt.savefig(_out_dir / "kde_sclass.svg")
+plt.savefig(_out_dir / "kde_sclass.svg")   # not cropped, so its page and axes match 4D-1's and the two line up edge to edge
 plt.show()
 #%%
 syn_df=pd.read_feather(SYNAPSE_TABLE_FTR)
