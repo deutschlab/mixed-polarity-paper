@@ -110,7 +110,7 @@ if missing:
 limits = {'AD': (0, 90), 'AA': (0, 65), 'DA': (0, 20), 'DD': (0, 80)}
 limits = {'AD': (0,100), 'AA': (0,100), 'DA': (0,100), 'DD': (0,100)}
 
-types = ['AD','AA','DA','DD']
+types = ['AA','AD','DA','DD']   # the main figures' order
 
 fig, axes = plt.subplots(2, 2, figsize=(6, 6), sharex=False, sharey=False)
 axes = axes.ravel()
@@ -134,9 +134,8 @@ for ax, t in zip(axes, types):
     ax.set_title(f'{t} (r={r_val:.2f})' if pd.notna(r_val) else t, fontsize=7)
     ax.grid(True, ls=':', lw=0.4)
     ax.set_xlabel('Princeton (%)', size=6)
-    ax.set_ylabel('Buhamn (%)', size=6)
+    ax.set_ylabel('Buhmann (%)', size=6)
 
-fig.suptitle('Percent by comp type per npil: Princeton (x) vs Old (y)', y=0.98, fontsize=10)
 plt.tight_layout()
 _out_dir = OUTPUT_DIR / "fig3" / "si_x_npil_x_synapse_detection"
 _out_dir.mkdir(parents=True, exist_ok=True)
@@ -175,7 +174,7 @@ for ax, t in zip(axes, types):
     ax.set_title(f'{t} (r={r_val:.2f})' if pd.notna(r_val) else t, fontsize=7)
     ax.grid(True, ls=':', lw=0.4)
     ax.set_xlabel('Princeton (%)', size=8)
-    ax.set_ylabel('Buhamn (%)', size=8)
+    ax.set_ylabel('Buhmann (%)', size=8)
 
 # --- build legend entries: numbers + npil names, colored accordingly ---
 handles = []
@@ -189,7 +188,6 @@ for npil, idx in npil_to_id.items():
 fig.legend(handles, labels, loc='center left', bbox_to_anchor=(1.02, 0.5),
            fontsize=5, title="NPIL mapping")
 
-fig.suptitle('Percent by comp type per npil: Princeton (x) vs Old (y)', y=0.98, fontsize=8)
 plt.tight_layout(rect=[0,0,0.85,1])  # leave space for legend
 plt.savefig(
     _out_dir / "SI_corrr_npils_numbers.svg",

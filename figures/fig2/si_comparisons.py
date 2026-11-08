@@ -267,7 +267,7 @@ ref_max = max(40000, df.groupby(pd.cut(df['SI_princeton'], bins=bins)).size().ma
 # --- Figure layout: horizontal layout ------------------------
 # ------------------------------------------------------------
 fig = plt.figure(figsize=(12, 4.2))  # wide and short
-gs = GridSpec(2, 22, figure=fig, wspace=0.6, hspace=0.4)
+gs = GridSpec(2, 23, figure=fig, wspace=1.0, hspace=0.4)   # one empty column after the big panel
 
 # Left: overall correlation panel
 ax_general = fig.add_subplot(gs[:, :5])
@@ -276,11 +276,11 @@ ax_general = fig.add_subplot(gs[:, :5])
 axes = {}
 col_width_top = 17 // 4
 for i, cls in enumerate(upper4):
-    axes[cls] = fig.add_subplot(gs[0, 5 + i * col_width_top:5 + (i + 1) * col_width_top])
+    axes[cls] = fig.add_subplot(gs[0, 6 + i * col_width_top:6 + (i + 1) * col_width_top])
 
 col_width_bottom = 17 // 5
 for j, cls in enumerate(rest):
-    axes[cls] = fig.add_subplot(gs[1, 5 + j * col_width_bottom:5 + (j + 1) * col_width_bottom])
+    axes[cls] = fig.add_subplot(gs[1, 6 + j * col_width_bottom:6 + (j + 1) * col_width_bottom])
 
 # ------------------------------------------------------------
 # --- (A) General panel (left) -------------------------------
@@ -303,11 +303,12 @@ ax_general.scatter(
 ax_general.plot([0, 1], [0, 1], '--', lw=1, color='black')
 ax_general.set_xlim(0, 1)
 ax_general.set_ylim(0, 1)
-ax_general.set_xlabel('Segregation Index (SI_princeton)')
-ax_general.set_ylabel('Mean SI')
+ax_general.set_xlabel('SI, Princeton (0.05 bins)')
+ax_general.set_ylabel('Mean SI, Buhmann')
+ax_general.set_aspect('equal')
 ax_general.set_xticks([0, 0.25, 0.5, 0.75, 1])
 r_all = round(df['SI_princeton'].corr(df['SI']), 2)
-ax_general.set_title(f'Overall correlation\nr = {r_all}', fontsize=11)
+ax_general.set_title(f'All neurons, r = {r_all}', fontsize=11)
 
 # ------------------------------------------------------------
 # --- (B) Per-super_class panels (right) ---------------------
@@ -330,10 +331,13 @@ for i, (superclass, ax) in enumerate(axes.items()):
     ax.plot([0, 1], [0, 1], '--', lw=1, color='black')
 
     title_r = "N/A" if r_val is None or np.isnan(r_val) else f"{r_val:.2f}"
-    ax.set_title(f"{superclass}\nr={title_r}", fontsize=9)
+    ax.set_title(f"{superclass.replace('_', ' ')}\nr = {title_r}", fontsize=9)
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
-    ax.set_xticks([0, 0.25, 0.5, 0.75, 1])
+    ax.set_xticks([0, 0.5, 1])   # three ticks, so neighbouring panels' labels don't run together
+    ax.set_yticks([0, 0.5, 1])
+    ax.set_xticklabels(['0', '0.5', '1'])
+    ax.set_yticklabels(['0', '0.5', '1'])
 
     # Remove y labels/ticks for all but leftmost in each row
     if (i not in [0, 4]):  # keep first of each row
@@ -348,7 +352,7 @@ for i, (superclass, ax) in enumerate(axes.items()):
 # ------------------------------------------------------------
 # --- Shared x label for all panels --------------------------
 # ------------------------------------------------------------
-fig.text(0.6, 0.04, 'Segregation Index (SI_princeton)', ha='center', fontsize=10)
+fig.text(0.6, 0.04, 'SI, Princeton (0.05 bins)', ha='center', fontsize=10)
 
 # ------------------------------------------------------------
 # --- Shared legend (absolute neuron counts, extended) -------
@@ -366,18 +370,17 @@ fig.legend(
     fontsize=7,
     title_fontsize=7,
     loc='upper left',
-    bbox_to_anchor=(0.06, 0.97)
+    bbox_to_anchor=(1.0, 0.95)   # right of the panels, clear of every axis
 )
 
 # ------------------------------------------------------------
 # --- Final layout -------------------------------------------
 # ------------------------------------------------------------
 sns.despine(top=True, right=True)
-fig.suptitle('SI vs. SI_princeton: Overall and per super_class', y=0.995, fontsize=11)
 plt.tight_layout(rect=[0, 0.05, 1, 0.96])  # leave space for shared x label
 plt.savefig(
     _out_dir / "SI_corr_combined_general_left_blue_clean.svg",
-    format='svg'
+    format='svg', bbox_inches='tight'   # keeps the legend at the right inside the file
 )
 plt.show()
 

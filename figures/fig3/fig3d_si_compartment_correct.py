@@ -1,7 +1,8 @@
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from config import NEURON_TABLE_FTR, SYNAPSE_TABLE_FTR, SI_UPDATED_FTR, OUTPUT_DIR, METHODS_DIR
+from config import (NEURON_TABLE_FTR, SYNAPSE_TABLE_FTR, SI_UPDATED_FTR, OUTPUT_DIR, METHODS_DIR,
+                    NEURON_TABLE_NONP_FTR, SYNAPSE_TABLE_NONP_FTR)
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
 import os
@@ -15,13 +16,24 @@ mpl.rcParams['svg.fonttype'] = 'none'
 mpl.rcParams['font.family'] = 'Arial'
 from methods.figure_text import use_arial_8
 use_arial_8()   # every text in Arial 8 pt when a figure is saved
+# DATA_SOURCE "princeton" (Fig 3D-3F): the Princeton synapses, each cell's SI from SI_UPDATED_FTR.
+# DATA_SOURCE "buhmann" (Supp 3-S2 A-B): the Buhmann synapses and neuron table (NEURON_TABLE_NONP_FTR,
+# SYNAPSE_TABLE_NONP_FTR), whose SI is the cell's SI on the Buhmann synapses; written to a folder of its own.
+# FIG3D_DATA_SOURCE in the environment overrides the setting.
+DATA_SOURCE = os.environ.get("FIG3D_DATA_SOURCE", "princeton")
+if DATA_SOURCE not in ("princeton", "buhmann"):
+    raise SystemExit(f'DATA_SOURCE must be "princeton" or "buhmann", not {DATA_SOURCE!r}')
 #allsynapses=allsynapses.head(1000000)
-nodesG=pd.read_feather(NEURON_TABLE_FTR)
-#%%
-nodesG=nodesG.drop(columns=['SI'])
-all_SI_df=pd.read_feather(SI_UPDATED_FTR)
-all_SI_df=all_SI_df.rename(columns={'root_id':'neuron'})
-nodesG=nodesG.merge(all_SI_df,on='neuron',how='left').dropna(subset='SI')
+if DATA_SOURCE == "princeton":
+    nodesG=pd.read_feather(NEURON_TABLE_FTR)
+    #%%
+    nodesG=nodesG.drop(columns=['SI'])
+    all_SI_df=pd.read_feather(SI_UPDATED_FTR)
+    all_SI_df=all_SI_df.rename(columns={'root_id':'neuron'})
+    nodesG=nodesG.merge(all_SI_df,on='neuron',how='left').dropna(subset='SI')
+else:
+    nodesG=pd.read_feather(NEURON_TABLE_NONP_FTR).dropna(subset='SI')
+    assert nodesG['neuron'].dtype == np.int64 and nodesG['neuron'].is_unique
 a=nodesG[['neuron','SI','super_class','nodes','primary_type','axon_correct']]
 #%%
 nodesG=nodesG[nodesG['super_class'].isin(['central','optic','visual_projection','visual_centrifugal'])]
@@ -123,6 +135,8 @@ plt.title('SI Distribution and Rolling Correctness (Axon vs Dendrite)')
 plt.tight_layout()
 plt.xlim(0,0.6)
 _out_dir = OUTPUT_DIR / "fig3" / "SI_x_correct_compartment"
+if DATA_SOURCE == "buhmann":
+    _out_dir = OUTPUT_DIR / "fig3" / "SI_x_correct_compartment_buhmann_si_rule"
 _out_dir.mkdir(parents=True, exist_ok=True)
 plt.savefig(_out_dir / "axon_dend_correct_SI_v2.svg")
 plt.show()
@@ -132,7 +146,10 @@ print(f"  Axon → {axon_val:.2f}%")
 print(f"  Dendrite → {dend_val:.2f}%")
 
 #%%
-allsynapses=pd.read_feather(SYNAPSE_TABLE_FTR)
+if DATA_SOURCE == "princeton":
+    allsynapses=pd.read_feather(SYNAPSE_TABLE_FTR)
+else:
+    allsynapses=pd.read_feather(SYNAPSE_TABLE_NONP_FTR).rename(columns={'id': 'synapse_id'})
 #%%
 cell_type = nodesG.set_index('neuron')['primary_type']   # for the 3F pies below
 nodesG=nodesG[['neuron','SI','axon_correct','dend_correct']]
@@ -315,6 +332,10 @@ for name, keep in (("syn_type_same_ptype_pie_mixed.svg", same_type),
 
     #%%
 allsynapses['npil'] = allsynapses['npil'].str.replace(r'_(L|R)$', '', regex=True)
+# synapses outside every neuropil (npil 'None', in the Buhmann table) get no bar
+_no_npil = allsynapses['npil'].isna() | (allsynapses['npil'] == 'None')
+print(f"synapses outside every neuropil, left out of the neuropil bars: {int(_no_npil.sum()):,}")
+allsynapses = allsynapses[~_no_npil]
 
 #%%
 #allsynapses.to_feather(r'C:\Users\user\organised_work\data\783\generated\post_processing_data\article\synapses_783_article_princeton_mixed.ftr')

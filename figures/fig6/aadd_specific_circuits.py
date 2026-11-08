@@ -58,8 +58,8 @@ _out_dir.mkdir(parents=True, exist_ok=True)
 #%% parameters
 SI_threshold = 0.1
 # Which synapse detection the tables come from: 'buhmann' (NEURON_TABLE_NONP_FTR and
-# SYNAPSE_TABLE_NONP_FTR, the tables the Buhmann comparison scripts read; not built by this
-# repository) or 'princeton' (the tables of the rest of the paper). The submitted Fig 6 was made
+# SYNAPSE_TABLE_NONP_FTR, the tables the Buhmann comparison scripts read: the authors' published ones, or under
+# SPLIT_METHOD = "maxsi" the ones processing/buhmann_maxsi_labels.py builds) or 'princeton' (the tables of the rest of the paper). The submitted Fig 6 was made
 # from the Buhmann tables: with 'buhmann' every Fig 6D box and whisker is reproduced exactly, and
 # 6A-C and the per-type bars of Supp 6-S1/S2 come close but not exactly, because the Buhmann
 # table's primary_type is not Codex consolidated_cell_types783 (it merges e.g. FS4A/B/C and has
@@ -88,7 +88,7 @@ synapse_table = SYNAPSE_TABLE_NONP_FTR if DATA_SOURCE == 'buhmann' else SYNAPSE_
 for table in (neuron_table, synapse_table):
     if not table.exists():
         raise FileNotFoundError(f"{table} is missing. With DATA_SOURCE = 'buhmann' this script needs the Buhmann "
-                                "tables, which this repository does not build (docs/data_availability.md); "
+                                "tables (published: docs/data_availability.md; MaxSI: processing/buhmann_maxsi_labels.py); "
                                 "set DATA_SOURCE = 'princeton' to run it on the paper's other tables.")
 nodes = pd.read_feather(neuron_table, columns=['root_id', 'primary_type', 'SI'])
 nodes['root_id'] = nodes['root_id'].astype(np.int64)
