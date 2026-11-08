@@ -59,6 +59,7 @@ pre_g = pd.pivot_table(
     index='pre',
     columns='pre_compartment',
     aggfunc='sum',
+    fill_value=0,
 )
 
 post_g=connectors.groupby(by=['post','post_compartment']).size().reset_index()
@@ -68,24 +69,34 @@ post_g = pd.pivot_table(
     index='post',
     columns='post_compartment',
     aggfunc='sum',
+    fill_value=0,
 )
-# the compartment columns by name, so that a split with no linker (MaxSI) still gets an (empty) L column
+# the compartment columns by name, so that a split with no linker (MaxSI) still gets an L column (of zeros)
 assert set(pre_g.columns) <= {'A','D','L'} and set(post_g.columns) <= {'A','D','L'}, 'unexpected compartment label'
-pre_g=pre_g.reindex(columns=['A','D','L'])
-post_g=post_g.reindex(columns=['A','D','L'])
+pre_g=pre_g.reindex(columns=['A','D','L'], fill_value=0)
+post_g=post_g.reindex(columns=['A','D','L'], fill_value=0)
 pre_g=pre_g.reset_index()
 pre_g.columns=['neuron','pre_A','pre_D','pre_L']
 post_g=post_g.reset_index()
 post_g.columns=['neuron','post_A','post_D','post_L']
-merged=pre_g.merge(post_g)
+# Outer join with missing counts as 0: a cell seen only as pre or only as post, or with no synapse of some
+# compartment type (pre or post), keeps its row.
+merged=pre_g.merge(post_g, on='neuron', how='outer').fillna(0)
 
 merged['axon_percent']=merged['pre_A']/(merged['post_A']+merged['pre_A'])*100
 merged['dend_percent']=merged['post_D']/(merged['post_A']+merged['post_D'])*100
-merged=merged.dropna(subset=['axon_percent','dend_percent'])
 
-merged['correct_pos']=(merged['pre_A']+merged['post_D'])/(merged['post_A']+merged['pre_A']+merged['post_A']+merged['post_D'])*100
+# Share of correctly placed synapses, as for the adult: (pre_A + post_D) / (pre_A + post_A + pre_D + post_D), linker
+# synapses left out; NaN for a cell with no synapse on the axon or the dendrite.
+ad_total=merged['pre_A']+merged['post_A']+merged['pre_D']+merged['post_D']
+merged['correct_pos']=((merged['pre_A']+merged['post_D'])/ad_total.where(ad_total>0))*100
 
-SI_larva=SI_larva.merge(merged)
+SI_larva=SI_larva.merge(merged, on='neuron', how='left')
+# The same rule as the adult side, whose dropna on dend_correct and axon_correct leaves out cells with no synapse on
+# the axon or none on the dendrite: a larval cell is kept if it has at least one synapse (pre or post) on each side.
+# A cell with one empty side is left out because its split leaves that side without synapses.
+SI_larva[['pre_A','post_A','pre_D','post_D']]=SI_larva[['pre_A','post_A','pre_D','post_D']].fillna(0)
+SI_larva=SI_larva[(SI_larva['pre_A']+SI_larva['post_A']>0) & (SI_larva['pre_D']+SI_larva['post_D']>0)]
 df_comb_larva=SI_larva[['correct_pos','SI']].sort_values(by='SI').dropna()
 
 
