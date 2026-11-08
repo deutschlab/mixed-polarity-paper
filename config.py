@@ -234,6 +234,16 @@ LARVA_MAXSI_SUMMARY_FTR  = LARVA_MAXSI_SYNAPSES_FTR.parent / "larva_maxsi_summar
 LARVA_MAXSI_FAILURES_FTR = LARVA_MAXSI_SYNAPSES_FTR.parent / "larva_maxsi_failures.ftr"   # cells whose split failed
 LARVA_MAXSI_PC1_FTR      = LARVA_MAXSI_SYNAPSES_FTR.parent / "larva_maxsi_pc1.ftr"        # processing/larva/larva_pc1.py
 
+# --- Buhmann synapses on the MaxSI split (processing/buhmann_maxsi_labels.py) ---
+# The published Buhmann tables (Buhmann synapse detection, SFC split; the tables NEURON_TABLE_NONP_FTR and
+# SYNAPSE_TABLE_NONP_FTR name under "sfc") are read from the published folder whatever PIPELINE_RUN is. The step
+# labels their synapses with the cut step 09 chose for each cell and writes NEURON_TABLE_NONP_FTR and
+# SYNAPSE_TABLE_NONP_FTR under "maxsi" (in MAXSI_SWITCHED below).
+BUHMANN_SYNAPSE_SFC_FTR  = PUBLISHED_DERIVED_DIR / "synapses_783_article.ftr"
+BUHMANN_NEURON_SFC_FTR   = PUBLISHED_DERIVED_DIR / "neuron_data_full_article.ftr"
+BUHMANN_MAXSI_LABEL_BATCH_DIR = _maxsi_path(INTERMEDIATE_DIR / "buhmann_maxsi_labels" / "batches")
+BUHMANN_MAXSI_SUBSET_DIR      = _maxsi_path(INTERMEDIATE_DIR / "buhmann_maxsi_labels" / "subset")   # a run on listed cells only, for checking
+
 # Which split the scripts read: "sfc" (the published synapse flow centrality split, steps 01-05), or "maxsi",
 # "minfisherp" or "maxphi" (step 09 run with that METHOD). Steps 04 and 05 always write the SFC tables and
 # SI_updated.ftr, and step 09 always reads them (the *_SFC_FTR names). Under "maxsi", the two tables and every table
@@ -256,6 +266,8 @@ MAXSI_SWITCHED = [
     "CONNECTIONS_FILTERED_FTR", "CONNECTIONS_RECI_FILTERED_FTR", "CONNECTIONS_TABLE_FTR",
     # step 07 (step 08 always reads the SFC cells, so its table doesn't switch)
     "PCA_TABLE_FTR",
+    # the Buhmann tables (processing/buhmann_maxsi_labels.py writes the MaxSI ones)
+    "NEURON_TABLE_NONP_FTR", "SYNAPSE_TABLE_NONP_FTR",
     # tables figure scripts write
     "PC1_TABLE_CSV", "PC1_TABLE_PREDICTIONS_CSV", "FIG4_HELDOUT_MODELS_FTR", "FIG4_HELDOUT_CONFUSION_FTR", "LARVA_4D_RESULTS_FTR", "LARVA_4D_CONFUSION_FTR", "RECI_PROP_FTR", "NEURONS_NT_BWF_FTR",
     "FILOPODIA_NODES_BASELINE_FTR", "FILOPODIA_NODES_NO_FILOPODIA_FTR", "FILOPODIA_NODES_SAMPLEOUT_FTR",
@@ -265,7 +277,7 @@ MAXSI_SWITCHED = [
     "LARVA_SI_FTR", "LARVA_SYNAPSES_FTR",
 ]
 # Tables that exist only for the SFC split (or for Buhmann's synapses): Majd's Fig 7 tables (bouton, filopodia,
-# inertia, t2), Dudi's 4E table and the Buhmann tables (Fig 6 and some supplementary panels). There is no MaxSI
+# inertia, t2), Dudi's 4E table and the Buhmann connection table, which no script reads. There is no MaxSI
 # version, so under "maxsi" they point into the _maxsi folders too, where nothing writes them: a script that reads one
 # stops, instead of drawing an SFC panel among the MaxSI ones. Don't copy the SFC files there to make such a script
 # run. Two tables stay where they are: neuron_data.ftr (its scripts use only cell-type columns) and Majd's two
@@ -277,10 +289,11 @@ MAXSI_SWITCHED = [
 MAXSI_NOT_AVAILABLE = [
     "BOUTON_TABLE_FTR", "BOUTON_FILOPODIA_TABLE_FTR", "FILOPODIA_FILTERED_FTR", "FILOPODIA_RECIPROCAL_FTR",
     "BOUTON_INERTIA_FTR", "SYNAPSES_NO_SELF_FTR",
-    "PER_TYPE_SUMMARY_CSV", "NEURON_TABLE_NONP_FTR", "SYNAPSE_TABLE_NONP_FTR", "CONNECTIONS_TABLE_NONP_FTR",
+    "PER_TYPE_SUMMARY_CSV", "CONNECTIONS_TABLE_NONP_FTR",
 ]
 # Under PIPELINE_RUN = "rebuild" the same co-authors' tables have no rebuilt version either (they were made from the
-# published tables). Those in data/derived already point into data/derived_rebuild, where nothing writes them; any in
+# published tables; the two Buhmann tables have a MaxSI rebuild only, from processing/buhmann_maxsi_labels.py). Those
+# in data/derived already point into data/derived_rebuild, where nothing writes them; any in
 # data/raw would be moved into data/raw_rebuild here (the list has none: the two flag tables in data/raw stay, as above).
 # So their scripts stop rather than mix published and rebuilt tables.
 REBUILD_NOT_AVAILABLE = MAXSI_NOT_AVAILABLE
