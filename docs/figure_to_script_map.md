@@ -101,7 +101,8 @@ whether neurons within the same type use the same synapse-type pattern.
 | Fig 3H | `figures/fig3/syntype_x_strength_x_identity.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_x_strength_x_identity/` |
 | Fig 3I | `figures/fig3/syn_type_prob_based_on_other_syn_type_princeton.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR` | `outputs/fig3/syn_type_prob/` |
 | Fig 3J | `figures/fig3/syntype_x_features.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_x_features/` |
-| Fig 3 Supp 1A (Buhmann curve) / 2A/B | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_correct_compartment_buhmann/` |
+| Fig 3 Supp 1A (Buhmann curve; old-rule pies) | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_correct_compartment_buhmann/` |
+| Fig 3 Supp 2A/B (3D's rule: a cell below SI 0.1 is mixed) | `figures/fig3/fig3d_si_compartment_correct.py` with `DATA_SOURCE = "buhmann"` (or `FIG3D_DATA_SOURCE=buhmann`) | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/SI_x_correct_compartment_buhmann_si_rule/` (A: `synaptic_type_pie2_v2.svg`, B: `synaptic_type_npils2_v2.svg`) |
 | Fig 3 Supp 2C | `figures/fig3/si_x_npil_x_synapse_detection.py` | `SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_npil_x_synapse_detection/` |
 
 > Fig 3E is `synaptic_type_npils2_v2.svg` (line 440 of `fig3d_si_compartment_correct.py`). The script's
@@ -229,8 +230,8 @@ like every other figure of the revised paper: `NEURON_TABLE_FTR` and `SYNAPSE_TA
 if `SI_SOURCE = 'SI_updated'`). The submitted Figure 6 was made from the Buhmann tables; `DATA_SOURCE = 'buhmann'`
 reproduces it: every Fig 6D box and whisker exactly, Fig 6A–C and the per-type bars of Supp 6-S1/S2 closely
 (the Buhmann table's `primary_type` is not the Codex consolidated cell types the MATLAB script read), and the
-Supp 6-S3 graphs with the same edges. This repository does not build the Buhmann tables (see
-`docs/data_availability.md`).
+Supp 6-S3 graphs with the same edges. This repository does not build the published Buhmann tables; it builds MaxSI versions of them
+(`processing/buhmann_maxsi_labels.py`; see `docs/data_availability.md`).
 
 | Panel | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|

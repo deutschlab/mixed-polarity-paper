@@ -178,6 +178,7 @@ python processing/phi_threshold.py                     # optional, after 05 and 
 python processing/09_maxsi_synapse_labels.py           # optional -> data/derived_maxsi/ (MaxSI synapse, neuron and SI tables)
 STEP09_METHOD=minfisherp python processing/09_maxsi_synapse_labels.py   # optional -> data/derived_minfisherp/
 STEP09_METHOD=maxphi python processing/09_maxsi_synapse_labels.py   # optional -> data/derived_maxphi/
+python processing/buhmann_maxsi_labels.py               # optional, "rebuild" + "maxsi" -> data/derived_rebuild_maxsi/; needs the published Buhmann tables, not deposited
 ```
 
 Notes:
@@ -276,6 +277,7 @@ processing/         the pipeline, from raw data to derived tables
   build_raw_synapse_table.py               optional: the raw synapse table from the Codex CSV (for 08 and the split-method figures)
   08_alternative_split_methods.py          optional: two single-node cuts compared with the published split
   09_maxsi_synapse_labels.py               optional: synapse, neuron and SI tables under the MaxSI, MinFisherP or MaxPhi split
+  buhmann_maxsi_labels.py                  optional: the Buhmann synapse and neuron tables on step 09's MaxSI cuts
   phi_threshold.py                         optional: the Phi cutoff that matches SI = 0.1
   larva/larva_process.py                   larval SI for Figure 2A
   larva/larva_maxsi_labels.py              larval SI and synapse tables on the MaxSI split
