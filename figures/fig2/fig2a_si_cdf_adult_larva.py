@@ -87,7 +87,7 @@ merged['axon_percent']=merged['pre_A']/(merged['post_A']+merged['pre_A'])*100
 merged['dend_percent']=merged['post_D']/(merged['post_A']+merged['post_D'])*100
 
 # Share of correctly placed synapses, as for the adult: (pre_A + post_D) / (pre_A + post_A + pre_D + post_D), linker
-# synapses left out; NaN for a cell with no synapse on the axon or the dendrite.
+# synapses left out; NaN for a cell with no A or D synapse at all.
 ad_total=merged['pre_A']+merged['post_A']+merged['pre_D']+merged['post_D']
 merged['correct_pos']=((merged['pre_A']+merged['post_D'])/ad_total.where(ad_total>0))*100
 
