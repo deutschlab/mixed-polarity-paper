@@ -23,6 +23,11 @@ use_arial_8()   # every text in Arial 8 pt when a figure is saved
 DATA_SOURCE = os.environ.get("FIG3D_DATA_SOURCE", "princeton")
 if DATA_SOURCE not in ("princeton", "buhmann"):
     raise SystemExit(f'DATA_SOURCE must be "princeton" or "buhmann", not {DATA_SOURCE!r}')
+# MIXED_RULE (see the labelling cell below): "si" for the main figure, "cutoffs" for the old-rule supplement.
+# FIG3D_MIXED_RULE in the environment overrides the setting; "cutoffs" writes to a folder of its own.
+MIXED_RULE = os.environ.get("FIG3D_MIXED_RULE", "si")
+if MIXED_RULE not in ("si", "cutoffs"):
+    raise SystemExit(f'MIXED_RULE must be "si" or "cutoffs", not {MIXED_RULE!r}')
 #allsynapses=allsynapses.head(1000000)
 if DATA_SOURCE == "princeton":
     nodesG=pd.read_feather(NEURON_TABLE_FTR)
@@ -90,7 +95,8 @@ ax1.legend(loc='upper left')
 # DISPLAY_HALF_WIDTH of it, so the smoothing has the same width in SI everywhere (a fixed number of cells would span a
 # much wider SI range where cells are few, near SI 0.5 and above). The cut-offs at SI 0.1 (axon_val, dend_val, below)
 # still come from the trailing 400-cell mean above, so the old-rule labels and every number they feed are unchanged;
-# the drawn curves differ from them at SI 0.1 by well under a point.
+# on the Princeton synapses the drawn curves differ from them at SI 0.1 by well under a point, on the Buhmann
+# synapses by about one.
 DISPLAY_HALF_WIDTH = 0.0125
 ax2 = ax1.twinx()
 for col, color, label in [('axon_correct', '#92278f', 'Axon rolling correct (%)'),
@@ -130,13 +136,16 @@ ax2.axhline(dend_val, color='#fbb042', linestyle='--', lw=1, alpha=0.7)
 ax2.text(0.45, axon_val, f'Axon: {axon_val:.2f}%', color='#92278f', va='bottom',size=15)   # inside the axes (x limit 0.6)
 ax2.text(0.45, dend_val-0.5, f'Dend: {dend_val:.2f}%', color='#fbb042', va='bottom',size=15)
 
-# --- Titles and layout ---
-plt.title('SI Distribution and Rolling Correctness (Axon vs Dendrite)')
+# --- Layout ---
 plt.tight_layout()
 plt.xlim(0,0.6)
 _out_dir = OUTPUT_DIR / "fig3" / "SI_x_correct_compartment"
 if DATA_SOURCE == "buhmann":
     _out_dir = OUTPUT_DIR / "fig3" / "SI_x_correct_compartment_buhmann_si_rule"
+if MIXED_RULE == "cutoffs":
+    _out_dir = OUTPUT_DIR / "fig3" / "SI_x_correct_compartment_cutoffs_rule"
+    if DATA_SOURCE == "buhmann":
+        _out_dir = OUTPUT_DIR / "fig3" / "SI_x_correct_compartment_buhmann_cutoffs_rule"
 _out_dir.mkdir(parents=True, exist_ok=True)
 plt.savefig(_out_dir / "axon_dend_correct_SI_v2.svg")
 plt.show()
@@ -156,8 +165,7 @@ nodesG=nodesG[['neuron','SI','axon_correct','dend_correct']]
 #%%
 # MIXED_RULE "si" (the main figure): a cell with SI below 0.1 counts as mixed, in both its axon and its dendrite.
 # MIXED_RULE "cutoffs" (the supplement): a compartment counts as mixed when its share of correct synapses is not
-# above the rolling curve's value at SI 0.1 (axon_val for axons, dend_val for dendrites).
-MIXED_RULE = "si"
+# above the rolling curve's value at SI 0.1 (axon_val for axons, dend_val for dendrites). Set at the top.
 if MIXED_RULE == "si":
     nodesG['axon_label'] = np.where(nodesG['SI'] >= 0.1, 'A', 'M')
 else:
@@ -316,16 +324,24 @@ for name, keep in (("syn_type_same_ptype_pie_mixed.svg", same_type),
     order = [k for k in ['AA', 'AD', 'DA', 'DD'] if k in counts.index]
     counts = counts.reindex(order + [k for k in counts.index if k not in order])
     fig, ax = plt.subplots(figsize=(4, 4))
-    _, _, pcts = ax.pie(counts, labels=counts.index, colors=[custom_palette.get(k, '#4F4F4F') for k in counts.index],
-                        autopct='%1.1f%%', startangle=90, counterclock=False,
-                        wedgeprops={'linewidth': 2, 'edgecolor': 'white'})
-    for label, pct in zip(counts.index, pcts):
-        if label == 'Mixed':
-            pct.set_color('white')   # readable on the black slice
+    _, texts, pcts = ax.pie(counts, labels=counts.index, colors=[custom_palette.get(k, '#4F4F4F') for k in counts.index],
+                            autopct='%1.1f%%', startangle=90, counterclock=False,
+                            wedgeprops={'linewidth': 2, 'edgecolor': 'white'})
+    prev = None
+    for label, txt, pct in zip(counts.index, texts, pcts):
+        if label in ('Mixed', 'AA', 'AD'):
+            pct.set_color('white')   # readable on the dark slices
+        if counts[label] / counts.sum() < 0.02:
+            txt.set_text(f'{label} {pct.get_text()}')   # thin slice: the percentage goes beside its label
+            pct.set_visible(False)
+        x, y = txt.get_position()
+        if prev is not None and abs(y - prev) < 0.12:   # slices run clockwise, so push a crowded label down
+            y = prev - 0.12
+            txt.set_position((x, y))
+        prev = y
     ax.set_title(f"{'Same' if name.startswith('syn_type_same') else 'Different'} type connections, "
                  f"Total Syn: {int(counts.sum()):,}")
-    plt.tight_layout()
-    plt.savefig(_out_dir / name)
+    plt.savefig(_out_dir / name, bbox_inches='tight')
     plt.close(fig)
     print(name, int(counts.sum()), (counts / counts.sum() * 100).round(1).to_dict())
 
@@ -396,7 +412,6 @@ comp_counts_pct.plot(
 
 ax.set_ylabel('Percentage of comp2 combinations')
 ax.set_xlabel('Neuropil (npil)')
-ax.set_title('Stacked Distribution of comp2 per npil (sorted by AD%)')
 ax.legend(title='comp2', bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
 plt.savefig(_out_dir / "synaptic_type_npils_bign_v2.svg")
@@ -487,7 +502,6 @@ comp_counts_pct.plot(
 # --- Style ---
 ax.set_ylabel('Percentage of comp2 combinations')
 ax.set_xlabel('Neuropil (npil)')
-ax.set_title('Stacked Distribution of comp2 per npil (sorted by AD%)')
 ax.legend(title='comp2', bbox_to_anchor=(1.05, 1), loc='upper left')
 
 # --- Color x-axis labels by neuropil family ---

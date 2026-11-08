@@ -101,12 +101,14 @@ whether neurons within the same type use the same synapse-type pattern.
 | Fig 3H | `figures/fig3/syntype_x_strength_x_identity.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_x_strength_x_identity/` |
 | Fig 3I | `figures/fig3/syn_type_prob_based_on_other_syn_type_princeton.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR` | `outputs/fig3/syn_type_prob/` |
 | Fig 3J | `figures/fig3/syntype_x_features.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_x_features/` |
-| Fig 3 Supp 1A (Buhmann curve; old-rule pies) | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_correct_compartment_buhmann/` |
+| Fig 3 Supp 1A, Buhmann curve, and the old-rule 3D, 3E and 3F on the Buhmann synapses | `figures/fig3/fig3d_si_compartment_correct.py` with `FIG3D_DATA_SOURCE=buhmann` and `FIG3D_MIXED_RULE=cutoffs` | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/SI_x_correct_compartment_buhmann_cutoffs_rule/` (the curve is `axon_dend_correct_SI_v2.svg`) |
+| Fig 3 Supp 1A (Buhmann curve, earlier version; old-rule pies) | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_correct_compartment_buhmann/` |
 | Fig 3 Supp 2A/B (3D's rule: a cell below SI 0.1 is mixed) | `figures/fig3/fig3d_si_compartment_correct.py` with `DATA_SOURCE = "buhmann"` (or `FIG3D_DATA_SOURCE=buhmann`) | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/SI_x_correct_compartment_buhmann_si_rule/` (A: `synaptic_type_pie2_v2.svg`, B: `synaptic_type_npils2_v2.svg`) |
 | Fig 3 Supp 2C | `figures/fig3/si_x_npil_x_synapse_detection.py` | `SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_npil_x_synapse_detection/` |
 
 > Fig 3E is `synaptic_type_npils2_v2.svg` (line 440 of `fig3d_si_compartment_correct.py`). The script's
-> `MIXED_RULE` picks how a compartment is called mixed. `"si"`, the setting for the main 3D and 3E, marks both
+> `MIXED_RULE` (or `FIG3D_MIXED_RULE` in the environment) picks how a compartment is called mixed; `"cutoffs"` writes to
+> `outputs/fig3/SI_x_correct_compartment_cutoffs_rule/` (with `"buhmann"`, `..._buhmann_cutoffs_rule/`). `"si"`, the setting for the main 3D and 3E, marks both
 > compartments of a cell mixed when the cell's SI (from `SI_UPDATED_FTR`, lines 21-24) is below 0.1. `"cutoffs"`, for
 > the supplement, marks a compartment mixed when its share of correct synapses is not above the rolling curve's value
 > at SI 0.1, the rule of the published 3D and 3E. The published panels were drawn on the neuron table's SI: with lines
