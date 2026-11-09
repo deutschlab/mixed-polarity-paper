@@ -111,9 +111,19 @@ PORTS = {
         ["Each violin value is one neuron and compartment (the mean of 'filopodia' over its boutons), with no minimum bouton count.",
          "The 'All' violins use every compartment row with no SI filter; the axon and dendrite violins keep SI >= 0.1.",
          "Boutons with no compartment are left out of the violins but count in the bouton-level means that order the super-classes.",
-         "Positions 3 and 4 of the non-intrinsic order are typed in ('sensory', 'ascending'); on these tables that is already the computed order."],
+         "'sensory' and 'ascending' are moved to positions 3 and 4 of the non-intrinsic order, and the other classes keep the",
+         "computed order, so no class is dropped or repeated (the original wrote the two names over those positions).",
+         "On the published tables this is the computed order."],
         [("plt.show()\nplt.savefig(\n    _out_dir / 'super_fractions_split2_new(2).svg',\n    format='svg'\n)",
-          "plt.savefig(\n    _out_dir / 'super_fractions_split2_new(2).svg',\n    format='svg'\n)\nplt.show()")]),
+          "plt.savefig(\n    _out_dir / 'super_fractions_split2_new(2).svg',\n    format='svg'\n)\nplt.show()"),
+         ("non_intrinsic_order[3]='sensory'\nnon_intrinsic_order[4]='ascending'\n",
+          "# 'sensory' and 'ascending' are taken out first, then put at positions 3 and 4 (each only if present);\n"
+          "# the other classes keep the computed order\n"
+          "_moved = [_sc for _sc in ['sensory', 'ascending'] if _sc in non_intrinsic_order]\n"
+          "non_intrinsic_order = [_sc for _sc in non_intrinsic_order if _sc not in _moved]\n"
+          "for _pos, _sc in [(3, 'sensory'), (4, 'ascending')]:\n"
+          "    if _sc in _moved:\n"
+          "        non_intrinsic_order.insert(_pos, _sc)\n")]),
     "fig7g.py": (
         "fig7g_filopodia_fraction_x_si.py",
         "Fig 7G: fraction of boutons with a postsynaptic terminal (left) and postsynaptic sites per bouton, among boutons "
@@ -122,7 +132,10 @@ PORTS = {
          "The dashed lines at 0.24 and 0.75 are typed in; the 'All' lines use every super-class with no SI filter.",
          "The axon and dendrite lines keep intrinsic boutons with SI >= 0.1 (left) or SI > 0.1 (right), binned in equal-count",
          "SI bins over axon and dendrite boutons together; r and p are computed over boutons, not neurons.",
-         "p below 0.001 is written '< 0.001', so the labels stay Arial 8 pt; above it, '=' and three decimals."],
+         "p below 0.001 is written '< 0.001', so the labels stay Arial 8 pt; above it, '=' and three decimals.",
+         "The x axes run to 0.9 (left) and 0.8 (right) as in the original, and widen to 1 (ticks 0 to 1 by 0.2) only when",
+         "a plotted bin centre (si_center of any of the three lines) lies past that limit.",
+         "After each plot it prints a line if a plotted value lies above the panel's y limit (0.9 left, 8 right)."],
         [("plt.show()\n# plt.savefig(\n#     _out_dir / 'SI_vs_fraction_all_new.svg',\n#     format='svg'\n# )",
           "plt.savefig(\n    _out_dir / 'SI_vs_fraction_all_new.svg',\n    format='svg'\n)\nplt.show()"),
          ("# plt.savefig(\n#     _out_dir / 'SI_vs_post_on_bouton_ALL_AXON_DENDRITE_2_new.svg',\n#     format='svg'\n# )",
@@ -130,7 +143,29 @@ PORTS = {
          ('# 8. Helper for p-value formatting\n# ----------------------------------------------------\ndef format_p(p, threshold=1e-3, min_exp=-30):\n    if p <= 0 or not np.isfinite(p):\n        return rf"<10^{{{min_exp}}}"\n    if p < threshold:\n        exp = int(np.floor(np.log10(p)))\n        if exp < min_exp:\n            return rf"<10^{{{min_exp}}}"\n        return rf"<10^{{{exp}}}"\n    return f"{p:.3f}"',
           '# 8. Helper for p-value formatting\n# ----------------------------------------------------\ndef format_p(p, threshold=1e-3):\n    # p below the threshold is written \'< 0.001\', so every character stays Arial 8 pt (a maths exponent is drawn smaller)\n    if not np.isfinite(p):\n        return "=n/a"\n    if p < threshold:\n        return f"<{threshold:g}"\n    return f"={p:.3f}"'),
          ('# 6. Helper for p-value formatting\n# ----------------------------------------------------\ndef format_p(p, threshold=1e-3, min_exp=-30):\n    if p <= 0 or not np.isfinite(p):\n        return rf"<10^{{{min_exp}}}"\n    if p < threshold:\n        exp = int(np.floor(np.log10(p)))\n        if exp < min_exp:\n            return rf"<10^{{{min_exp}}}"\n        return rf"<10^{{{exp}}}"\n    return f"{p:.3f}"',
-          '# 6. Helper for p-value formatting\n# ----------------------------------------------------\ndef format_p(p, threshold=1e-3):\n    # p below the threshold is written \'< 0.001\', so every character stays Arial 8 pt (a maths exponent is drawn smaller)\n    if not np.isfinite(p):\n        return "=n/a"\n    if p < threshold:\n        return f"<{threshold:g}"\n    return f"={p:.3f}"')]),
+          '# 6. Helper for p-value formatting\n# ----------------------------------------------------\ndef format_p(p, threshold=1e-3):\n    # p below the threshold is written \'< 0.001\', so every character stays Arial 8 pt (a maths exponent is drawn smaller)\n    if not np.isfinite(p):\n        return "=n/a"\n    if p < threshold:\n        return f"<{threshold:g}"\n    return f"={p:.3f}"'),
+         ("ax.set_xlim(0, 0.9)\nax.set_ylim(0, 0.9)\n\nticks = [0, 0.2, 0.4,0.6,0.8]\nax.set_xticks(ticks)\nax.set_yticks(ticks)\n",
+          "ax.set_xlim(0, 0.9)\nax.set_ylim(0, 0.9)\n\nticks = [0, 0.2, 0.4,0.6,0.8]\nax.set_xticks(ticks)\nax.set_yticks(ticks)\n"
+          "# the x axis widens to 1 only when a plotted bin centre lies past 0.9\n"
+          "_x_drawn = np.concatenate([A['si_center'].to_numpy(float), D['si_center'].to_numpy(float), binned_all['si_center'].to_numpy(float)])\n"
+          "if _x_drawn.size and np.nanmax(_x_drawn) > 0.9:\n"
+          "    ax.set_xlim(0, 1.0)\n"
+          "    ax.set_xticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])\n"
+          "# a plotted value above the y limit is drawn outside the axes; say so (the drawing is not changed)\n"
+          "_y_drawn = np.concatenate([A['filopodia_fraction'].to_numpy(float), D['filopodia_fraction'].to_numpy(float), binned_all['filopodia_fraction'].to_numpy(float)])\n"
+          "if _y_drawn.size and np.nanmax(_y_drawn) > ax.get_ylim()[1]:\n"
+          "    print(f\"Fig 7G left: {int((_y_drawn > ax.get_ylim()[1]).sum())} plotted values above the y limit {ax.get_ylim()[1]:g} (max {np.nanmax(_y_drawn):.3f})\")\n"),
+         ("plt.xlim(0, 0.8)\nplt.ylim(0, 8)\n\nplt.xticks([0, 0.2, 0.4, 0.6, 0.8])\nplt.yticks([0, 2, 4, 6, 8])\n",
+          "plt.xlim(0, 0.8)\nplt.ylim(0, 8)\n\nplt.xticks([0, 0.2, 0.4, 0.6, 0.8])\nplt.yticks([0, 2, 4, 6, 8])\n"
+          "# the x axis widens to 1 only when a plotted bin centre lies past 0.8\n"
+          "_x_drawn = np.concatenate([binned_all['si_center'].to_numpy(float), A['si_center'].to_numpy(float), D['si_center'].to_numpy(float)])\n"
+          "if _x_drawn.size and np.nanmax(_x_drawn) > 0.8:\n"
+          "    plt.xlim(0, 1.0)\n"
+          "    plt.xticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])\n"
+          "# a plotted value above the y limit is drawn outside the axes; say so (the drawing is not changed)\n"
+          "_y_drawn = np.concatenate([binned_all['fil_count_mean'].to_numpy(float), A['fil_count_mean'].to_numpy(float), D['fil_count_mean'].to_numpy(float)])\n"
+          "if _y_drawn.size and np.nanmax(_y_drawn) > plt.ylim()[1]:\n"
+          "    print(f\"Fig 7G right: {int((_y_drawn > plt.ylim()[1]).sum())} plotted values above the y limit {plt.ylim()[1]:g} (max {np.nanmax(_y_drawn):.3f})\")\n")]),
     "fig7i.py": (
         "fig7i_filopodia_fraction_x_nt.py",
         "Fig 7I: per-neuron fraction of boutons with a postsynaptic terminal, by neurotransmitter.",

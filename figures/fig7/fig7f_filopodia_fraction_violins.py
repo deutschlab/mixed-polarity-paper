@@ -4,7 +4,9 @@
 # Each violin value is one neuron and compartment (the mean of 'filopodia' over its boutons), with no minimum bouton count.
 # The 'All' violins use every compartment row with no SI filter; the axon and dendrite violins keep SI >= 0.1.
 # Boutons with no compartment are left out of the violins but count in the bouton-level means that order the super-classes.
-# Positions 3 and 4 of the non-intrinsic order are typed in ('sensory', 'ascending'); on these tables that is already the computed order.
+# 'sensory' and 'ascending' are moved to positions 3 and 4 of the non-intrinsic order, and the other classes keep the
+# computed order, so no class is dropped or repeated (the original wrote the two names over those positions).
+# On the published tables this is the computed order.
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -76,8 +78,13 @@ mean_all = (
 
 intrinsic_order = [sc for sc in mean_all.index if sc in intrinsic_superclasses]
 non_intrinsic_order = [sc for sc in mean_all.index if sc not in intrinsic_superclasses]
-non_intrinsic_order[3]='sensory'
-non_intrinsic_order[4]='ascending'
+# 'sensory' and 'ascending' are taken out first, then put at positions 3 and 4 (each only if present);
+# the other classes keep the computed order
+_moved = [_sc for _sc in ['sensory', 'ascending'] if _sc in non_intrinsic_order]
+non_intrinsic_order = [_sc for _sc in non_intrinsic_order if _sc not in _moved]
+for _pos, _sc in [(3, 'sensory'), (4, 'ascending')]:
+    if _sc in _moved:
+        non_intrinsic_order.insert(_pos, _sc)
 
 
 superclass_order = intrinsic_order + non_intrinsic_order

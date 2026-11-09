@@ -256,7 +256,13 @@ The bouton and filopodia panels. The two MSB pipelines in `MSB-and-Post-on-MSB-p
 boutons and the postsynapses near them, but they do not make any panel, and no script in this
 repository writes `SYN_BOUTON_FTR`, `SYN_BOUTON_NEW_FTR` or the bouton tables (`BOUTON_TABLE_FTR`, `BOUTON_FILOPODIA_TABLE_FTR`,
 `FILOPODIA_RECIPROCAL_FTR`, `FILOPODIA_FILTERED_FTR`, `BOUTON_INERTIA_FTR`), `NEURON_DATA_FTR` or `SYNAPSES_NO_SELF_FTR`, which these scripts read
-(see `docs/data_availability.md`). The `fig7*.py` scripts are ported from the scripts that drew those panels.
+(see `docs/data_availability.md`), except the MaxSI versions of `BOUTON_TABLE_FTR` and `BOUTON_FILOPODIA_TABLE_FTR`, which
+`processing/bouton_maxsi_tables.py` writes under `PIPELINE_RUN = "rebuild"` and `SPLIT_METHOD = "maxsi"`. Under that
+setting, with them and with `NEURON_DATA_FTR` read from `data/derived/` (`REBUILD_KEEPS_PUBLISHED`), `fig7f`, `fig7g` and
+`fig7i` run, and after `fig7i` (which writes `NEURONS_NT_BWF_FTR`) so do `filopodia_x_mirror_neurons.py` and
+`figures/fig5/reciprocal_fraction_x_bwf.py`; 7H and the four 7J scripts read no bouton table and run too. `fig7e` stops on
+`SYNAPSES_NO_SELF_FTR` (and `FILOPODIA_FILTERED_FTR` after it), `fig7k` on `FILOPODIA_RECIPROCAL_FTR`, and `fig7s2a` and
+`fig7s2b` on `BOUTON_INERTIA_FTR`, which have no rebuilt version. The `fig7*.py` scripts are ported from the scripts that drew those panels.
 
 | Panel | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|

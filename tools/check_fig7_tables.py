@@ -1,9 +1,14 @@
-"""Check the Figure 7 input tables that config.py names against a recorded reference.
+"""Check the published Figure 7 input tables that config.py names against a recorded reference.
 
-No script in this repository writes these tables (apart from NEURONS_NT_BWF_FTR, which
-figures/fig7/fig7i_filopodia_fraction_x_nt.py writes), so a figure can only be trusted to come
-from the same data if the files themselves are the same. For each table in TABLES below this
-checks, against tools/fig7_tables_reference.json:
+No script in this repository writes the published versions of these tables (apart from
+NEURONS_NT_BWF_FTR, which figures/fig7/fig7i_filopodia_fraction_x_nt.py writes;
+processing/bouton_maxsi_tables.py writes MaxSI versions of the two bouton tables, but only under
+PIPELINE_RUN = "rebuild" and SPLIT_METHOD = "maxsi", in data/derived_rebuild_maxsi/), so a figure
+can only be trusted to come from the same data if the files themselves are the same. The reference
+was recorded on the published tables, so the check stops unless config.py has
+PIPELINE_RUN = "published" and SPLIT_METHOD = "sfc", the setting under which every name in TABLES
+points at them (under any other, several point at rebuilt or MaxSI tables, or at none). For each
+table in TABLES below this checks, against tools/fig7_tables_reference.json:
   - the file is there (a table listed in NOT_YET_SUPPLIED, none at present, is reported NOT SUPPLIED,
     which is not a failure; no table here is deposited, so on a clean clone every one FAILs as missing);
   - its sha256 (for NEURONS_NT_BWF_FTR, which is regenerated, a hash of its content instead,
@@ -260,6 +265,9 @@ def main() -> None:
     parser.add_argument("--record", action="store_true", help="measure the tables that are there and write the reference")
     parser.add_argument("--selftest", action="store_true", help="require altered copies of the tables to FAIL")
     args = parser.parse_args()
+    if config.PIPELINE_RUN != "published" or config.SPLIT_METHOD != "sfc":
+        raise SystemExit('The reference is of the published tables: set PIPELINE_RUN = "published" and '
+                         'SPLIT_METHOD = "sfc" in config.py (now %r and %r).' % (config.PIPELINE_RUN, config.SPLIT_METHOD))
     paths = {name: Path(getattr(config, name)) for name in TABLES}
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     report = OUT_DIR / ("selftest_report.txt" if args.selftest else "report.txt")
@@ -300,7 +308,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    # No inputs needed: it reads the Figure 7 tables named in config.py:
+    # No inputs needed: it reads the Figure 7 tables named in config.py, under PIPELINE_RUN = "published"
+    # and SPLIT_METHOD = "sfc" (it stops under any other setting):
     #   data/derived/b_table_full_prince(new)_filtered.ftr  (BOUTON_TABLE_FTR)
     #   data/derived/bwf_table_full_prince(new)_filtered.ftr  (BOUTON_FILOPODIA_TABLE_FTR)
     #   data/derived/filopodia_reciprocal.ftr  (FILOPODIA_RECIPROCAL_FTR)

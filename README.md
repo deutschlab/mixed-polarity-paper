@@ -16,7 +16,7 @@ The demo runs without downloading anything, since its 200 neurons, their synapse
 
 The full pipeline cannot be run from public data alone. With the Codex downloads you can run steps 01 to 04, but step 05, which builds the per-neuron table, also needs a file called `swc_data.ftr` that no script here makes. Steps 06 to 08, the Phi-cutoff script, the two synapse-type tools and almost all figure scripts need step 05's table, so from the downloads alone none of them can run.
 
-Fifteen tables that the scripts read are not made anywhere in this repository, and one more input, the neuropil synapse table read by `figures/fig2/si_x_twigs.py`, has to be requested from the corresponding authors. All sixteen are listed in [docs/data_availability.md](docs/data_availability.md), and the scripts that need them will not run without them. Three of the fifteen tables come from the earlier Buhmann synapse detection. The pipeline here is written for the Princeton synapse table; the Buhmann section of docs/data_availability.md says what would have to change and which panels need those tables (among them all of Figure 6's script-made panels). The larval curve in Figure 2A can't be rebuilt either: it needs raw files from the corresponding authors, and the larva script currently gives no usable output (see [docs/pipeline_overview.md](docs/pipeline_overview.md)).
+Sixteen tables that the scripts read are not made anywhere in this repository, and one more input, the neuropil synapse table read by `figures/fig2/si_x_twigs.py`, has to be requested from the corresponding authors. All seventeen are listed in [docs/data_availability.md](docs/data_availability.md), and the scripts that need them will not run without them. Three of the sixteen tables come from the earlier Buhmann synapse detection. The pipeline here is written for the Princeton synapse table; the Buhmann section of docs/data_availability.md says what would have to change and which panels need those tables (among them all of Figure 6's script-made panels). The larval curve in Figure 2A can't be rebuilt either: it needs raw files from the corresponding authors, and the larva script currently gives no usable output (see [docs/pipeline_overview.md](docs/pipeline_overview.md)).
 
 The derived tables in `data/derived/` are not included; they are available from the corresponding authors on request.
 
@@ -179,13 +179,14 @@ python processing/09_maxsi_synapse_labels.py           # optional -> data/derive
 STEP09_METHOD=minfisherp python processing/09_maxsi_synapse_labels.py   # optional -> data/derived_minfisherp/
 STEP09_METHOD=maxphi python processing/09_maxsi_synapse_labels.py   # optional -> data/derived_maxphi/
 python processing/buhmann_maxsi_labels.py               # optional, "rebuild" + "maxsi" -> data/derived_rebuild_maxsi/; needs the published Buhmann tables, not deposited
+python processing/bouton_maxsi_tables.py                # optional, "rebuild" + "maxsi" -> data/derived_rebuild_maxsi/ (the two Fig 7 bouton tables); needs the authors' bouton tables, not deposited
 ```
 
 Notes:
 
 - Step 05 reads `swc_data.ftr`, which no script here writes. The code that writes it is inside step 05 (lines 137-190), in a commented-out block that points to a local Windows path.
 - Step 01 skips neurons with more than 80,000 skeleton nodes; step 02a processes the large neurons, from a list of 186 neuron IDs written into the script, not from step 01's size check (182 of them got an SI). Run step 02b only after step 01 has finished every subfolder.
-- `swc_data.ftr` and the raw synapse table stay in `data/derived/` under `"rebuild"` too, since no step from 01 to 07 makes them. The raw table is needed only by steps 08 and 09 and four figure scripts (`figures/fig1/create_split_axon_dendrite_princeton.py`, the two `figures/split_methods/skeleton_comparisons*.py` and `figures/split_methods/method_examples.py`). For a split made by step 09, run 01 → … → 05, then 09 with that method, then set `SPLIT_METHOD` to the same method and run 06 → 07, then the figure scripts, the ones that write tables first.
+- `swc_data.ftr`, `neuron_data.ftr` and the raw synapse table stay in `data/derived/` under `"rebuild"` too, since no step from 01 to 07 makes them. The raw table is needed only by steps 08 and 09, the optional `processing/buhmann_maxsi_labels.py` and `processing/bouton_maxsi_tables.py` (which reads the version without self-synapses, `SYNAPSE_TABLE_RAW_NO_SELF_FTR`, directly, not through the `RAW_TABLE_KEEP_SELF_SYNAPSES` switch), and four figure scripts (`figures/fig1/create_split_axon_dendrite_princeton.py`, the two `figures/split_methods/skeleton_comparisons*.py` and `figures/split_methods/method_examples.py`). For a split made by step 09, run 01 → … → 05, then 09 with that method, then set `SPLIT_METHOD` to the same method and run 06 → 07, then the figure scripts, the ones that write tables first.
 - Tables with no MaxSI version (`MAXSI_NOT_AVAILABLE`) stop the scripts that read them under `"maxsi"`, and the same holds for the other two methods. Do not copy the SFC files into the `_maxsi` folders to make them run. If a script stops on a missing file in a `_maxsi` folder, either the script that writes it (09, 06, 07 or a figure script) has not yet run under `"maxsi"`, or the table has no MaxSI version.
 - The larval SI for Figure 2A comes from `processing/larva/larva_process.py` (SFC split), which runs separately from these steps; as committed it gives no usable output (see above). Under `SPLIT_METHOD = "maxsi"` Figure 2A reads the larval MaxSI tables from `processing/larva/larva_maxsi_labels.py` instead, which also runs separately. Each larval step writes its own folders, whatever `PIPELINE_RUN` is.
 
@@ -278,6 +279,7 @@ processing/         the pipeline, from raw data to derived tables
   08_alternative_split_methods.py          optional: two single-node cuts compared with the published split
   09_maxsi_synapse_labels.py               optional: synapse, neuron and SI tables under the MaxSI, MinFisherP or MaxPhi split
   buhmann_maxsi_labels.py                  optional: the Buhmann synapse and neuron tables on step 09's MaxSI cuts
+  bouton_maxsi_tables.py                   optional: the two Fig 7 bouton tables on the MaxSI synapse table
   phi_threshold.py                         optional: the Phi cutoff that matches SI = 0.1
   larva/larva_process.py                   larval SI for Figure 2A
   larva/larva_maxsi_labels.py              larval SI and synapse tables on the MaxSI split

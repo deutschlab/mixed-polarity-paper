@@ -186,7 +186,7 @@ they stop, or report the tables missing.
 |---|---|
 | `make_fig7_ports.py` | makes the seven scripts from the originals. By default it checks that each script is exactly what it makes, so a hand edit fails (a change belongs in its list of fixes); `--write` rewrites them, only from originals whose checksums it knows. `--selftest` plants mistakes in its fix list |
 | `check_fig7_ports.py` | runs each original and its port side by side, without writing anything real, and compares what they draw, print, read and write, and that each port saves its SVGs into `outputs/fig7/<script>/` in Arial. Text is set to Arial 8 pt on both sides, so fonts are not compared. A port whose input is missing (7E) is reported as not run. `--mutants` plants 27 bugs; `--only` checks some of the seven; `--timeout` defaults to 1200 s. About a minute, 5 with `--mutants` |
-| `check_fig7_tables.py` | checks the Figure 7 tables `config.py` names (and `NEURON_TABLE_FTR`) against `tools/fig7_tables_reference.json`: checksums, columns, types, rows, 64-bit IDs, duplicate keys. `--selftest` requires altered copies to fail; `--record` writes a new reference to `outputs/tools/check_fig7_tables/` for review. About a minute |
+| `check_fig7_tables.py` | checks the published Figure 7 tables `config.py` names (and `NEURON_TABLE_FTR`) against `tools/fig7_tables_reference.json`: checksums, columns, types, rows, 64-bit IDs, duplicate keys. It stops unless `PIPELINE_RUN = "published"` and `SPLIT_METHOD = "sfc"`. `--selftest` requires altered copies to fail; `--record` writes a new reference to `outputs/tools/check_fig7_tables/` for review. About a minute |
 
 A PASS of `check_fig7_ports.py` means a port does what the original does on this machine, not that it reproduces the
 published panel.

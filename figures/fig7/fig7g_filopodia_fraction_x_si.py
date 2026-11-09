@@ -6,6 +6,9 @@
 # The axon and dendrite lines keep intrinsic boutons with SI >= 0.1 (left) or SI > 0.1 (right), binned in equal-count
 # SI bins over axon and dendrite boutons together; r and p are computed over boutons, not neurons.
 # p below 0.001 is written '< 0.001', so the labels stay Arial 8 pt; above it, '=' and three decimals.
+# The x axes run to 0.9 (left) and 0.8 (right) as in the original, and widen to 1 (ticks 0 to 1 by 0.2) only when
+# a plotted bin centre (si_center of any of the three lines) lies past that limit.
+# After each plot it prints a line if a plotted value lies above the panel's y limit (0.9 left, 8 right).
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -276,6 +279,15 @@ ax.set_ylim(0, 0.9)
 ticks = [0, 0.2, 0.4,0.6,0.8]
 ax.set_xticks(ticks)
 ax.set_yticks(ticks)
+# the x axis widens to 1 only when a plotted bin centre lies past 0.9
+_x_drawn = np.concatenate([A['si_center'].to_numpy(float), D['si_center'].to_numpy(float), binned_all['si_center'].to_numpy(float)])
+if _x_drawn.size and np.nanmax(_x_drawn) > 0.9:
+    ax.set_xlim(0, 1.0)
+    ax.set_xticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+# a plotted value above the y limit is drawn outside the axes; say so (the drawing is not changed)
+_y_drawn = np.concatenate([A['filopodia_fraction'].to_numpy(float), D['filopodia_fraction'].to_numpy(float), binned_all['filopodia_fraction'].to_numpy(float)])
+if _y_drawn.size and np.nanmax(_y_drawn) > ax.get_ylim()[1]:
+    print(f"Fig 7G left: {int((_y_drawn > ax.get_ylim()[1]).sum())} plotted values above the y limit {ax.get_ylim()[1]:g} (max {np.nanmax(_y_drawn):.3f})")
 
 
 # ✅ Add horizontal dashed lines
@@ -502,6 +514,15 @@ plt.ylim(0, 8)
 
 plt.xticks([0, 0.2, 0.4, 0.6, 0.8])
 plt.yticks([0, 2, 4, 6, 8])
+# the x axis widens to 1 only when a plotted bin centre lies past 0.8
+_x_drawn = np.concatenate([binned_all['si_center'].to_numpy(float), A['si_center'].to_numpy(float), D['si_center'].to_numpy(float)])
+if _x_drawn.size and np.nanmax(_x_drawn) > 0.8:
+    plt.xlim(0, 1.0)
+    plt.xticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+# a plotted value above the y limit is drawn outside the axes; say so (the drawing is not changed)
+_y_drawn = np.concatenate([binned_all['fil_count_mean'].to_numpy(float), A['fil_count_mean'].to_numpy(float), D['fil_count_mean'].to_numpy(float)])
+if _y_drawn.size and np.nanmax(_y_drawn) > plt.ylim()[1]:
+    print(f"Fig 7G right: {int((_y_drawn > plt.ylim()[1]).sum())} plotted values above the y limit {plt.ylim()[1]:g} (max {np.nanmax(_y_drawn):.3f})")
 
 # ax.set_aspect('equal', adjustable='box')
 

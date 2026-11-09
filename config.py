@@ -36,11 +36,13 @@ OUTPUT_DIR = ROOT / "outputs"
 # data/derived_rebuild and data/intermediate_rebuild, figures in outputs_rebuild, so a fresh run can't write over a
 # published table. Inputs no script here builds stay where they are (REBUILD_KEEPS_PUBLISHED below); the co-authors'
 # tables, made from the published tables, have no rebuilt version, so their scripts stop (REBUILD_NOT_AVAILABLE;
-# neuron_data.ftr and the 4E olfactory table move too, and their only readers stop on the tables above anyway),
-# except Majd's two per-synapse flag tables, which stay in data/raw (see MAXSI_NOT_AVAILABLE).
+# the 4E olfactory table moves too, and its only reader stops on the 4E table in that list anyway),
+# except Majd's two per-synapse flag tables, which stay in data/raw (see MAXSI_NOT_AVAILABLE), and neuron_data.ftr,
+# which stays in data/derived (REBUILD_KEEPS_PUBLISHED; its readers use only its nt_type and cell-type columns); the
+# two bouton tables and the two Buhmann tables have a rebuilt version under "rebuild" + "maxsi" only.
 # The split setting (SPLIT_METHOD, further down) applies on top: "rebuild" with "maxsi" gives data/derived_rebuild_maxsi
 # (data/derived_rebuild_minfisherp and data/derived_rebuild_maxphi for the other two cut rules).
-PIPELINE_RUN = "published"
+PIPELINE_RUN = "rebuild"
 PUBLISHED_DERIVED_DIR = DERIVED_DATA_DIR
 if PIPELINE_RUN == "published":
     pass
@@ -154,10 +156,13 @@ FILOPODIA_NODES_BASELINE_FTR     = FILOPODIA_DIR / "nodes_baseline.ftr"
 FILOPODIA_NODES_NO_FILOPODIA_FTR = FILOPODIA_DIR / "nodes_no_filopodia.ftr"
 FILOPODIA_NODES_SAMPLEOUT_FTR    = FILOPODIA_DIR / "nodes_sampleout.ftr"
 
-# --- Fig 7 bouton tables (made outside this repository; no script here writes them) ---
+# --- Fig 7 bouton tables (the published ones were made outside this repository) ---
 # Read by the figures/fig7/fig7*.py panel scripts. One row per bouton (neuron, cluster),
-# and one row per bouton with a postsynaptic terminal (neuron, bwf); both carry NEURON_TABLE_FTR's SI
-# (13 bouton neurons are not in that table). Their neuron and bwf columns read back as pandas' nullable Int64.
+# and one row per bouton with a postsynaptic terminal (neuron, bwf); the published ones carry NEURON_TABLE_FTR's SI
+# (13 bouton neurons are not in that table), the MaxSI ones the MaxSI synapse table's SI_pre (equal, cell for cell, to
+# step 09's SI_updated.ftr). Their neuron and bwf columns read back as pandas' nullable Int64.
+# No script writes the published two; processing/bouton_maxsi_tables.py writes the MaxSI ones under these names
+# (BOUTON_TABLE_FTR and BOUTON_FILOPODIA_TABLE_FTR are in MAXSI_SWITCHED below). The other tables here have no writer.
 BOUTON_TABLE_FTR              = DERIVED_DATA_DIR / "b_table_full_prince(new)_filtered.ftr"
 BOUTON_FILOPODIA_TABLE_FTR    = DERIVED_DATA_DIR / "bwf_table_full_prince(new)_filtered.ftr"
 FILOPODIA_RECIPROCAL_FTR      = DERIVED_DATA_DIR / "filopodia_reciprocal.ftr"
@@ -171,8 +176,12 @@ CONSOLIDATED_CELL_TYPES_CSV   = RAW_DATA_DIR / "consolidated_cell_types.csv.gz" 
 # Two versions: without self-synapses (as steps 01/02a and the authors' original split-method script use the synapses;
 # the default) and with them. A cell split without them gives the SI in SI_updated.ftr and SI_comparisons.ftr;
 # split with them, it gives the SI in the delivered neuron table (the same on 30 of 30 cells checked).
-# This switch decides which file SYNAPSE_TABLE_RAW_FTR points to, for every script that reads it: step 08,
-# figures/fig1/create_split_axon_dendrite_princeton.py and figures/split_methods/skeleton_comparisons*.py.
+# This switch decides which file SYNAPSE_TABLE_RAW_FTR points to, for every script that reads it: steps 08 and 09;
+# processing/buhmann_maxsi_labels.py (through its folder); the figure scripts
+# figures/fig1/create_split_axon_dendrite_princeton.py and figures/split_methods/skeleton_comparisons.py,
+# skeleton_comparisons_kc.py and method_examples.py; and the tools check_split_methods_on_subset.py,
+# check_step09_failures.py and compare_split_runs.py. processing/bouton_maxsi_tables.py and
+# tools/check_raw_synapse_table.py read the named versions below directly, whatever the switch says.
 RAW_TABLE_KEEP_SELF_SYNAPSES     = False
 SYNAPSE_TABLE_RAW_NO_SELF_FTR    = SYNAPSE_TABLE_RAW_FTR   # the name set above
 SYNAPSE_TABLE_RAW_WITH_SELF_FTR  = DERIVED_DATA_DIR / "synapses_783_article_princeton_raw_with_self.ftr"
@@ -180,10 +189,12 @@ SYNAPSE_TABLE_RAW_FTR = (SYNAPSE_TABLE_RAW_WITH_SELF_FTR if RAW_TABLE_KEEP_SELF_
                          else SYNAPSE_TABLE_RAW_NO_SELF_FTR)
 
 # Under PIPELINE_RUN = "rebuild": inputs that no step of the fresh run builds, read from where they are now:
-# swc_data.ftr (step 05 reads it; the only code that writes it is commented out) and the two raw synapse tables
-# (built from the Codex CSV by build_raw_synapse_table.py, whatever the run).
+# swc_data.ftr (step 05 reads it; the only code that writes it is commented out), the two raw synapse tables
+# (built from the Codex CSV by build_raw_synapse_table.py, whatever the run) and neuron_data.ftr (made outside this
+# repository; its readers, fig7e, fig7i, fig7s2b and the revised Fig 4E script, use only its nt_type and cell-type
+# columns, none of which a run here changes).
 REBUILD_KEEPS_PUBLISHED = ["SWC_DATA_FTR", "SYNAPSE_TABLE_RAW_NO_SELF_FTR", "SYNAPSE_TABLE_RAW_WITH_SELF_FTR",
-                           "SYNAPSE_TABLE_RAW_FTR"]
+                           "SYNAPSE_TABLE_RAW_FTR", "NEURON_DATA_FTR"]
 if PIPELINE_RUN == "rebuild":
     for _name in REBUILD_KEEPS_PUBLISHED:
         globals()[_name] = PUBLISHED_DERIVED_DIR / Path(globals()[_name]).name
@@ -244,6 +255,20 @@ BUHMANN_NEURON_SFC_FTR   = PUBLISHED_DERIVED_DIR / "neuron_data_full_article.ftr
 BUHMANN_MAXSI_LABEL_BATCH_DIR = _maxsi_path(INTERMEDIATE_DIR / "buhmann_maxsi_labels" / "batches")
 BUHMANN_MAXSI_SUBSET_DIR      = _maxsi_path(INTERMEDIATE_DIR / "buhmann_maxsi_labels" / "subset")   # a run on listed cells only, for checking
 
+# --- Fig 7 bouton tables on the MaxSI split (processing/bouton_maxsi_tables.py) ---
+# The step reads these from the published folder whatever PIPELINE_RUN and SPLIT_METHOD are, and writes
+# BOUTON_TABLE_FTR and BOUTON_FILOPODIA_TABLE_FTR under "rebuild" + "maxsi" (it stops under any other setting), and
+# BOUTON_MAXSI_LOG_TXT (set at the end of this file). CLUSTER_INFO_FILTERED_FTR is the authors' per-synapse
+# bouton table (one row per presynaptic synapse: neuron, cluster, synapse_id, partner_id, x, y, z, and a comp the step
+# doesn't use; no script here writes it); with FILOPODIA_FILTERED_PUBLISHED_FTR it gives each synapse its bouton,
+# which does not use the split. The published synapse table and the two published bouton tables are the step's
+# check: its rules on the first must give the other two.
+CLUSTER_INFO_FILTERED_FTR             = PUBLISHED_DERIVED_DIR / "cluster_info_filtered.ftr"
+FILOPODIA_FILTERED_PUBLISHED_FTR      = PUBLISHED_DERIVED_DIR / "filopodia_filtered.ftr"
+BOUTON_TABLE_PUBLISHED_FTR            = PUBLISHED_DERIVED_DIR / "b_table_full_prince(new)_filtered.ftr"
+BOUTON_FILOPODIA_TABLE_PUBLISHED_FTR  = PUBLISHED_DERIVED_DIR / "bwf_table_full_prince(new)_filtered.ftr"
+SYNAPSE_TABLE_PUBLISHED_FTR           = PUBLISHED_DERIVED_DIR / "synapses_783_article_princeton.ftr"
+
 # Which split the scripts read: "sfc" (the published synapse flow centrality split, steps 01-05), or "maxsi",
 # "minfisherp" or "maxphi" (step 09 run with that METHOD). Steps 04 and 05 always write the SFC tables and
 # SI_updated.ftr, and step 09 always reads them (the *_SFC_FTR names). Under "maxsi", the two tables and every table
@@ -251,7 +276,9 @@ BUHMANN_MAXSI_SUBSET_DIR      = _maxsi_path(INTERMEDIATE_DIR / "buhmann_maxsi_la
 # under the same file names. SI_UPDATED_FTR does too, and step 09 writes it there (MAXSI_SI_UPDATED_FTR, root_id and
 # the MaxSI SI of every cell it labels). "minfisherp" and "maxphi" do the same with their own folders and tables.
 # Steps 08 and phi_threshold.py always read the SFC tables, since their output doesn't depend on the split. Raw
-# tables, skeletons and annotations stay where they are; the co-authors' tables are in MAXSI_NOT_AVAILABLE below.
+# tables, skeletons and annotations stay where they are; the co-authors' tables are in MAXSI_NOT_AVAILABLE below,
+# except the two bouton tables and the two Buhmann tables, which have a MaxSI version under "rebuild" + "maxsi" only
+# (listed here; under "published" + "maxsi" their folder, data/derived_maxsi, has no such file).
 SPLIT_METHOD = "sfc"
 SYNAPSE_TABLE_SFC_FTR = SYNAPSE_TABLE_FTR   # the names set above
 NEURON_TABLE_SFC_FTR  = NEURON_TABLE_FTR
@@ -268,6 +295,9 @@ MAXSI_SWITCHED = [
     "PCA_TABLE_FTR",
     # the Buhmann tables (processing/buhmann_maxsi_labels.py writes the MaxSI ones)
     "NEURON_TABLE_NONP_FTR", "SYNAPSE_TABLE_NONP_FTR",
+    # the two Fig 7 bouton tables (processing/bouton_maxsi_tables.py writes the MaxSI ones, under "rebuild" + "maxsi"
+    # only; there is no MinFisherP or MaxPhi version, so under those the panels that read them stop)
+    "BOUTON_TABLE_FTR", "BOUTON_FILOPODIA_TABLE_FTR",
     # tables figure scripts write
     "PC1_TABLE_CSV", "PC1_TABLE_PREDICTIONS_CSV", "FIG4_HELDOUT_MODELS_FTR", "FIG4_HELDOUT_CONFUSION_FTR", "LARVA_4D_RESULTS_FTR", "LARVA_4D_CONFUSION_FTR", "RECI_PROP_FTR", "NEURONS_NT_BWF_FTR",
     "FILOPODIA_NODES_BASELINE_FTR", "FILOPODIA_NODES_NO_FILOPODIA_FTR", "FILOPODIA_NODES_SAMPLEOUT_FTR",
@@ -276,27 +306,31 @@ MAXSI_SWITCHED = [
     # larval MinFisherP or MaxPhi split, so under those the figure stops)
     "LARVA_SI_FTR", "LARVA_SYNAPSES_FTR",
 ]
-# Tables that exist only for the SFC split (or for Buhmann's synapses): Majd's Fig 7 tables (bouton, filopodia,
+# Tables that exist only for the SFC split (or for Buhmann's synapses): Majd's other Fig 7 tables (filopodia,
 # inertia, t2), Dudi's 4E table and the Buhmann connection table, which no script reads. There is no MaxSI
 # version, so under "maxsi" they point into the _maxsi folders too, where nothing writes them: a script that reads one
 # stops, instead of drawing an SFC panel among the MaxSI ones. Don't copy the SFC files there to make such a script
-# run. Two tables stay where they are: neuron_data.ftr (its scripts use only cell-type columns) and Majd's two
+# run. Three tables stay where they are: neuron_data.ftr (its scripts use only nt_type and cell-type columns; it stays
+# under "rebuild" too, REBUILD_KEEPS_PUBLISHED) and Majd's two
 # per-synapse flag tables, SYN_BOUTON_FTR and SYN_BOUTON_NEW_FTR. A flag says whether a synapse's presynaptic end is in
 # a bouton and whether its postsynaptic end is on a filopodium; it comes from the skeleton and doesn't use the split.
 # The flags cover the published synapse table's synapses only, so Fig 7H and the three 7J si_sim scripts leave out the synapses
 # of any other table that have no flag (on data/derived_rebuild_maxsi, the 760,723 synapses with an end in one of the
 # 52 cells the published table lacks; their partners' counts lose those synapses too). The same holds under "minfisherp" and "maxphi", with their folders.
 MAXSI_NOT_AVAILABLE = [
-    "BOUTON_TABLE_FTR", "BOUTON_FILOPODIA_TABLE_FTR", "FILOPODIA_FILTERED_FTR", "FILOPODIA_RECIPROCAL_FTR",
+    "FILOPODIA_FILTERED_FTR", "FILOPODIA_RECIPROCAL_FTR",
     "BOUTON_INERTIA_FTR", "SYNAPSES_NO_SELF_FTR",
     "PER_TYPE_SUMMARY_CSV", "CONNECTIONS_TABLE_NONP_FTR",
 ]
 # Under PIPELINE_RUN = "rebuild" the same co-authors' tables have no rebuilt version either (they were made from the
-# published tables; the two Buhmann tables have a MaxSI rebuild only, from processing/buhmann_maxsi_labels.py). Those
-# in data/derived already point into data/derived_rebuild, where nothing writes them; any in
+# published tables). Those in data/derived already point into data/derived_rebuild, where nothing writes them; any in
 # data/raw would be moved into data/raw_rebuild here (the list has none: the two flag tables in data/raw stay, as above).
-# So their scripts stop rather than mix published and rebuilt tables.
-REBUILD_NOT_AVAILABLE = MAXSI_NOT_AVAILABLE
+# So their scripts stop rather than mix published and rebuilt tables. The two bouton tables and the two Buhmann tables
+# have a rebuild under "rebuild" + "maxsi" only (processing/bouton_maxsi_tables.py, processing/buhmann_maxsi_labels.py)
+# and none under "rebuild" + "sfc"; they are on the list too: like every entry outside data/raw, the loop below moves
+# no path for them.
+REBUILD_NOT_AVAILABLE = MAXSI_NOT_AVAILABLE + ["BOUTON_TABLE_FTR", "BOUTON_FILOPODIA_TABLE_FTR",
+                                               "NEURON_TABLE_NONP_FTR", "SYNAPSE_TABLE_NONP_FTR"]
 if PIPELINE_RUN == "rebuild":
     for _name in REBUILD_NOT_AVAILABLE:
         _p = Path(globals()[_name])
@@ -314,6 +348,10 @@ elif SPLIT_METHOD in ("maxsi", "minfisherp", "maxphi"):
     RESULTS_DIR = FIGURES_DIR = OUTPUT_DIR   # the two aliases set above
 else:
     raise ValueError(f'SPLIT_METHOD must be "sfc", "maxsi", "minfisherp" or "maxphi", not {SPLIT_METHOD!r}')
+
+# The log of processing/bouton_maxsi_tables.py: everything the step prints, appended run after run (under "rebuild" +
+# "maxsi", the only setting it runs under, outputs_rebuild_maxsi/tools/bouton_maxsi_tables/).
+BOUTON_MAXSI_LOG_TXT = OUTPUT_DIR / "tools" / "bouton_maxsi_tables" / "bouton_maxsi_tables_log.txt"
 
 
 def refuse_published_run(step):
