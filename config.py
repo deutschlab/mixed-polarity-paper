@@ -42,7 +42,7 @@ OUTPUT_DIR = ROOT / "outputs"
 # two bouton tables and the two Buhmann tables have a rebuilt version under "rebuild" + "maxsi" only.
 # The split setting (SPLIT_METHOD, further down) applies on top: "rebuild" with "maxsi" gives data/derived_rebuild_maxsi
 # (data/derived_rebuild_minfisherp and data/derived_rebuild_maxphi for the other two cut rules).
-PIPELINE_RUN = "rebuild"
+PIPELINE_RUN = "published"
 PUBLISHED_DERIVED_DIR = DERIVED_DATA_DIR
 if PIPELINE_RUN == "published":
     pass
