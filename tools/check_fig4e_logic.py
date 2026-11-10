@@ -1,8 +1,9 @@
 """Check what figures/fig4/syntype_x_pathway_layers.py computes, on a small made-up table.
 
-The revised Fig 4E script reads a per-type table this repository does not deposit
-(ex_table_npil_comp_pre_post_hiSI_PerTypeSummary.csv), so it cannot be run from a clean clone.
-This tool runs the script's own text on 27 made-up rows of that table, and on a made-up
+The Fig 4E script builds its per-type rows from the synapse and neuron tables by default
+(DATA_SOURCE = 'princeton'), or reads the authors' per-type table with DATA_SOURCE = 'csv'
+(ex_table_npil_comp_pre_post_hiSI_PerTypeSummary.csv, not deposited). This tool runs the script's own
+text on 27 made-up rows of that table, on made-up synapse and neuron tables, and on a made-up
 neuron_data table for the olfactory classes, written to a temporary folder together with a
 stand-in `config` module, and compares the tables it writes and the lines it plots with values
 worked out by hand (written below, with their arithmetic, separately from the script).
@@ -11,7 +12,7 @@ The script is run as it is, except for its DATA_SOURCE and SI_SOURCE settings (r
 text for the variants below) and matplotlib drawing to no screen (the Agg backend), with the
 outputs going to the temporary folder.
 
-Checks, on the default setting (DATA_SOURCE = 'csv'):
+Checks, with DATA_SOURCE = 'csv':
   - the neuropil's _L/_R suffix is dropped and the two sides pooled; 'LAL' is not 'LA', and
     'MB_CA_R' is 'MB_CA'; a row with no neuropil is in no layer;
   - the shares are of AD + AA + DD + DA only (a link-compartment row is left out of the total,
@@ -24,10 +25,11 @@ Checks, on the default setting (DATA_SOURCE = 'csv'):
   - the olfactory types: class olfactory, ALPN, Kenyon_Cell or MBON in the neuron_data table,
     primary_type or, when it is empty, cell_type; a row counts only when both types are
     olfactory; the four olfactory layers, and all, within- and between-type tables;
-  - the two olfactory line plots leave out LH+MB-CA (which stays in the tables);
+  - the two olfactory line plots show only AL and the mushroom body lobes (OLFACTORY_LINE_LAYERS); LH+MB-CA
+    and CRE+SMP+SIP+LAL stay in the tables;
   - each line plot: DD and AA in that order, their colours, the x labels, y from 0 to 100;
 then:
-  - DATA_SOURCE = 'princeton' rebuilds the table from made-up synapse and neuron tables: cells
+  - DATA_SOURCE = 'princeton' (the default) builds the rows from made-up synapse and neuron tables: cells
     with SI exactly 0.1 are kept, below it left out, cells with no type or an empty type left out,
     synapses summed per pre type, post type, comp and neuropil; adding SI_SOURCE = 'SI_updated'
     takes the SI from SI_UPDATED_FTR; DATA_SOURCE = 'buhmann' reads the other two tables and
@@ -77,7 +79,8 @@ warnings.filterwarnings("ignore", message="FigureCanvasAgg is non-interactive")
 SCRIPT = REPO_ROOT / "figures" / "fig4" / "syntype_x_pathway_layers.py"
 OUT_DIR = OUTPUT_DIR / "tools" / "check_fig4e_logic"
 TOL = 1e-6
-SETTING_SOURCE = "DATA_SOURCE = 'csv'\n"
+SETTING_SOURCE = "DATA_SOURCE = 'princeton'\n"
+CSV_SOURCE = "DATA_SOURCE = 'csv'\n"
 SETTING_SI = "SI_SOURCE = 'neuron_table'\n"
 
 # ---------------------------------------------------------------- the made-up per-type table
@@ -165,8 +168,8 @@ EXPECTED = {
 LINES = {
     3: (["LA+ME", "LO+LOP", "VPN"], [1900 / 26, 25, 40], [300 / 26, 40, 40]),
     4: (["LA+ME", "LO+LOP", "VPN"], [100, 0, 20], [0, 800 / 11, 80]),
-    5: (["AL", "MB lobes (ML/PED/VL)", "CRE+SMP+SIP+LAL"], [2500 / 27, 50 / 3, 200 / 11], [200 / 27, 100 / 3, 300 / 11]),
-    6: (["AL", "MB lobes (ML/PED/VL)", "CRE+SMP+SIP+LAL"], [500 / 7, 100 / 3, 40], [200 / 7, 200 / 3, 60]),
+    5: (["AL", "MB lobes (ML/PED/VL)"], [2500 / 27, 50 / 3], [200 / 27, 100 / 3]),
+    6: (["AL", "MB lobes (ML/PED/VL)"], [500 / 7, 100 / 3], [200 / 7, 200 / 3]),
 }
 COLOR_DD, COLOR_AA = np.array([243, 185, 91]) / 255, np.array([120, 80, 161]) / 255
 # plot 1, stacked bars: per layer AD, AA, DD, DA heights (NaN drawn as nothing)
@@ -253,7 +256,8 @@ def write_inputs(tmp: Path, rows=ROWS):
         "NEURON_DATA_FTR = D / 'neuron_data.ftr'\n"
         "NEURON_TABLE_FTR = D / 'neurons_p.ftr'\nSYNAPSE_TABLE_FTR = D / 'synapses_p.ftr'\n"
         "NEURON_TABLE_NONP_FTR = D / 'neurons_b.ftr'\nSYNAPSE_TABLE_NONP_FTR = D / 'synapses_b.ftr'\n"
-        "SI_UPDATED_FTR = D / 'si_updated.ftr'\n", encoding="utf-8")
+        "SI_UPDATED_FTR = D / 'si_updated.ftr'\n"
+        "PIPELINE_RUN = 'published'\nSPLIT_METHOD = 'sfc'\n", encoding="utf-8")
 
 
 def write_inputs_csv_only(tmp: Path):
@@ -378,7 +382,7 @@ def main():
     with tempfile.TemporaryDirectory() as t:
         tmp = Path(t)
         write_inputs(tmp)
-        ns, out, err = run(source, tmp, {})
+        ns, out, err = run(source, tmp, {SETTING_SOURCE: CSV_SOURCE})
         results.append((err is None, "the script runs on the made-up per-type table" + (f": {err}" if err else "")))
         if err is None:
             check_tables(tmp / "out" / "fig4" / "syntype_x_pathway_layers")
@@ -395,7 +399,7 @@ def main():
         pd.DataFrame([dict(preType=a, postType=b, comp=c, npil=d, pre_SuperClass=e, post_SuperClass=f,
                            preSI=0.5, postSI=0.5, pre_nt="ACH", post_nt="ACH", synapses=s)
                       for a, b, c, d, e, f, s in EDGE_ROWS]).to_csv(tmp / "data" / "per_type.csv", index=False)
-        ns, out, err = run(source, tmp, {})
+        ns, out, err = run(source, tmp, {SETTING_SOURCE: CSV_SOURCE})
         results.append((err is None, "the script runs on the second table" + (f": {err}" if err else "")))
         if err is None:
             for row, values in EDGE.items():
@@ -408,7 +412,7 @@ def main():
         write_inputs_csv_only(tmp)
 
         for label, settings, want in (
-                ("princeton", {SETTING_SOURCE: "DATA_SOURCE = 'princeton'\n"}, STANDIN["princeton"]),
+                ("princeton", {}, STANDIN["princeton"]),
                 ("princeton + SI_updated", {SETTING_SOURCE: "DATA_SOURCE = 'princeton'\n",
                                             SETTING_SI: "SI_SOURCE = 'SI_updated'\n"}, STANDIN["SI_updated"]),
                 ("buhmann", {SETTING_SOURCE: "DATA_SOURCE = 'buhmann'\n",
@@ -421,7 +425,7 @@ def main():
         ns, out, err = run(source, tmp, {SETTING_SOURCE: "DATA_SOURCE = 'csvv'\n"})
         results.append((err is not None and "AssertionError" in err, "a misspelled DATA_SOURCE stops the script"))
         (tmp / "data" / "per_type.csv").unlink()
-        ns, out, err = run(source, tmp, {})
+        ns, out, err = run(source, tmp, {SETTING_SOURCE: CSV_SOURCE})
         results.append((err is not None and "per_type.csv" in err and "DATA_SOURCE" in err,
                         "a missing per-type table stops the script with a message naming it"))
 

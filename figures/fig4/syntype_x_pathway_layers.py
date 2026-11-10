@@ -2,8 +2,14 @@
 # (LA, ME, LO, LOP and the visual projection neurons) and of the olfactory pathway (AL, LH + MB_CA,
 # the mushroom body lobes, and CRE + SMP + SIP + LAL), the share of AD, AA, DD and DA synapses,
 # over all synapses and over synapses between cells of the same type (and, for olfaction, of
-# different types), for rows that pass an SI >= 0.1 filter (see the input below). Tables and six plots; the
-# revised Fig 4E is plots 3-6 (the DD and AA lines).
+# different types). By default (DATA_SOURCE = 'princeton') each synapse counts in the neuropil it is in (left and
+# right merged), and only synapses whose two cells each have SI >= 0.1 are kept (each cell's own SI from NEURON_TABLE_FTR; the paper's
+# Fig 4E is drawn with PIPELINE_RUN = "rebuild" and SPLIT_METHOD = "maxsi", so that is the MaxSI SI). Tables and
+# six plots; Fig 4E is plots 3-6 (the DD and AA lines). The olfactory line plots show AL and the mushroom body
+# lobes (OLFACTORY_LINE_LAYERS); the tables keep all four olfactory layers. The visual stages LA, ME, LO and LOP
+# take every synapse in that neuropil; the VPN stage takes every synapse with a visual projection neuron on either
+# side, in any neuropil, so it overlaps the other four. The olfactory stages take only synapses whose two cell types
+# are both ORN, ALPN, Kenyon cell or MBON types.
 # Ported from the corresponding author's MATLAB script FlyWire_VisualOlfactoryPathway_LayerStats.m
 # (not included in this repository).
 # Differences from the MATLAB script:
@@ -11,7 +17,8 @@
 #     into its data folder), and the MATLAB .fig copies of the figures are not made;
 #   - its input ex_table_npil_comp_pre_post_hiSI_PerTypeSummary.csv (one row per pre type, post type and
 #     connection type, with one npil label; kept where the mean SI over the row's records, and over its
-#     two types' records, is >= 0.1) is not in the repository and no code here writes it: see DATA_SOURCE below;
+#     two types' records, is >= 0.1) is not in the repository and no code here writes it; DATA_SOURCE = 'csv'
+#     reads it if it is supplied, and the default builds the per-type rows from this repository's tables instead;
 #   - neuron_data.csv, which the MATLAB script reads for the olfactory cell classes, is not in the
 #     repository either; NEURON_DATA_FTR stands in for it (same columns: class, primary_type, cell_type);
 #   - Olfactory_ClassNeuropilStats.csv is only printed by the MATLAB script; it is printed here if
@@ -19,9 +26,9 @@
 #   - missing text in the table is read as empty text and text is trimmed of surrounding spaces, as
 #     MATLAB's readtable does, so two empty types count as the same type; a missing synapse count
 #     makes the shares it falls in NaN, as MATLAB's sum does;
-#   - with a stand-in (DATA_SOURCE 'princeton' or 'buhmann') the olfactory types are the chosen neuron
+#   - with DATA_SOURCE 'princeton' or 'buhmann' the olfactory types are the chosen neuron
 #     table's primary_type of the cells NEURON_DATA_FTR puts in the four olfactory classes (joined by
-#     root_id), so they match the types of the stand-in's rows (81 olfactory cells have another
+#     root_id), so they match the types of the rows (81 olfactory cells have another
 #     primary_type in NEURON_DATA_FTR than in NEURON_TABLE_FTR); with 'csv' they follow the MATLAB rule;
 #   - run_info.txt in the output folder records which input the run used;
 #   - figure size, fonts and legend placement follow matplotlib, not MATLAB; the plotted values,
@@ -30,7 +37,8 @@
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from config import (NEURON_DATA_FTR, NEURON_TABLE_FTR, NEURON_TABLE_NONP_FTR, OLFACTORY_CLASS_NEUROPIL_CSV,
+from config import (NEURON_DATA_FTR, NEURON_TABLE_FTR, NEURON_TABLE_NONP_FTR, OLFACTORY_CLASS_NEUROPIL_CSV, PIPELINE_RUN,
+                    SPLIT_METHOD,
                     OUTPUT_DIR, PER_TYPE_SUMMARY_CSV, SI_UPDATED_FTR, SYNAPSE_TABLE_FTR, SYNAPSE_TABLE_NONP_FTR)
 
 import numpy as np
@@ -48,18 +56,19 @@ _out_dir = OUTPUT_DIR / "fig4" / "syntype_x_pathway_layers"
 _out_dir.mkdir(parents=True, exist_ok=True)
 
 #%% parameters
-# Where the per-type table comes from: 'csv' reads the authors' table (PER_TYPE_SUMMARY_CSV; put it
-# in data/derived/), which the revised panel was drawn from. 'princeton' or 'buhmann' rebuild a
-# stand-in from this repository's synapse and neuron tables (SYNAPSE_TABLE_FTR and NEURON_TABLE_FTR,
-# or SYNAPSE_TABLE_NONP_FTR and NEURON_TABLE_NONP_FTR): synapses counted per pre type, post type,
-# comp and npil, over cells with a type and SI >= 0.1 on both sides. A stand-in is not the panel:
-# none of the three gives the revised panel's values.
-DATA_SOURCE = 'csv'
+# Where the per-type rows come from. 'princeton' (Fig 4E) and 'buhmann' build them from this repository's
+# synapse and neuron tables (SYNAPSE_TABLE_FTR and NEURON_TABLE_FTR, or SYNAPSE_TABLE_NONP_FTR and
+# NEURON_TABLE_NONP_FTR): synapses counted per pre type, post type, comp and npil, so each synapse counts in its
+# own neuropil, over cells with a type and SI >= 0.1 on both sides. 'csv' reads the authors' per-type table
+# (PER_TYPE_SUMMARY_CSV; put it in data/derived/), where each row counts in one neuropil, the first of its row
+# in alphabetical order, and rows are kept by mean SI.
+DATA_SOURCE = 'princeton'
 # With DATA_SOURCE = 'princeton' only: 'neuron_table' (NEURON_TABLE_FTR's SI) or 'SI_updated'.
 SI_SOURCE = 'neuron_table'
 assert DATA_SOURCE in ('csv', 'princeton', 'buhmann'), DATA_SOURCE
 assert SI_SOURCE in ('neuron_table', 'SI_updated'), SI_SOURCE
-SI_threshold = 0.1   # used only to rebuild a stand-in; the authors' table is already filtered
+SI_threshold = 0.1   # each cell's own SI, for 'princeton' and 'buhmann'; the authors' table is already filtered
+OLFACTORY_LINE_LAYERS = ['AL', 'MB lobes (ML/PED/VL)']   # the olfactory layers on the two olfactory line plots
 
 layerOrder = ['LA', 'ME', 'LO', 'LOP', 'VPN']   # row order for both tables and both plots
 
@@ -76,7 +85,7 @@ if DATA_SOURCE == 'csv':
     if not PER_TYPE_SUMMARY_CSV.exists():
         raise FileNotFoundError(f"{PER_TYPE_SUMMARY_CSV} is missing. It is the authors' per-type table, which this "
                                 "repository does not build (docs/data_availability.md); set DATA_SOURCE = 'princeton' "
-                                "or 'buhmann' to rebuild a stand-in from the synapse tables.")
+                                "or 'buhmann' to build the rows from the synapse tables.")
     T = pd.read_csv(PER_TYPE_SUMMARY_CSV, dtype={c: str for c in TEXT_COLUMNS + ['pre_nt', 'post_nt']},
                     keep_default_na=False, na_values={'preSI': [''], 'postSI': [''], 'synapses': ['']})
     source_name = str(PER_TYPE_SUMMARY_CSV)
@@ -109,10 +118,12 @@ else:
     T = (conn.groupby(['preType', 'postType', 'comp', 'npil', 'pre_SuperClass', 'post_SuperClass'], dropna=False)
          .agg(synapses=('count_all', 'sum'), preSI=('preSI', 'min'), postSI=('postSI', 'min')).reset_index())
     del conn
-    source_name = f"a stand-in rebuilt from {synapse_table.name} and {neuron_table.name}"
+    source_name = f"per-type rows built from {synapse_table.name} and {neuron_table.name}"
 for c in TEXT_COLUMNS:
     T[c] = T[c].fillna('').astype(str).str.strip()
-(_out_dir / 'run_info.txt').write_text(f"DATA_SOURCE = {DATA_SOURCE!r}, SI_SOURCE = {SI_SOURCE!r}\ninput: {source_name}\n",
+(_out_dir / 'run_info.txt').write_text(f"DATA_SOURCE = {DATA_SOURCE!r}, SI_SOURCE = {SI_SOURCE!r}, PIPELINE_RUN = "
+                                      f"{PIPELINE_RUN!r}, SPLIT_METHOD = {SPLIT_METHOD!r}\ninput: {source_name}"
+                                      + ("" if DATA_SOURCE == 'csv' else f" ({synapse_table.parent})") + "\n",
                                       encoding='utf-8')
 
 print(f"read {len(T)} rows from {source_name}")
@@ -277,7 +288,7 @@ if DATA_SOURCE == 'csv':
     typeName = T_neuronData['primary_type'].where(T_neuronData['primary_type'] != '', T_neuronData['cell_type'])
     olfactoryTypeNames = sorted(set(typeName[isOlfClass]) - {''})
 else:
-    # the stand-in's types come from the neuron table, so take those cells' types from it too
+    # the rows' types come from the neuron table, so take those cells' types from it too
     olf_ids = T_neuronData.loc[isOlfClass, 'root_id'].astype(np.int64)
     olf_types = nodes['primary_type'].reindex(olf_ids).dropna().astype(str).str.strip()
     olfactoryTypeNames = sorted(set(olf_types) - {''})
@@ -296,6 +307,12 @@ print("\n=== Olfactory Table 1: ALL synapses (olfactory-to-olfactory only), by l
 print(T_olf_all.to_string(index=False))
 print("\n=== Olfactory Table 2: WITHIN-TYPE synapses only (olfactory-to-olfactory only), by layer ===")
 print(T_olf_within.to_string(index=False))
+# which type pairs make up each same-type olfactory layer (one type pair can carry most of a point)
+for layer, m in zip(olfactoryLayerOrder, olf_masks):
+    by_pair = T[m & isWithinType].groupby('preType')['synapses'].sum().sort_values(ascending=False)
+    if by_pair.sum() > 0:
+        print(f"same-type {layer}: {by_pair.sum():,} synapses in {len(by_pair)} types; largest "
+              + ", ".join(f"{k} {v:,} ({v / by_pair.sum():.1%})" for k, v in by_pair.head(3).items()))
 print("\n=== Olfactory Table 3: BETWEEN-TYPE synapses only (olfactory-to-olfactory only), by layer ===")
 print(T_olf_between.to_string(index=False))
 # the file names are the MATLAB script's; all three are olfactory-to-olfactory type pairs only
@@ -304,11 +321,11 @@ T_olf_within.to_csv(_out_dir / 'LayerComposition_Olfactory_WithinType.csv', inde
 T_olf_between.to_csv(_out_dir / 'LayerComposition_Olfactory_BetweenType.csv', index=False)
 
 #%% plots 5 and 6: DD and AA lines across the olfactory layers (Fig 4E, the two olfactory panels).
-# 'LH+MB-CA' is left out of these two plots only; it stays in the tables.
-dd_aa_lines(T_olf_all[T_olf_all['layer'] != 'LH+MB-CA'].reset_index(drop=True), 5,
+# Only OLFACTORY_LINE_LAYERS are drawn; the other two layers stay in the tables.
+dd_aa_lines(T_olf_all[T_olf_all['layer'].isin(OLFACTORY_LINE_LAYERS)].reset_index(drop=True), 5,
             'OLFACTORY (ORN+ALPN+KC+MBON only) - ALL synapses: DD vs AA across layers',
             'LayerComposition_Olfactory_AllSynapses_lines', 'layer', rotation=20)
-dd_aa_lines(T_olf_within[T_olf_within['layer'] != 'LH+MB-CA'].reset_index(drop=True), 6,
+dd_aa_lines(T_olf_within[T_olf_within['layer'].isin(OLFACTORY_LINE_LAYERS)].reset_index(drop=True), 6,
             'OLFACTORY (ORN+ALPN+KC+MBON only) - WITHIN-TYPE synapses only: DD vs AA across layers',
             'LayerComposition_Olfactory_WithinType_lines', 'layer', rotation=20)
 plt.show()
