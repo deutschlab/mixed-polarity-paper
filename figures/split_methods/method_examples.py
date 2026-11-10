@@ -86,6 +86,38 @@ pool['diff'] = pool['MaxSI_SI'] - pool['SFC_SI']
 pool['spread'] = pool[[f'{m}_SI' for m in METHODS]].max(axis=1) - pool[[f'{m}_SI' for m in METHODS]].min(axis=1)
 pool = pool.sort_values('neuron').reset_index(drop=True)
 
+#%% A central cell whose cut-SI histogram falls in two groups (rule "central, two groups" below). For each pool cell,
+# from step 08's table of every candidate node: its distinct cuts (each distinct set of side counts once, as the
+# histogram's grey bars), and on their sorted SIs the widest empty gap between two consecutive cuts (gap), the cuts
+# above it (n_high) and the gap as a share of the cell's largest cut SI (rel).
+side_cols = ['side_1_pre', 'side_1_post', 'side_2_pre', 'side_2_post']
+gaps = []
+for f in sorted(Path(ALT_SPLIT_BATCH_DIR).glob('nodes_batch_*.ftr')):
+    t_ = ds.dataset(str(f), format='feather').to_table(
+        columns=['neuron_id'] + side_cols + ['SI'], filter=ds.field('neuron_id').isin(pool['neuron'].tolist())).to_pandas()
+    t_ = t_.dropna(subset=['SI']).drop_duplicates(['neuron_id'] + side_cols).sort_values(['neuron_id', 'SI'])
+    t_['d'] = t_.groupby('neuron_id')['SI'].diff()
+    t_['rank'] = t_.groupby('neuron_id').cumcount()
+    n_cuts = t_.groupby('neuron_id').size()
+    widest = t_.dropna(subset=['d']).sort_values(['neuron_id', 'd', 'rank'], ascending=[True, False, True]) \
+               .drop_duplicates('neuron_id').set_index('neuron_id')
+    gaps.append(pd.DataFrame({'gap': widest['d'], 'n_high': n_cuts.reindex(widest.index) - widest['rank'],
+                              'si_max': t_.groupby('neuron_id')['SI'].max().reindex(widest.index)}))
+gaps = pd.concat(gaps)
+gaps.index = gaps.index.astype(np.int64)
+pool = pool.merge(gaps, left_on='neuron', right_index=True, how='left', validate='1:1')
+pool['rel'] = pool['gap'] / pool['si_max']
+GAP_MIN, REL_MIN, NHIGH_MIN = pool['gap'].quantile(0.9), pool['rel'].quantile(0.9), pool['n_high'].quantile(0.25)
+two_groups = (pool['gap'] >= GAP_MIN) & (pool['rel'] >= REL_MIN) & (pool['n_high'] >= NHIGH_MIN)
+central = pool[(pool['super_class'] == 'central') & pool['primary_type'].notna()
+               & (pool['primary_type'].astype(str) != '')]
+SIZE_WIN = tuple(central['n_synapses'].quantile([0.25, 0.75]))
+whole_type = central.assign(ok=two_groups).groupby('primary_type')['ok'].agg(['size', 'all'])
+whole_type = set(whole_type[(whole_type['size'] >= 2) & whole_type['all']].index)
+print(f"two groups: widest gap >= {GAP_MIN:.4f} (90th percentile), gap / largest cut SI >= {REL_MIN:.3f} (90th), "
+      f">= {NHIGH_MIN:.0f} distinct cuts above it (25th); central cells of typical size {SIZE_WIN[0]:.0f} to "
+      f"{SIZE_WIN[1]:.0f} synapse ends; types where every pool cell has two groups: {len(whole_type)}")
+
 #%% Pick the six cells by rule (ties: lowest cell ID; a cell already picked is skipped)
 picked = []
 def take(rule, candidates, key):
@@ -97,7 +129,10 @@ agree = pool[(pool['MaxSI_SI'] >= AGREE_MIN_SI) & (pool['spread'] < AGREE_MAX_DI
 take(f'all four within {AGREE_MAX_DIFF} and MaxSI SI >= {AGREE_MIN_SI}: nearest that set\'s median MaxSI SI',
      agree, lambda c: (c['MaxSI_SI'] - agree['MaxSI_SI'].median()).abs())
 take('typical: MaxSI minus SFC SI nearest its median', pool, lambda c: (c['diff'] - pool['diff'].median()).abs())
-take('largest MaxSI minus SFC SI', pool, lambda c: -c['diff'])
+bimodal = central[two_groups.reindex(central.index) & central['n_synapses'].between(*SIZE_WIN)
+                  & central['primary_type'].isin(whole_type)]
+take('central, two groups: the widest gap among central cells of typical size whose type has two groups in every '
+     'cell', bimodal, lambda c: -c['gap'])
 take('largest SFC minus MaxSI SI', pool, lambda c: c['diff'])
 mixed = pool[pool['MaxSI_SI'] < MIXED_SI]
 take(f'MaxSI SI < {MIXED_SI}: nearest that set\'s median MaxSI SI', mixed,
