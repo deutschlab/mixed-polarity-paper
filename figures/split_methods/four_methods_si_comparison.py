@@ -161,12 +161,16 @@ axes[-1].legend(handles=[mpl.lines.Line2D([], [], marker='o', linestyle='', colo
 plt.tight_layout()
 plt.savefig(_out_dir / "A1_left_right_scatter.svg", dpi=300)
 
-plt.figure(figsize=(2, 2))
-y = np.arange(len(METHODS))
-plt.errorbar(lr_table.icc1, y, xerr=[lr_table.icc1 - lr_table.icc1_low, lr_table.icc1_high - lr_table.icc1],
+plt.figure(figsize=(2.4, 2))
+order = lr_table.sort_values('icc1').reset_index(drop=True)   # lowest ICC at the top, highest at the bottom
+y = np.arange(len(order))
+plt.errorbar(order.icc1, y, xerr=[order.icc1 - order.icc1_low, order.icc1_high - order.icc1],
              fmt='o', color='black', markersize=3, capsize=2, linewidth=0.8)
-plt.yticks(y, METHODS)
+for yi, row in order.iterrows():   # each rule's ICC written to the right of its interval
+    plt.text(row.icc1_high + 0.006, yi, f"{row.icc1:.3f}", va='center', ha='left')
+plt.yticks(y, order.method)
 plt.gca().invert_yaxis()
+plt.xlim(right=order.icc1_high.max() + 0.045)
 plt.xlabel('Left/right ICC (95%)')
 sns.despine()
 plt.tight_layout()
