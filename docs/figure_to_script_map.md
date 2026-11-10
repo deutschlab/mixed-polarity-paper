@@ -12,9 +12,9 @@ With `PIPELINE_RUN = "rebuild"` (a fresh run of the pipeline), the same applies 
 
 ## Running the figure scripts
 
-Fig 1C and Fig 3C make a Neuroglancer link through `caveclient` before they draw the panel, so they stop with an error unless you have a FlyWire account and a CAVE token saved on your machine (see the caveclient documentation). Every script imports `methods/methods_all.py`, which imports `caveclient` and `nglui`, so both packages must be installed (they are in the pinned requirements); only these two panels need the token. Both panels also write a `temp_link_<random hex>.html` file into the folder you run them from and try to open it with Microsoft Edge at its Windows path; on macOS and Linux they print "Edge executable not found" and carry on.
+`figures/fig1/create_split_axon_dendrite_princeton.py` and the Fig 3C script make a Neuroglancer link through `caveclient` before they draw, so they stop with an error unless you have a FlyWire account and a CAVE token saved on your machine (see the caveclient documentation). Every script imports `methods/methods_all.py`, which imports `caveclient` and `nglui`, so both packages must be installed (they are in the pinned requirements); only these two scripts need the token. Both also write a `temp_link_<random hex>.html` file into the folder you run them from and try to open it with Microsoft Edge at its Windows path; on macOS and Linux they print "Edge executable not found" and carry on.
 
-Each script saves its figures as SVG in its own folder, usually `outputs/figN/<name>/`, `outputs/split_methods/<name>/` or `outputs/supporting/<name>/`. One exception: the Fig 1C script writes to `outputs/fig3/pc1_example/`. The two Fig 4 PC1 scripts also write PNG, and `figures/fig5/syn_type_x_reci_x_npil.py` writes PDF. A few figure scripts also write tables into `data/derived/`. Under `SPLIT_METHOD = "maxsi"` the figures go to `outputs_maxsi/` instead of `outputs/`, and those tables to `data/derived_maxsi/` or `data/intermediate_maxsi/`.
+Each script saves its figures as SVG in its own folder, usually `outputs/figN/<name>/`, `outputs/split_methods/<name>/` or `outputs/supporting/<name>/`. One exception: `figures/fig1/create_split_axon_dendrite_princeton.py` writes to `outputs/fig3/pc1_example/`. The two Fig 4 PC1 scripts also write PNG, and `figures/fig5/syn_type_x_reci_x_npil.py` writes PDF. A few figure scripts also write tables into `data/derived/`. Under `SPLIT_METHOD = "maxsi"` the figures go to `outputs_maxsi/` instead of `outputs/`, and those tables to `data/derived_maxsi/` or `data/intermediate_maxsi/`.
 
 A note on SI: step 04 stores each neuron's SI in the synapse table as `SI_pre` and `SI_post`, and step 05 stores it in the neuron table and in `SI_updated.ftr`. All three come from the same output of steps 01 and 02a, so after a fresh run each neuron has the same SI in all three (`SI_updated.ftr` has a few more neurons than the neuron table). Tables from an earlier run may not match, which is why the synapse-type tools refer to the table SI as "older" and to `SI_updated.ftr` as "corrected".
 
@@ -29,15 +29,17 @@ the SI distribution, axon/dendrite split examples, and canonical vs mixed neuron
 
 | Panel | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|
-| Fig 1C | `figures/fig1/create_split_axon_dendrite_princeton.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_RAW_FTR` (from `processing/build_raw_synapse_table.py`; which version is set by `RAW_TABLE_KEEP_SELF_SYNAPSES`), skeletons in `SWC_DIR`, a FlyWire token for the links | `outputs/fig3/pc1_example/` |
+| Fig 1C | `figures/fig1/fig1c_example_splits.py` (after step 09 with MaxSI; `PIPELINE_RUN = "rebuild"`): the cells 720575940628463468 (LC31b), 720575940614955304 (LC15) and 720575940633095137 (DNp09 in the legend; FlyWire's type is DNp71), split by MaxSI | `MAXSI_LABEL_BATCH_DIR`, `MAXSI_SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` | `outputs/fig1/fig1c_example_splits/` (`fig1c_example_splits.svg`, `fig1c_canonical_shares.csv`: each compartment's canonical count, total and percent) |
 | Fig 1E | `figures/fig1/canonicality_axon_dend.py` | `NEURON_TABLE_FTR` | `outputs/fig1/canonicality_axon_dend/` |
 | Fig 1G | `figures/fig1/si_x_canonicality.py` | `NEURON_TABLE_FTR` | `outputs/fig1/si_x_canonicality/` |
 | Fig 1 Supp D | `figures/fig1/canonicality_violin_intrinsic_sclass.py` | `NEURON_TABLE_FTR` | `outputs/fig1/canonicality_violin_intrinsic_sclass/` |
 | Fig 1 Supp D | `figures/fig1/canonicality_violin_non_intrinsic_sclass.py` | `NEURON_TABLE_FTR` | `outputs/fig1/canonicality_violin_non_intrinsic_sclass/` |
 | Fig 1 Supp E | `figures/fig1/fig1supp_e_sclass_canonicality_corr.py` | `NEURON_TABLE_FTR` | `outputs/fig1/sclass_canonicality_corr/` |
 
-> `create_split_axon_dendrite_princeton.py` writes all its outputs to `outputs/fig3/pc1_example/`
-> (not to `outputs/fig1/`): an example neuron used as a visual reference in both Fig 1 and Fig 3.
+> `figures/fig1/create_split_axon_dendrite_princeton.py` is not the Fig 1C script and draws none of its cells. It reads `NEURON_TABLE_FTR`,
+> `SYNAPSE_TABLE_RAW_FTR` (which version is set by `RAW_TABLE_KEEP_SELF_SYNAPSES`) and skeletons in `SWC_DIR`, makes a
+> FlyWire link for 720575940627236874, splits 720575940620605776 and 720575940620451974, and writes
+> `pc1_example_AA1.svg` to `outputs/fig3/pc1_example/`.
 
 ---
 
