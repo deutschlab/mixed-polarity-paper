@@ -3,6 +3,8 @@
 # Paths come from config.py; every figure is saved before plt.show(); every text is Arial 8 pt when saved (methods/figure_text.py).
 # The cell-type table's root_id column is renamed to neuron for the merge.
 # The excluded-type lists write 'R1–6' with an en dash, while the table has 'R1-6', so R1-6 is coloured 'included'.
+# DNge175 is left out of the type lists (it has no cell in CONSOLIDATED_CELL_TYPES_CSV), and T3 is in the
+# 'other excluded' group (excluded before clustering), not the RMS group.
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -65,7 +67,6 @@ exclude_types = {
     'CB0268','CB0419',
     'Dm8',
     'DNa16',
-    'DNge175',
     'GLNO',
     'JO-A','JO-E',
     'Lai',
@@ -105,7 +106,6 @@ rms_excluded_types = {
     'CB0268','CB0419',
     'Dm8',
     'DNa16',
-    'DNge175',
     'GLNO',
     'JO-A','JO-E',
     'Lai',
@@ -118,14 +118,14 @@ rms_excluded_types = {
     'SA_VTV_6',
     'VP3+_vPN',
     'VS8',
-    'T2','T2a','T3'
+    'T2','T2a'
 }
 
 # Other excluded types
 other_excluded_types = {
     'L1','L2','L3','L4','L5',
     'Mi1','Mi4',
-    'T1',
+    'T1','T3',
     'R1–6','R7','R8',
     'Tm1','Tm2','Tm3','Tm4',
     'Tm5a','Tm5f','Tm6','Tm9','Tm21',

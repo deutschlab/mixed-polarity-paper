@@ -43,7 +43,9 @@ Numbers must agree within np.allclose(rtol=1e-9, atol=1e-9) after rounding to 12
 
 Known, deliberate differences, applied to the original's run so the comparison is like for like:
   fig7S2b.py  the original stops on a KeyError (the cell-type table names its column root_id);
-              the original's read of that table renames the column, as the port does in its code.
+              the original's read of that table renames the column, as the port does in its code. The
+              original is also run with the port's excluded-type lists (SAME_TYPE_LISTS: DNge175 left out, T3
+              in the 'other excluded' group), so only the code is compared.
   fig7g.py    the port writes p below 0.001 as '< 0.001' (Arial 8 pt) where the original writes a maths
               exponent; the original is run with the port's p formatter (SAME_P_LABELS), so the labels compare.
 A pair where both sides stop because t2.ftr or filopodia_filtered.ftr is missing (at present only fig7e reads them) is
@@ -97,21 +99,36 @@ PORTS_DIR = REPO_ROOT / "figures" / "fig7"
 RENAME_ROOT_ID = {"fig7S2b.py"}
 # originals run with the port's p-value formatter: the generator's fixes whose old text defines format_p
 SAME_P_LABELS = {"fig7g.py"}
+# originals run with the port's excluded-type lists: the generator's fixes that edit those lists (DNge175 left out,
+# T3 in the 'other excluded' group)
+SAME_TYPE_LISTS = {"fig7S2b.py"}
+N_TYPE_LIST_FIXES = 4   # DNge175 out of exclude_types and of rms_excluded_types, T3 out of the RMS group and into the other group
+
+
+def _is_type_list_fix(old: str) -> bool:
+    return "'DNge175'" in old or "'T2','T2a','T3'" in old or "'T1',\n" in old
 
 
 def original_to_run(originals: Path, orig: str, rec_dir: Path) -> Path:
-    """The original script, or for SAME_P_LABELS a copy of it with the generator's format_p fixes applied."""
-    if orig not in SAME_P_LABELS:
+    """The original script, or a copy of it with some of the generator's fixes applied: the format_p fixes for
+    SAME_P_LABELS, the excluded-type list fixes for SAME_TYPE_LISTS."""
+    if orig in SAME_P_LABELS:
+        pick, what, prefix = (lambda o: "def format_p" in o), "format_p", "p_labels__"
+    elif orig in SAME_TYPE_LISTS:
+        pick, what, prefix = _is_type_list_fix, "excluded-type list", "type_lists__"
+    else:
         return originals / orig
     text = (originals / orig).read_text(encoding="utf-8")
-    fixes = [(o, n) for o, n in mk.PORTS[orig][3] if "def format_p" in o]
+    fixes = [(o, n) for o, n in mk.PORTS[orig][3] if pick(o)]
     if not fixes:
-        raise RuntimeError("no format_p fix for %s in tools/make_fig7_ports.py" % orig)
+        raise RuntimeError("no %s fix for %s in tools/make_fig7_ports.py" % (what, orig))
+    if orig in SAME_TYPE_LISTS and len(fixes) != N_TYPE_LIST_FIXES:
+        raise RuntimeError("%d excluded-type list fixes for %s, expected %d" % (len(fixes), orig, N_TYPE_LIST_FIXES))
     for o, n in fixes:
         if text.count(o) != 1:
-            raise RuntimeError("a format_p fix for %s does not match the original once" % orig)
+            raise RuntimeError("a %s fix for %s does not match the original once" % (what, orig))
         text = text.replace(o, n)
-    copy = rec_dir / ("p_labels__" + orig)
+    copy = rec_dir / (prefix + orig)
     copy.write_text(text, encoding="utf-8")
     return copy
 NOT_SUPPLIED_OK = ("t2.ftr", "filopodia_filtered.ftr")
@@ -364,6 +381,7 @@ MUTANTS = [
      "    neuron_quality['mean_rms'],\n    neuron_quality['mean_centroid_dist'],",
      "    neuron_quality['mean_centroid_dist'],\n    neuron_quality['mean_rms'],"),
     ("type_unexcluded", "fig7S2b.py", "fig7s2b_bouton_spread_by_type.py", "    'Lai',\n    'LTe26',\n    'Mi9',", "    'Lai',\n    'LTe26',"),
+    ("t3_back_in_rms", "fig7S2b.py", "fig7s2b_bouton_spread_by_type.py", "    'T2','T2a'\n}", "    'T2','T2a','T3'\n}"),
     ("save_removed", "fig7S2a.py", "fig7s2a_bouton_spread.py", "plt.savefig(_out_dir / 'inertia_all.svg', format='svg')\n", ""),
     ("fonttype_removed", "fig7S2a.py", "fig7s2a_bouton_spread.py", "mpl.rcParams['svg.fonttype'] = 'none'\n", ""),
     ("table_written_elsewhere", "fig7i.py", "fig7i_filopodia_fraction_x_nt.py",
@@ -593,7 +611,8 @@ def check_pairs(originals: Path, inputs: list, ports: Path, only, out_dir: Path,
             lines.append("FAIL     %-18s %s (sha %s)" % (orig, port_name, sha))
             lines += ["           " + p[:220] for p in problems[:8]]
         else:
-            note = ("; root_id renamed for the original too" if orig in RENAME_ROOT_ID else
+            note = ("; root_id renamed and the port's type lists used for the original too" if orig in SAME_TYPE_LISTS else
+                    "; root_id renamed for the original too" if orig in RENAME_ROOT_ID else
                     "; the original run with the port's p labels" if orig in SAME_P_LABELS else "")
             lines.append("PASS     %-18s %s (sha %s): %d figure(s), %d save(s) byte-identical, %d table(s), %d read(s), %d printed line(s)%s"
                          % (orig, port_name, sha, len(b["final"]), len(mk.EXPECTED_SAVES[orig]), len(b["tables"]),
