@@ -79,7 +79,7 @@ Step 08 and `build_raw_synapse_table.py` are not in the table: `build_raw_synaps
 
 ### Data
 
-Most of the data is not in this repository. Two inputs are included in `data/raw/`: the neuron annotation table (`Supplemental_file1_neuron_annotations.csv`) and the 15 sensory-rank files in `data/raw/ranks/`, both from Dorkenwald et al. 2024. Step 05 matches each rank file to the neurons by its own `root_id`. In the published neuron table (`data/derived/`), only `allinputs_layer_mean` is matched by neuron ID; the other `*_layer_mean` columns hold other neurons' values, and no figure script reads them. The connectome files come from the [FlyWire Codex download page](https://codex.flywire.ai/api/download?dataset=fafb). [data/README.md](data/README.md) and [docs/data_availability.md](docs/data_availability.md) list every file, where to get it and where to put it.
+Most of the data is not in this repository. Three inputs are included in `data/raw/`: the neuron annotation table (`Supplemental_file1_neuron_annotations.csv`) and the 15 sensory-rank files in `data/raw/ranks/`, both from Dorkenwald et al. 2024, and the list of cell types left out of the Fig 7 bouton analysis (`msb_excluded_cell_types.csv`). Step 05 matches each rank file to the neurons by its own `root_id`. In the published neuron table (`data/derived/`), only `allinputs_layer_mean` is matched by neuron ID; the other `*_layer_mean` columns hold other neurons' values, and no figure script reads them. The connectome files come from the [FlyWire Codex download page](https://codex.flywire.ai/api/download?dataset=fafb). [data/README.md](data/README.md) and [docs/data_availability.md](docs/data_availability.md) list every file, where to get it and where to put it.
 
 Skeletons go in subfolders of `data/raw/swc/783/`, one file per neuron named `<root_id>.swc`. Any number of subfolders is fine (we used batches of about 1,500 neurons), but files placed directly in `data/raw/swc/783/` won't be found. (The demo keeps its skeletons in one flat folder, `demo/swc/`, because the notebook loads them itself.) If the archive unpacks into one flat folder, make a subfolder and move the files into it. Step 01 gives no error when it finds no skeletons; it just writes nothing.
 
@@ -223,6 +223,7 @@ Run these from the repository root with the environment active. [docs/tools.md](
 | [`make_fig7_ports.py`](docs/tools.md#figure-7-ports) | Makes, or checks, the seven Fig 7 panel scripts from the authors' originals | The originals (maintainers) | Printed |
 | [`check_fig7_ports.py`](docs/tools.md#figure-7-ports) | That each Fig 7 panel script draws what the original draws | The originals (maintainers) | About a minute, 5 with `--mutants` |
 | [`check_fig7_tables.py`](docs/tools.md#figure-7-ports) | The Fig 7 input tables against a recorded reference | The undeposited tables (maintainers) | About a minute |
+| [`check_msb_exclusion.py`](docs/tools.md#figure-7-ports) | The Fig 7 cell-type exclusion list against the two bouton tables | The bouton tables, `neuron_data.ftr` and the Codex cell-type file; the unfiltered bouton tables for the full check (maintainers) | A few seconds; `outputs/tools/check_msb_exclusion/` |
 | [`synapse_type_shares.py`](docs/tools.md#synapse-type-tools) | Share of each synapse type in a synapse table | Step 05's tables, about 4 GB | Printed |
 | [`split_agreement.py`](docs/tools.md#synapse-type-tools) | Agreement of synapse types between splits | About 12 GB, and a table with two synapse-type columns (none here has more than one) | Printed |
 | [`check_split_methods_on_subset.py`](docs/tools.md#checking-the-split-methods) | Runs step 08 on some neurons and compares with a reference table | Raw synapse table, local skeletons | 28 to 36 minutes for 1,144 neurons (macOS, with navis's own flow centrality); `--out` |
@@ -298,7 +299,7 @@ tools/              check and comparison tools (see Tools above and docs/tools.m
 demo/               the demo notebook and its 200-neuron data set
 
 data/               mostly empty; the data goes here (see data/README.md)
-  raw/              downloaded inputs, plus the included annotation table and ranks/
+  raw/              downloaded inputs, plus the included annotation table, ranks/ and the Fig 7 exclusion list
   derived/          tables made by the pipeline
   intermediate/     working files made by the pipeline
   derived_maxsi/    tables made on the MaxSI split (step 09, and SPLIT_METHOD = "maxsi")

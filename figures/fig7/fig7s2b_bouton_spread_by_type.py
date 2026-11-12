@@ -2,7 +2,7 @@
 # Ported from the authors' original script fig7S2b.py.
 # Paths come from config.py; every figure is saved before plt.show(); every text is Arial 8 pt when saved (methods/figure_text.py).
 # The cell-type table's root_id column is renamed to neuron for the merge.
-# The excluded-type lists write 'R1–6' with an en dash, while the table has 'R1-6', so R1-6 is coloured 'included'.
+# R1-6 is written with a hyphen in the excluded-type lists, as in the cell-type table, so it is coloured 'other excluded'.
 # DNge175 is left out of the type lists (it has no cell in CONSOLIDATED_CELL_TYPES_CSV), and T3 is in the
 # 'other excluded' group (excluded before clustering), not the RMS group.
 import sys
@@ -56,7 +56,7 @@ exclude_types = {
     'L1','L2','L3','L4','L5',
     'Mi1','Mi4','Mi9',
     'T1','T2','T2a','T3',
-    'R1–6','R7','R8',
+    'R1-6','R7','R8',
     'Tm1','Tm2','Tm3','Tm4',
     'Tm5a','Tm5f','Tm6','Tm9','Tm21',
     'LCNOp','LCNOpm',
@@ -126,7 +126,7 @@ other_excluded_types = {
     'L1','L2','L3','L4','L5',
     'Mi1','Mi4',
     'T1','T3',
-    'R1–6','R7','R8',
+    'R1-6','R7','R8',
     'Tm1','Tm2','Tm3','Tm4',
     'Tm5a','Tm5f','Tm6','Tm9','Tm21',
     'LCNOp','LCNOpm'

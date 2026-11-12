@@ -171,6 +171,7 @@ BOUTON_INERTIA_FTR            = DERIVED_DATA_DIR / "inertia_all.ftr"
 NEURON_DATA_FTR               = DERIVED_DATA_DIR / "neuron_data.ftr"   # neuron metadata with neurons.csv's nt_type, class and sub_class; not NEURON_TABLE_FTR. Its SI equals the Buhmann neuron table's to 0.001 for 111,525 of the 129,903 cells they share; read by fig7e, fig7i and fig7s2b (nt_type, sub_class) and by the revised Fig 4E script (class, primary_type, cell_type); none reads its SI
 SYNAPSES_NO_SELF_FTR          = DERIVED_DATA_DIR / "t2.ftr"           # a subset of SYNAPSE_TABLE_FTR (which has no self-synapses): 1,029,925 whole (pre, post) connections, 5,727,011 synapses, are left out, for a reason not known
 CONSOLIDATED_CELL_TYPES_CSV   = RAW_DATA_DIR / "consolidated_cell_types.csv.gz"   # Codex download
+MSB_EXCLUDED_TYPES_CSV        = RAW_DATA_DIR / "msb_excluded_cell_types.csv"   # the cell types left out of the bouton tables, with their kind (included in the repository); checked by tools/check_msb_exclusion.py
 
 # --- raw synapse table (built by processing/build_raw_synapse_table.py from PRINCETON_SYNAPSE_CSV) ---
 # Two versions: without self-synapses (as steps 01/02a and the authors' original split-method script use the synapses;

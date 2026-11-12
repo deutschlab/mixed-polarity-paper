@@ -19,6 +19,7 @@ was given. None of the tools shows that an analysis is the right one.
 | check the raw synapse tables, or step 05's `root_id` | `check_raw_synapse_table.py`, `check_step05_root_id.py` |
 | check the Figure 6 or revised 4E script without their input tables | `check_fig6_logic.py`, `check_fig4e_logic.py` |
 | keep the Fig 7 scripts tied to the authors' originals | `make_fig7_ports.py`, `check_fig7_ports.py`, `check_fig7_tables.py` |
+| check the Fig 7 cell-type exclusion list against the bouton tables | `check_msb_exclusion.py` |
 | count synapse types, or compare them between splits | `synapse_type_shares.py`, `split_agreement.py` |
 | check the split methods (step 08) or step 09 | `check_split_methods_on_subset.py`, `check_split_functions.py`, `check_step09_failures.py`, `compare_split_runs.py` |
 | check the Fig 4 simple PC1 model | `check_simple_pc1_model.py` |
@@ -190,6 +191,16 @@ they stop, or report the tables missing.
 
 A PASS of `check_fig7_ports.py` means a port does what the original does on this machine, not that it reproduces the
 published panel.
+
+`check_msb_exclusion.py` checks the list of cell types left out of the bouton analysis (`MSB_EXCLUDED_TYPES_CSV`)
+against the two bouton tables `config.py` names: the list's columns, kinds and type names (each must be a
+`primary_type` in the Codex cell-type file, `CONSOLIDATED_CELL_TYPES_CSV`), and that neither table holds a cell of
+a `pre_clustering` or `rms_inspection` type
+or a cell whose own `sub_class` is `uniglomerular`. Given the two tables before any type was removed
+(`--unfiltered` and `--unfiltered-bwf`; they are not deposited), it also requires that removing those cells gives the
+two tables exactly, row for row. `--mutants` requires five wrong lists to fail (a type left out, a kept type added, a
+name with an en dash, a wrong kind, a kind spelt differently). It does not test why a type was left out. A few
+seconds, with or without the unfiltered tables; `outputs/tools/check_msb_exclusion/`.
 
 ## Synapse-type tools
 

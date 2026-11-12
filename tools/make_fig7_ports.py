@@ -12,7 +12,8 @@ repository. Each generated script is the original text with only these changes:
   - svg.fonttype='none' and Arial added where the original did not set them;
   - a call to methods.figure_text.use_arial_8(), so that every text is Arial 8 pt when a figure
     is saved;
-  - the per-script fixes listed in PORTS below, each of which must match the original exactly once.
+  - the per-script fixes listed in PORTS below, applied in order, each of which must match exactly once
+    the original as changed by the fixes before it.
 So a change to one of these scripts belongs in PORTS here, never in the script itself: a
 regeneration would undo it.
 
@@ -193,7 +194,7 @@ PORTS = {
         "fig7s2b_bouton_spread_by_type.py",
         "Supp 7-S2 B: the same per cell type, coloured by why a type was excluded from the bouton analysis.",
         ["The cell-type table's root_id column is renamed to neuron for the merge.",
-         "The excluded-type lists write 'R1\u20136' with an en dash, while the table has 'R1-6', so R1-6 is coloured 'included'.",
+         "R1-6 is written with a hyphen in the excluded-type lists, as in the cell-type table, so it is coloured 'other excluded'.",
          "DNge175 is left out of the type lists (it has no cell in CONSOLIDATED_CELL_TYPES_CSV), and T3 is in the",
          "'other excluded' group (excluded before clustering), not the RMS group."],
         [("neuron_types = pd.read_csv(CONSOLIDATED_CELL_TYPES_CSV)\n",
@@ -206,6 +207,11 @@ PORTS = {
           "    'T2','T2a'\n}"),
          ("    'T1',\n    'R1\u20136','R7','R8',",
           "    'T1','T3',\n    'R1\u20136','R7','R8',"),
+         # R1-6 with a hyphen, as in the cell-type table (the original writes an en dash in both lists)
+         ("    'T1','T2','T2a','T3',\n    'R1\u20136','R7','R8',",
+          "    'T1','T2','T2a','T3',\n    'R1-6','R7','R8',"),
+         ("    'T1','T3',\n    'R1\u20136','R7','R8',",
+          "    'T1','T3',\n    'R1-6','R7','R8',"),
          ("plt.show()\n# plt.savefig(_out_dir / 'inertia_grouped.svg', format='svg')",
           "plt.savefig(_out_dir / 'inertia_grouped.svg', format='svg')\nplt.show()")]),
 }

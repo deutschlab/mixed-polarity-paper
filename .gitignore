@@ -51,6 +51,7 @@ data/intermediate/*.csv
 data/larva/*.csv
 # Bundled input files (<=50 MB, included in repo)
 !data/raw/Supplemental_file1_neuron_annotations.csv
+!data/raw/msb_excluded_cell_types.csv
 !data/raw/ranks/*.feather
 outputs/
 outputs_maxsi/

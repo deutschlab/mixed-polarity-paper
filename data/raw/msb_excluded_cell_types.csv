@@ -1,0 +1,142 @@
+primary_type,exclusion_kind,reason,n_cells_sheet
+AN_AVLP_6,rms_inspection,,2
+AN_AVLP_10,rms_inspection,,2
+AN_AVLP_18,rms_inspection,,2
+AN_AVLP_29,rms_inspection,,2
+AN_AVLP_40,rms_inspection,,2
+AN_AVLP_45,rms_inspection,,6
+AN_GNG_55,rms_inspection,,2
+AN_GNG_VES_5,rms_inspection,,2
+AN_multi_2,rms_inspection,,2
+CB0268,rms_inspection,,2
+CB0419,rms_inspection,,2
+D_adPN,uniglomerular,,6
+DA1_lPN,uniglomerular,,15
+DA1_vPN,uniglomerular,,2
+DA2_lPN,uniglomerular,,11
+DA3_adPN,uniglomerular,,4
+DA4l_adPN,uniglomerular,,2
+DA4m_adPN,uniglomerular,,2
+DC1_adPN,uniglomerular,,2
+DC2_adPN,uniglomerular,,4
+DC3_adPN,uniglomerular,,5
+DC4_adPN,uniglomerular,,2
+DC4_vPN,uniglomerular,,2
+DL1_adPN,uniglomerular,,4
+DL2d_adPN,uniglomerular,,10
+DL2d_vPN,uniglomerular,,3
+DL2v_adPN,uniglomerular,,8
+DL3_lPN,uniglomerular,,10
+DL4_adPN,uniglomerular,,2
+DL5_adPN,uniglomerular,,2
+DM1_lPN,uniglomerular,,2
+DM2_lPN,uniglomerular,,4
+DM3_adPN,uniglomerular,,2
+DM4_adPN,uniglomerular,,2
+DM4_vPN,uniglomerular,,2
+DM5_lPN,uniglomerular,,5
+DM6_adPN,uniglomerular,,6
+Dm8,rms_inspection,,19
+DNa16,rms_inspection,,2
+DP1l_adPN,uniglomerular,,2
+DP1l_vPN,uniglomerular,,2
+DP1m_adPN,uniglomerular,,2
+GLNO,rms_inspection,,4
+JO-A,rms_inspection,,94
+JO-E,rms_inspection,,196
+L1,pre_clustering,Sub Class lamina_monopolar,1596
+L2,pre_clustering,Sub Class lamina_monopolar,1593
+L3,pre_clustering,Sub Class lamina_monopolar,1426
+L4,pre_clustering,Sub Class lamina_monopolar,1404
+L5,pre_clustering,Sub Class lamina_monopolar,1570
+Lai,rms_inspection,,405
+LCNOp,pre_clustering,Very big/dense area,2
+LCNOpm,pre_clustering,Very big/dense area,2
+LTe26,rms_inspection,,2
+M_lvPNm46,uniglomerular,,2
+M_vPNml80,uniglomerular,,1
+Mi1,pre_clustering,Very dense area,1581
+Mi4,pre_clustering,Very dense area,1532
+Mi9,rms_inspection,,1551
+MTe44,rms_inspection,,2
+PLP163,rms_inspection,,2
+PS083a,rms_inspection,,4
+PS280,rms_inspection,,2
+PVLP061,rms_inspection,,2
+PVLP141,rms_inspection,,2
+R1-6,pre_clustering,No boutons structure,8456
+R7,pre_clustering,No boutons structure,1333
+R8,pre_clustering,No boutons structure,1339
+SA_VTV_6,rms_inspection,,12
+T1,pre_clustering,Boutons not organized (algorithm failes to separate),1389
+T2,rms_inspection,Boutons not organized (algorithm failes to separate),1466
+T2a,rms_inspection,Boutons not organized (algorithm failes to separate),1774
+T3,pre_clustering,Boutons not organized (algorithm failes to separate),1676
+T4a,rms_inspection,Boutons not organized (algorithm failes to separate),1457
+T4b,rms_inspection,Boutons not organized (algorithm failes to separate),1507
+T4c,rms_inspection,Boutons not organized (algorithm failes to separate),1710
+T4d,rms_inspection,Boutons not organized (algorithm failes to separate),1569
+T5a,rms_inspection,Boutons not organized (algorithm failes to separate),1483
+T5b,rms_inspection,Boutons not organized (algorithm failes to separate),1514
+T5c,rms_inspection,Boutons not organized (algorithm failes to separate),1536
+T5d,rms_inspection,Boutons not organized (algorithm failes to separate),1469
+Tm1,pre_clustering,Very dense area (unseparable to boutons),1554
+Tm2,pre_clustering,some boutons unseparable,1549
+Tm21,pre_clustering,some boutons unseparable,1291
+Tm3,pre_clustering,some boutons unseparable,1756
+Tm4,pre_clustering,some boutons unseparable,1489
+Tm5a,pre_clustering,some boutons unseparable,452
+Tm5f,pre_clustering,some boutons unseparable,801
+Tm6,pre_clustering,some boutons unseparable,6
+Tm9,pre_clustering,dense area (unseparable to boutons),1522
+TuBu01a,pre_clustering,most presynapses in one dense area (no bouton structure),4
+TuBu01b,pre_clustering,most presynapses in one dense area (no bouton structure),7
+TuBu02,pre_clustering,most presynapses in one dense area (no bouton structure),12
+TuBu03,pre_clustering,most presynapses in one dense area (no bouton structure),44
+TuBu06a,pre_clustering,most presynapses in one dense area (no bouton structure),2
+TuBu06b,pre_clustering,most presynapses in one dense area (no bouton structure),5
+TuBu07,pre_clustering,most presynapses in one dense area (no bouton structure),17
+TuBu08,pre_clustering,most presynapses in one dense area (no bouton structure),27
+TuBu09,pre_clustering,most presynapses in one dense area (no bouton structure),32
+V_ilPN,uniglomerular,,2
+V_l2PN,uniglomerular,,2
+VA1d_adPN,uniglomerular,,6
+VA1d_vPN,uniglomerular,,2
+VA1v_adPN,uniglomerular,,9
+VA1v_vPN,uniglomerular,,4
+VA2_adPN,uniglomerular,,2
+VA3_adPN,uniglomerular,,4
+VA4_lPN,uniglomerular,,2
+VA5_lPN,uniglomerular,,6
+VA6_adPN,uniglomerular,,2
+VA7l_adPN,uniglomerular,,2
+VA7m_lPN,uniglomerular,,6
+VC1_lPN,uniglomerular,,2
+VC2_lPN,uniglomerular,,2
+VC3_adPN,uniglomerular,,8
+VC4_adPN,uniglomerular,,5
+VC5_lvPN,uniglomerular,,5
+VL1_ilPN,uniglomerular,,2
+VL1_vPN,uniglomerular,,2
+VL2a_adPN,uniglomerular,,2
+VL2a_vPN,uniglomerular,,5
+VL2p_adPN,uniglomerular,,2
+VL2p_vPN,uniglomerular,,2
+VM1_lPN,uniglomerular,,4
+VM2_adPN,uniglomerular,,4
+VM3_adPN,uniglomerular,,4
+VM4_adPN,uniglomerular,,2
+VM4_lvPN,uniglomerular,,5
+VM5d_adPN,uniglomerular,,9
+VM5v_adPN,uniglomerular,,6
+VM6_adPN,uniglomerular,,2
+VM7d_adPN,uniglomerular,,5
+VM7v_adPN,uniglomerular,,4
+VP1d_il2PN,uniglomerular,,2
+VP1l+_lvPN,uniglomerular,,9
+VP1m_l2PN,uniglomerular,,2
+VP2_adPN,uniglomerular,,2
+VP2_l2PN,uniglomerular,,2
+VP3+_vPN,rms_inspection,,2
+VP4_vPN,uniglomerular,,2
+VS8,rms_inspection,,2

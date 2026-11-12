@@ -45,7 +45,8 @@ Known, deliberate differences, applied to the original's run so the comparison i
   fig7S2b.py  the original stops on a KeyError (the cell-type table names its column root_id);
               the original's read of that table renames the column, as the port does in its code. The
               original is also run with the port's excluded-type lists (SAME_TYPE_LISTS: DNge175 left out, T3
-              in the 'other excluded' group), so only the code is compared.
+              in the 'other excluded' group, R1-6 written with a hyphen as in the cell-type table), so only the
+              code is compared.
   fig7g.py    the port writes p below 0.001 as '< 0.001' (Arial 8 pt) where the original writes a maths
               exponent; the original is run with the port's p formatter (SAME_P_LABELS), so the labels compare.
 A pair where both sides stop because t2.ftr or filopodia_filtered.ftr is missing (at present only fig7e reads them) is
@@ -55,7 +56,7 @@ out of time; each still writes the report.
 
 --mutants shows the check can fail: it first requires the unchanged ports to pass, then copies the ports to a scratch folder, plants one bug at a
 time (MUTANTS below: a threshold, a reference line, the statistic, the order, a row dropped, a
-legend label, the axes swapped, an excluded type kept, a save removed, the font setting, the
+legend label, the axes swapped, an excluded type kept, R1-6 back with an en dash, a save removed, the font setting, the
 table destination, tick labels, colours, a save before the legend, the wrong figure saved, the
 layout, label rotation and weight, the Arial 8 pt call removed, the legend position, save options, extra reads and writes, and
 a hand edit) and requires each to FAIL with both scripts finished. PASS there means every mutant was
@@ -100,13 +101,14 @@ RENAME_ROOT_ID = {"fig7S2b.py"}
 # originals run with the port's p-value formatter: the generator's fixes whose old text defines format_p
 SAME_P_LABELS = {"fig7g.py"}
 # originals run with the port's excluded-type lists: the generator's fixes that edit those lists (DNge175 left out,
-# T3 in the 'other excluded' group)
+# T3 in the 'other excluded' group, R1-6 with a hyphen)
 SAME_TYPE_LISTS = {"fig7S2b.py"}
-N_TYPE_LIST_FIXES = 4   # DNge175 out of exclude_types and of rms_excluded_types, T3 out of the RMS group and into the other group
+N_TYPE_LIST_FIXES = 6   # DNge175 out of exclude_types and of rms_excluded_types, T3 out of the RMS group and into the other group,
+                        # R1-6 with a hyphen in exclude_types and in other_excluded_types
 
 
 def _is_type_list_fix(old: str) -> bool:
-    return "'DNge175'" in old or "'T2','T2a','T3'" in old or "'T1',\n" in old
+    return "'DNge175'" in old or "'T2','T2a','T3'" in old or "'T1',\n" in old or "'R1\u20136'" in old
 
 
 def original_to_run(originals: Path, orig: str, rec_dir: Path) -> Path:
@@ -382,6 +384,8 @@ MUTANTS = [
      "    neuron_quality['mean_centroid_dist'],\n    neuron_quality['mean_rms'],"),
     ("type_unexcluded", "fig7S2b.py", "fig7s2b_bouton_spread_by_type.py", "    'Lai',\n    'LTe26',\n    'Mi9',", "    'Lai',\n    'LTe26',"),
     ("t3_back_in_rms", "fig7S2b.py", "fig7s2b_bouton_spread_by_type.py", "    'T2','T2a'\n}", "    'T2','T2a','T3'\n}"),
+    ("r1_6_en_dash", "fig7S2b.py", "fig7s2b_bouton_spread_by_type.py",
+     "    'T1','T3',\n    'R1-6','R7','R8',", "    'T1','T3',\n    'R1\u20136','R7','R8',"),
     ("save_removed", "fig7S2a.py", "fig7s2a_bouton_spread.py", "plt.savefig(_out_dir / 'inertia_all.svg', format='svg')\n", ""),
     ("fonttype_removed", "fig7S2a.py", "fig7s2a_bouton_spread.py", "mpl.rcParams['svg.fonttype'] = 'none'\n", ""),
     ("table_written_elsewhere", "fig7i.py", "fig7i_filopodia_fraction_x_nt.py",
