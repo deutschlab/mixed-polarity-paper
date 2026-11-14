@@ -56,7 +56,7 @@ corresponding authors.
 
 | File | Local path | Config variable | Description |
 |------|-----------|----------------|-------------|
-| Neuropil synapse table | `data/raw/Cloud_SQL_fw_mat783_synapses_v3_neuropil.csv` | `NEUROPIL_SYNAPSE_CSV` | Synapse table with neuropil annotations, derived from FlyWire data published in Dorkenwald et al. 2024 (see citation below). Required only by `figures/fig2/si_x_twigs.py` (Fig 2 supplementary panel). |
+| Neuropil synapse table | `data/raw/Cloud_SQL_fw_mat783_synapses_v3_neuropil.csv` | `NEUROPIL_SYNAPSE_CSV` | Synapse table with neuropil annotations, derived from FlyWire data published in Dorkenwald et al. 2024 (see citation below), with every partner kept, including segments not connected to any proofread neuron ("twigs"): 192,210,404 rows, no header row, 14 columns (a synapse ID, the presynaptic point, a third point, the postsynaptic point, size, the presynaptic and postsynaptic root IDs as full 18-digit IDs, the neuropil). Its rows between two proofread neurons match the Princeton synapses (row by row for the 31,819 synapses of 30 sampled cells; for 10,000 cells, each cell's MaxSI split on them is the paper's). Required only by `figures/fig2/si_x_twigs.py` (Fig 2 supplementary panel). |
 
 
 > Dorkenwald S, Matsliah A, Sterling AR, Schlegel P, Yu SC, McKellar CE, et al. Neuronal wiring diagram of an adult brain. *Nature* 634(8032), 124–138 (2024). https://doi.org/10.1038/s41586-024-07558-y

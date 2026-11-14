@@ -59,7 +59,7 @@ Includes an adult vs larva SI comparison and PCA of morphological features.
 | Fig 2 Supp 4B (`feat_import_bar_princeton.svg`) | `figures/fig2/feat_rf_and_lr_models.py` | `NEURON_TABLE_FTR` | `outputs/fig2/feat_rf_and_lr_models/` |
 | Fig 2F | `figures/fig2/si_x_pca.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` (loaded, but nothing that runs uses it) | `outputs/fig2/SI_x_PCA/` |
 | Fig 2G | `figures/fig2/si_x_pca.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` (loaded, but nothing that runs uses it) | `outputs/fig2/SI_x_PCA/` |
-| Fig 2 Supp 1A | `figures/fig2/si_x_twigs.py` | `NEURON_TABLE_FTR`, `NEUROPIL_SYNAPSE_CSV` | `outputs/fig2/SI_x_twigs/` |
+| Fig 2 Supp 1A | `figures/fig2/si_x_twigs.py` (runs only with `SPLIT_METHOD = "maxsi"`) | `SI_UPDATED_FTR`, `MAXSI_LABEL_BATCH_DIR`, `NEUROPIL_SYNAPSE_CSV`, `NEURONS_CSV`, skeletons in `SWC_DIR` | `outputs/fig2/SI_x_twigs/` (SVG, per-cell CSV, summary) |
 | Fig 2 Supp 1B/C | `figures/fig2/si_comparisons.py` | `NEURON_TABLE_FTR`, `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig2/SI_comparisons/` |
 | Supp 2-S2 A | `figures/fig2/si_x_primary_types_mirror.py` | `NEURON_ANNOTATIONS_CSV`, `NEURON_TABLE_FTR`, `SI_UPDATED_FTR` | `outputs/fig2/SI_x_primary_types_mirror/` |
 | Supp 2-S2 D | `figures/fig2/si_x_primary_types.py` | `NEURON_TABLE_FTR` | `outputs/fig2/SI_x_primary_types/` |
