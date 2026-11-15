@@ -4,7 +4,7 @@ The processing steps that turn the raw connectome inputs into the derived tables
 
 - **Run order:** 01 → 02a → 02b → 03 → 04 → 05 → 06 → 07. Optional: `build_raw_synapse_table.py` (the raw synapse table, from the Codex CSV) → 08 (split-method comparison) → `phi_threshold.py`; and 09 (MaxSI, MinFisherP or MaxPhi labels), after 05 and `build_raw_synapse_table.py`. The larval steps run separately: `processing/larva/larva_process.py` (SFC split, Figure 2A) and `processing/larva/larva_maxsi_labels.py` (MaxSI split, which 2A reads under `SPLIT_METHOD = "maxsi"`), then `processing/larva/larva_pc1.py` (each larval cell's PC1, for the larval 4D). Each writes its own folders, whatever `PIPELINE_RUN` is.
 - **Paths:** all in `config.py`; `PIPELINE_RUN` and `SPLIT_METHOD` choose the folders ([Settings](#settings-split_method-and-pipeline_run)).
-- **Shared code:** the numbered scripts import `methods/methods_all.py` via `METHODS_DIR`; 08 and 09 also `methods/node_cut_si.py`; 01, 02a and 08 also `methods/flow_centrality.py`, which gives navis's synapse flow centrality without the dense geodesic matrix navis builds when navis-fastcore is not installed (the same values, in a fraction of the memory).
+- **Shared code:** the numbered scripts import `methods/methods_all.py` via `METHODS_DIR`; 08 and 09 also `methods/node_cut_si.py`; `methods/split_max_si.py` (MaxSI computed again, for drawing) is used only by `tools/draw_max_si_split.py`; 01, 02a and 08 also `methods/flow_centrality.py`, which gives navis's synapse flow centrality without the dense geodesic matrix navis builds when navis-fastcore is not installed (the same values, in a fraction of the memory).
 
 ---
 

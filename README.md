@@ -229,6 +229,7 @@ Run these from the repository root with the environment active. [docs/tools.md](
 | [`check_split_methods_on_subset.py`](docs/tools.md#checking-the-split-methods) | Runs step 08 on some neurons and compares with a reference table | Raw synapse table, local skeletons | 28 to 36 minutes for 1,144 neurons (macOS, with navis's own flow centrality); `--out` |
 | [`check_split_functions.py`](docs/tools.md#checking-step-08s-split-code) | Step 08's split code on made-up neurons, against a separate reference | No data | About 40 seconds |
 | [`check_step09_failures.py`](docs/tools.md#checking-step-08s-split-code) | Step 09 on five local cells with planted failures, and its three tables | SFC and raw tables, five skeletons | About four minutes |
+| [`draw_max_si_split.py`](docs/tools.md#drawing-a-cells-maxsi-split) | Draws cells split at their MaxSI cut, with the SI and each side's canonical share, and checks each cut against step 09's rule, and against step 09's saved run where its batches are there | Raw synapse table, the cells' skeletons | One SVG per cell; `outputs/tools/draw_max_si_split/` |
 | [`compare_split_runs.py`](docs/tools.md#comparing-two-runs-of-step-08) | The cuts of two step 08 runs on the same neurons | Two step 08 runs | `outputs/tools/compare_split_runs/` |
 | [`check_simple_pc1_model.py`](docs/tools.md#checking-the-simple-pc1-model) | Rebuilds the Fig 4 simple PC1 model and checks a run of its script | Steps 05 and 07, about 7 GB | About 8 minutes with `--variants` (measured once, macOS) |
 
@@ -291,6 +292,7 @@ methods/
   node_cut_si.py    the SI of every single-node cut, used by steps 08 and 09
   flow_centrality.py  navis's synapse flow centrality without its dense matrix, used by steps 01, 02a and 08
   figure_text.py    every saved text in Arial 8 pt, used by every figure script and phi_threshold.py
+  split_max_si.py   a cell cut at its highest-SI node, for drawing, used by tools/draw_max_si_split.py
 
 figures/            69 scripts: fig1/ 7, fig2/ 11, fig3/ 14, fig4/ 8, fig5/ 8, fig6/ 1, fig7/ 13, split_methods/ 6, supporting/ 1
 

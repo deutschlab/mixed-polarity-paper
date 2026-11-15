@@ -1,12 +1,12 @@
 # Tools
 
-The scripts in `tools/` check the pipeline and the figure scripts, and compare runs. Run them from the repository
+The scripts in `tools/` check the pipeline and the figure scripts, compare runs, and draw a cell's MaxSI split. Run them from the repository
 root with the environment active. Each one has `--help`, and its docstring has the full details; this page says what
 each tool is for, what it needs and what its result means.
 
 Most check tools print PASS or FAIL and exit with status 1 on a failure. Three exceptions: `compare_split_figures.py`
 exits 0 whatever it finds (only its selftests can fail), `check_split_methods_on_subset.py` checks nothing without
-`--compare`, and `compare_split_runs.py` exits 1 on a difference only with `--expect-identical`. A PASS holds only for the data the tool
+`--compare`, `compare_split_runs.py` exits 1 on a difference only with `--expect-identical`, and `draw_max_si_split.py` draws and stops with status 1 only when a cell fails its checks. A PASS holds only for the data the tool
 was given. None of the tools shows that an analysis is the right one.
 
 ## Which tool do I need?
@@ -24,6 +24,7 @@ was given. None of the tools shows that an analysis is the right one.
 | check the split methods (step 08) or step 09 | `check_split_methods_on_subset.py`, `check_split_functions.py`, `check_step09_failures.py`, `compare_split_runs.py` |
 | check the Fig 4 simple PC1 model | `check_simple_pc1_model.py` |
 | check that every figure's text is Arial 8 pt | `check_figure_text.py` |
+| draw a cell split at its MaxSI cut | `draw_max_si_split.py` |
 
 ## Checking that a figure reproduces
 
@@ -293,6 +294,28 @@ python tools/check_step09_failures.py
 ```
 
 Both write `outputs/tools/<tool name>/report.txt`.
+
+## Drawing a cell's MaxSI split
+
+`draw_max_si_split.py` draws cells split at their maximum-SI cut, the dendrite in orange and the axon in purple, with
+the cut's SI and each side's canonical share in the title (the dendrite's share of postsynapses, the axon's share of
+presynapses). It builds each cell as step 09 does, from its healed skeleton with the synapses of
+`SYNAPSE_TABLE_RAW_FTR` attached, and cuts it with `methods/split_max_si.py` (Amit Gross's function), which scores the
+same cuts as `methods/node_cut_si.py` and takes the highest SI, the first node on a tie. It computes the log another
+way, so on a near-tie it could choose another cut; the tool therefore runs step 09's rule on each cell too and stops
+unless the cut node, side counts and axon side are the same, and it does not draw a cell step 09 would refuse. If
+step 09's MaxSI batches are there (`MAXSI_LABEL_BATCH_DIR`, or `--batches`), it also stops unless each cell's cut node,
+SI and side counts are those of step 09's saved run. It stops if the raw table has self-synapses for a cell it draws,
+or if a cell has no skeleton, no synapse, or more than one row in step 09's summaries. The shares count the synapses attached to the skeleton, so they can differ by a few
+synapses from the neuron table's, which counts rows of the synapse table. It needs the raw synapse table and the
+cells' skeletons under `SWC_DIR`; `--view` sets the camera (default -90 -90 0).
+
+```bash
+python tools/draw_max_si_split.py 720575940628463468 720575940633095137
+python tools/draw_max_si_split.py 720575940633095137 --view -90 -90 -30 --batches data/intermediate_rebuild_maxsi/maxsi_labels/batches
+```
+
+It writes one SVG per cell and `summary.csv` to `outputs/tools/draw_max_si_split/`.
 
 ## Comparing two runs of step 08
 
