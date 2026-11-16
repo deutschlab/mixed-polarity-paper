@@ -89,7 +89,6 @@ CONNECTORS_DIR            = INTERMEDIATE_DIR / "connectors"
 
 # ── Reciprocity working directories ─────────────────────────────────────────
 RECIPROCITY_DIR           = INTERMEDIATE_DIR / "reciprocity"
-RECIPROCITY_CALC_DIR      = RECIPROCITY_DIR  / "calculations"
 RECIPROCITY_MODELS_DIR    = RECIPROCITY_DIR  / "models"
 
 # ── Filopodia analysis (fig7) ──────────────────────────────────────────────
@@ -110,8 +109,6 @@ SYNAPSES_PRE_MERGE_FTR        = CONNECTORS_DIR / "synapses_pre_merge_princeton.f
 RECIPROCITY_LIST_FTR          = DERIVED_DATA_DIR / "reciprocity_list_full_article_princeton.ftr"
 CONNECTIONS_FILTERED_FTR      = DERIVED_DATA_DIR / "connections_by_syn_type_filtered_article_princeton.ftr"
 CONNECTIONS_RECI_FILTERED_FTR = DERIVED_DATA_DIR / "connections_by_syn_type_reciprocal_filtered_article_princeton.ftr"
-ALL_R_FULL_PKL                = RECIPROCITY_CALC_DIR / "partners" / "all_r_full_.pkl"
-SELF_SDI_FTR                  = RECIPROCITY_CALC_DIR / "self_SDI.ftr"
 RF_MODEL_PKL                  = RECIPROCITY_MODELS_DIR / "final_random_forest_model_princeton.pkl"
 PC1_TABLE_CSV                 = DERIVED_DATA_DIR / "PC1_table.csv"
 FIG4_HELDOUT_MODELS_FTR       = DERIVED_DATA_DIR / "fig4_heldout_models.ftr"      # figures/fig4/fig4_heldout_models.py
@@ -190,11 +187,11 @@ SYNAPSE_TABLE_RAW_FTR = (SYNAPSE_TABLE_RAW_WITH_SELF_FTR if RAW_TABLE_KEEP_SELF_
                          else SYNAPSE_TABLE_RAW_NO_SELF_FTR)
 
 # Under PIPELINE_RUN = "rebuild": inputs that no step of the fresh run builds, read from where they are now:
-# swc_data.ftr (step 05 reads it; the only code that writes it is commented out), the two raw synapse tables
-# (built from the Codex CSV by build_raw_synapse_table.py, whatever the run) and neuron_data.ftr (made outside this
-# repository; its readers, fig7e, fig7i, fig7s2b and the revised Fig 4E script, use only its nt_type and cell-type
-# columns, none of which a run here changes).
-REBUILD_KEEPS_PUBLISHED = ["SWC_DATA_FTR", "SYNAPSE_TABLE_RAW_NO_SELF_FTR", "SYNAPSE_TABLE_RAW_WITH_SELF_FTR",
+# the two raw synapse tables (built from the Codex CSV by build_raw_synapse_table.py, whatever the run) and
+# neuron_data.ftr (made outside this repository; its readers, fig7e, fig7i, fig7s2b and the revised Fig 4E script,
+# use only its nt_type and cell-type columns, none of which a run here changes). swc_data.ftr is not among them:
+# processing/build_swc_data.py builds it, into data/derived_rebuild under "rebuild".
+REBUILD_KEEPS_PUBLISHED = ["SYNAPSE_TABLE_RAW_NO_SELF_FTR", "SYNAPSE_TABLE_RAW_WITH_SELF_FTR",
                            "SYNAPSE_TABLE_RAW_FTR", "NEURON_DATA_FTR"]
 if PIPELINE_RUN == "rebuild":
     for _name in REBUILD_KEEPS_PUBLISHED:
@@ -290,7 +287,7 @@ MAXPHI_SI_UPDATED_FTR     = _method_path(SI_UPDATED_SFC_FTR, "maxphi")       # l
 MAXSI_SWITCHED = [
     "SYNAPSE_TABLE_FTR", "NEURON_TABLE_FTR", "SI_UPDATED_FTR",
     # step 06
-    "RECIPROCITY_LIST_FTR", "ALL_R_FULL_PKL", "SELF_SDI_FTR", "FULL_RECI_CONNECTIONS_FTR",
+    "RECIPROCITY_LIST_FTR", "FULL_RECI_CONNECTIONS_FTR",
     "CONNECTIONS_FILTERED_FTR", "CONNECTIONS_RECI_FILTERED_FTR", "CONNECTIONS_TABLE_FTR",
     # step 07 (step 08 always reads the SFC cells, so its table doesn't switch)
     "PCA_TABLE_FTR",
@@ -358,7 +355,7 @@ BOUTON_MAXSI_LOG_TXT = OUTPUT_DIR / "tools" / "bouton_maxsi_tables" / "bouton_ma
 def refuse_published_run(step):
     """Stop a pipeline step when PIPELINE_RUN is "published".
 
-    Steps 01 to 07 write their tables to the paths set above. Under "published" those are the published tables in
+    Steps 01 to 07 and build_swc_data.py write their tables to the paths set above. Under "published" those are the published tables in
     data/intermediate, data/derived (and data/derived_maxsi under SPLIT_METHOD = "maxsi", likewise for "minfisherp"
     and "maxphi"). Some are writable and would be overwritten without a word; others were delivered read-only by the co-authors, but a write through a temporary
     file and a rename (os.replace, as steps 01, 02b, 03 and 04 do) replaces a read-only file in a writable folder without an error

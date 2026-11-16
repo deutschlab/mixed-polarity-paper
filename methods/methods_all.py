@@ -454,12 +454,6 @@ def create_links_two_neurons_shared_synapses(pre,post,syn_df):
 
     return all_urls
     
-'''
-
-gg=create_links_two_neurons_shared_synapses(720575940639628870,720575940623052981,allsynapses)
-shorthen_and_open_links(gg[0])
-
-'''
 
 #%%
 def create_links_many_neurons(nlist,syn_df):
@@ -551,12 +545,7 @@ def create_links_many_neurons(nlist,syn_df):
     links_='https://neuroglancer.neuvue.io'+all_urls[0][22:]
 
     return all_urls
-#allsynapses=pd.read_feather(r'C:\Users\user\organised_work\data\783\generated\post_processing_data\article\synapses_783_article_princeton.ftr')
 #%%
-'''
-gg=create_links_many_neurons([720575940625308162],allsynapses.sample(0))
-shorthen_and_open_links(gg[0])
-      ''' 
        #%%
 def safe_sample(df, n=200):
     return df.sample(n=min(len(df), n), random_state=42)
@@ -676,13 +665,6 @@ def create_links_two_neurons_and_shared_synapses2(nlist,syn_df,sample=200):
     return all_urls
 
 
-'''
-
-gg=create_links_two_neurons_and_shared_synapses2([720575940608199748,720575940611514261],allsynapses,sample=200)
-shorthen_and_open_links(gg[0])
-
-
-'''
               
 #%%
 
@@ -711,9 +693,6 @@ def upload_swc(id_):
             return swc
         except:
             continue
-'''
-swc=upload_swc(720575940608404747)
-'''
 
 
 def attach_synapses(x,syn, min_score=30,neuropils=False,batch_size=100, progress=True):
@@ -962,13 +941,6 @@ def heal_attach(item,allsynapses):
 
 
 
-'''
-id_=720575940601603185
-swc1=upload_swc(id_)
-allsynapses2=allsynapses[(allsynapses['pre']==n1_id)|(allsynapses['post']==n1_id)]
-swc1=heal_attach(swc1,allsynapses2)
-
-'''
 def load_swc_from_folder(directory):
     swc_list=[]
     i=0
@@ -981,10 +953,6 @@ def load_swc_from_folder(directory):
     return swc_list
 
 
-'''
-folder = r"C:\\Users\\user\\organised_work\\data\\783\\recieved\\swc\\783\\8"
-swc_list = load_swc_from_folder(folder)
-'''
 #%%reciprocity
 def calculate_geodesic_dist_pre_post_sampled(swc,sample_size,allsynapses):
     
@@ -1002,14 +970,6 @@ def calculate_geodesic_dist_pre_post_sampled(swc,sample_size,allsynapses):
     return gm_expanded.mean().mean()
 
 
-'''
-id_=720575940601603185
-swc=upload_swc(id_)
-allsynapses2=allsynapses[(allsynapses['pre']==id_)|(allsynapses['post']==id_)]
-
-swc=heal_attach(swc,allsynapses2)
-result=calculate_geodesic_dist_pre_post_sampled(swc,300,allsynapses)
-'''
 
 
 def calculate_reciprocal_geodesic_dist_pre_post_sampled(n1_id,n2_id,allsynapses):
@@ -1035,9 +995,6 @@ def calculate_reciprocal_geodesic_dist_pre_post_sampled(n1_id,n2_id,allsynapses)
     
     return gm_expanded.mean().mean()
 
-'''
-calculate_reciprocal_geodesic_dist_pre_post_sampled(720575940601603185,720575940625146621,allsynapses)
-'''
 
 
 
@@ -1059,10 +1016,6 @@ def calculate_geodesic_dist_pre_post_sampled_folder(folder,allsynapses):
         all_dist_list.append([swc.id,calculate_geodesic_dist_pre_post_sampled(swc,300,allsynapses2)])
     return all_dist_list
 
-'''
-folder = r"C:\\Users\\user\\organised_work\\data\\783\\recieved\\swc\\783\\8"
-aaa=calculate_geodesic_dist_pre_post_sampled_folder(folder,allsynapses)
-'''
 #%%trees
 
 
@@ -1268,18 +1221,8 @@ def spheres(id_, syn_df):
     post_path = os.path.join(save_dir, f'{id_}_post.csv')
     cc.to_csv(post_path, index=False, encoding='cp1252')
     
-#allsynapses=pd.read_feather(r'C:\Users\user\organised_work\data\783\generated\post_processing_data\article\synapses_783_article_princeton.ftr')
 #%%
-'''
-
-gg=create_links_many_neurons([720575940642312136],allsynapses.sample(0))
-shorthen_and_open_links(gg[0])
-      '''
 #%%
-'''
-# Construct the filename
-spheres(720575940642312136,allsynapses)
-'''
 #%%
 
 import pandas as pd

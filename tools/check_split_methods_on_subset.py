@@ -26,10 +26,9 @@ After the run (or with --compare-only, on an existing --out) the tool writes
 MinFisherP_Phi), the neuron's status, and, from the per-node tables step 08 saves:
 
 - MinFisherP_Phi_first: the Phi of the first node in table order with the lowest
-  fisher_p (pandas idxmin). Step 08 instead takes the first row after an unstable sort
-  on fisher_p. The two can differ only when nodes that give different cuts tie for the
-  lowest p, which happens mostly where Fisher's p underflows to 0 on well-separated
-  neurons;
+  fisher_p (pandas idxmin), as step 08 also takes it, so the two agree; a difference
+  would mean step 08's tie rule changed. Ties for the lowest p happen mostly where
+  Fisher's p underflows to 0 on well-separated neurons;
 - MaxPhi: the highest |Phi| over the candidate nodes, a fourth split method (step
   08 does not compute MaxPhi, so comparing it checks this reimplementation, not step 08);
 - the number of candidate nodes, of nodes with fisher_p == 0, of nodes tied for the

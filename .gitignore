@@ -125,3 +125,6 @@ excel_missing_files*.csv
 
 # demo notebook outputs
 demo/output/
+
+# Neuroglancer links written by the two figure scripts that make them
+temp_link_*.html

@@ -4,7 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import (
     METHODS_DIR, NEURON_TABLE_FTR, SYNAPSE_TABLE_FTR,
-    RECIPROCITY_LIST_FTR, ALL_R_FULL_PKL, SELF_SDI_FTR,
+    RECIPROCITY_LIST_FTR,
     FULL_RECI_CONNECTIONS_FTR, CONNECTIONS_FILTERED_FTR,
     CONNECTIONS_RECI_FILTERED_FTR, CONNECTIONS_TABLE_FTR,
     DERIVED_DATA_DIR, refuse_published_run,
@@ -61,115 +61,6 @@ RECIPROCITY_LIST_FTR.parent.mkdir(parents=True, exist_ok=True)
 reciprocal_edges_df.to_feather(RECIPROCITY_LIST_FTR)
 #%%ר
 reci_df=pd.read_feather(RECIPROCITY_LIST_FTR)
-#%%%
-
-
-
-#%%reci cal per neuron
-r'''
-allreci_neurons=pd.DataFrame(pd.concat([reci_df['Node A'],reci_df['Node B']]).unique(),columns=['neuron'])
-
-import time
-ii = 0
-
-all_r = []
-total_start_time = time.time() 
-for n1_id in allreci_neurons['neuron'].iloc[0:]:
-    if ii%100==0:
-        print(ii)
-        total_end_time = time.time()
-        print(f"Total execution time: {total_end_time - total_start_time:.2f} seconds")
-    ii += 1
-    start_time = time.time()  
-    
-    reci_partners1 = reci_df[reci_df['Node A'] == n1_id]
-    reci_partners2 = reci_df[reci_df['Node B'] == n1_id]
-    reci_partners = pd.DataFrame(
-        pd.concat([reci_partners1['Node A'], reci_partners1['Node B'], reci_partners2['Node A'], reci_partners2['Node B']]),
-        columns=['neuron']
-    )
-    reci_partners = reci_partners[reci_partners['neuron'] != n1_id]
-    
-    r_list = []
-    swc1 = upload_swc(n1_id)
-    allsynapses2 = allsynapses[(allsynapses['pre'] == n1_id) | (allsynapses['post'] == n1_id)]
-    swc1 = heal_attach(swc1, allsynapses2)
-    r_list.append(n1_id)
-    
-    for n2_id in reci_partners['neuron']:
-        shared_synapses = allsynapses2[
-            ((allsynapses2['pre'] == n1_id) & (allsynapses2['post'] == n2_id)) |
-            ((allsynapses2['pre'] == n2_id) & (allsynapses2['post'] == n1_id))
-        ]
-        
-        n1_id_pre = shared_synapses[shared_synapses['pre'] == n1_id][['pre_x', 'pre_y', 'pre_z']]
-        n1_id_pre.columns = ['x', 'y', 'z']
-        n1_id_post = shared_synapses[shared_synapses['post'] == n1_id][['post_x', 'post_y', 'post_z']]
-        n1_id_post.columns = ['x', 'y', 'z']
-        
-        pre_syn = swc1.connectors.merge(n1_id_pre[['x', 'y', 'z']], on=['x', 'y', 'z'], how='inner')['node_id']
-        post_syn = swc1.connectors.merge(n1_id_post[['x', 'y', 'z']], on=['x', 'y', 'z'], how='inner')['node_id']
-        
-        gm = navis.geodesic_matrix(swc1, from_=pre_syn)
-        gm_expanded = gm.loc[pre_syn.values]
-        gm_expanded = gm_expanded.loc[:, post_syn.values]
-        
-        r_list.append([n2_id, gm_expanded.mean().mean(), gm_expanded.shape])
-    
-    all_r.append(r_list)
-    
-    end_time = time.time()  # End time counter for this iteration
-    
-# Print total execution time
-
-total_end_time = time.time()
-print(f"Total execution time: {total_end_time - total_start_time:.2f} seconds")
-#%%
-import pickle
-file_path = r"C:\Users\user\organised_work\data\783\generated\reciprocity\calculations\partners\all_r_full_.pkl"
-
-# Ensure the directory exists
-os.makedirs(os.path.dirname(file_path), exist_ok=True)
-
-# Save the object
-with open(file_path, "wb") as file:
-    pickle.dump(all_r, file)
-
-#%%
-# Define the file path
-file_path = r"C:\Users\user\organised_work\data\783\generated\reciprocity\calculations\partners\all_r_full_.pkl"
-
-# Load the object
-with open(file_path, "rb") as file:
-    all_r = pickle.load(file)
-
-all_dfs=[]
-for i in all_r:
-    neuron=i[0]
-    partners=i[1:]
-    df=pd.DataFrame(partners)
-    df['neuron']=str(neuron)
-    
-    df.columns=['partner','dist','shape','neuron']
-    all_dfs.append(df)
-
-df_all=pd.DataFrame(pd.concat([i for i in all_dfs]))
-
-    #%%
-df_all['partner']=df_all['partner'].astype(np.int64)
-df_all['neuron']=df_all['neuron'].astype(np.int64)
-
-
-all_self=pd.read_feather(r'C:\Users\user\organised_work\data\783\generated\reciprocity\calculations\self_SDI.ftr')
-#%%
-all_self['neruon']=all_self['neruon'].astype(np.int64)
-#%%
-all_self_f = all_self[all_self['neruon'].isin(df_all['neuron'])]
-all_self_f.columns=['neuron','SDI']
-all_self_f['neuron']=all_self_f['neuron'].astype(np.int64)
-#%%
-'''
-#------------------------------------------------------------------------------
 #%%
 #%%
 # forward (A -> B)

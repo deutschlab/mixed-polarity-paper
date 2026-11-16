@@ -102,10 +102,6 @@ def calculate_SI(df):
 filopodia_sum=allsynapses['filopodia_on_post'].sum()
 total_post=len(allsynapses)
 #%%   baseline1
-'''
-baseline_comp_syntype=extract_comp_syntype(allsynapses,allsynapses)
-baseline_SI=calculate_SI(baseline_comp_syntype)
-'''
 #%%   baseline2
 bs2_total=total_post-filopodia_sum
 allsynapses_baseline=allsynapses.sample(bs2_total,random_state=42)

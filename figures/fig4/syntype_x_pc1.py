@@ -361,14 +361,6 @@ print("Balanced 'comp' Distribution:")
 print(balanced_syn_df_m['comp'].value_counts())
 
 #%%
-'''
-# Randomly sample from the full DataFrame
-balanced_syn_df_m = syn_df_m.sample(n=x*4, random_state=42)
-
-# Check distribution
-print("Unbalanced 'comp' Distribution:")
-print(sampled_syn_df_m['comp'].value_counts())
-'''
 #%%
 
 
@@ -413,32 +405,6 @@ rf_clf = joblib.load(model_file)
 y_pred = rf_clf.predict(X_test)
 
 #%%
-'''
-t=all_df.head(10000)
-
-
-#%%
-X_dummy = np.array([[15.644506 , 10.027891]])  # shape (1, 2)
-
-# Predict using dummy data
-y_pred_dummy = rf_clf.predict(X_dummy)
-print(y_pred_dummy)
-#%%
-sample = all_df.sample(n=100, random_state=10)  # pick 10 random rows
-X_sample = sample[['PC1_x', 'PC1_y']]
-y_true = sample['comp']
-
-y_pred = rf_clf.predict(X_sample)
-
-# ---------- Evaluate ----------
-print("Sample accuracy:", accuracy_score(y_true, y_pred))
-print("\nClassification report:\n", classification_report(y_true, y_pred))
-
-# Optional: merge predictions into the DataFrame
-sample['predicted'] = y_pred
-print("\nPredictions:")
-print(sample)
-'''
 #%%
 
 # ---------- Confusion matrix ----------
@@ -453,31 +419,7 @@ plt.ylabel('True label')
 plt.tight_layout()
 plt.show()
 #%%simple model
-'''
-# Step 3: Train Random Forest Classifier
-rf_clf = RandomForestClassifier(
-    n_estimators=100,        # enough trees for stability
-    max_depth=5,            # cap tree depth (prevents huge trees)
-    min_samples_split=10,    # node must have at least 20 samples to split
-    min_samples_leaf=10,     # each leaf must have at least 10 samples
-    max_features='sqrt',     # good default
-    bootstrap=True,
-    oob_score=True,
-    random_state=42
-)
-rf_clf.fit(X_train, y_train)
-
-# Step 4: Evaluate the Classifier
-y_pred = rf_clf.predict(X_test)
-'''
 #%%
-'''
-# --- tree sizes ---
-depths = [t.get_depth() for t in rf_clf.estimators_]
-leaves = [t.get_n_leaves() for t in rf_clf.estimators_]
-print(f"Tree depth (min/median/max): {min(depths)} / {np.median(depths)} / {max(depths)}")
-print(f"Leaves    (min/median/max): {min(leaves)} / {int(np.median(leaves))} / {max(leaves)}")
-'''
 
 
 #%%

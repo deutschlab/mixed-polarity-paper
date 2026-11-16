@@ -186,7 +186,7 @@ def run(script, work, run_dir, accept_skeleton=False, accept_failed=None, plant=
 
 
 def recount(syn, neuron_ids):
-    """Step 05's compartment counts, written out again here (05:223-256)."""
+    """Step 05's compartment counts, written out again here (05:164-197)."""
     r = pd.DataFrame({"neuron": neuron_ids})
     for k, end in ((0, "pre"), (1, "post")):
         for c in "ADL":

@@ -81,7 +81,7 @@ The combine section then writes
   05 does, only the cells that have an SI and a row in the synapse table: a cell that
   failed here is dropped, and the number is printed (a MinFisherP cell labelled with an
   empty SI is kept). SI = MaxSI_SI. Recounted from
-  MAXSI_SYNAPSE_TABLE_FTR with step 05's code (05:223-256), because they describe the
+  MAXSI_SYNAPSE_TABLE_FTR with step 05's code (05:164-197), because they describe the
   split: pre_A ... post_L, axon_correct, dend_correct. linker = 0, as the split has
   no linker compartment. Every other column is the SFC table's, including the cell
   properties out_synapses_count, in_synapses_count, the degree and partner columns and
@@ -817,7 +817,7 @@ if write_tables:
     # every other column, the cell properties among them, stays as in the SFC table
     maxsi_neurons = neuron_table.copy()
 
-    # 05:223-248, pre_A ... post_L; the first letter of comp is the pre end's, the second the post end's
+    # 05:167-192, pre_A ... post_L; the first letter of comp is the pre end's, the second the post end's
     for component in ["A", "D", "L"]:
         pre_mask = np.isin(comp_index, [i for i, v in enumerate(comp_values) if v[0] == component])
         post_mask = np.isin(comp_index, [i for i, v in enumerate(comp_values) if v[1] == component])
@@ -829,7 +829,7 @@ if write_tables:
                                               .fillna(0).astype(np.int64))
     del comp_index
 
-    # 05:254-256
+    # 05:195-197
     maxsi_neurons["axon_correct"] = maxsi_neurons["pre_A"] / (maxsi_neurons["pre_A"] + maxsi_neurons["post_A"])
     maxsi_neurons["dend_correct"] = maxsi_neurons["post_D"] / (maxsi_neurons["pre_D"] + maxsi_neurons["post_D"])
     maxsi_neurons["SI"] = maxsi_neurons["neuron"].map(maxsi_summary.set_index("neuron")[SI_COLUMN]).astype(np.float64)
@@ -842,7 +842,7 @@ if write_tables:
     assert list(maxsi_neurons.columns) == list(neuron_table.columns)
     assert (maxsi_neurons.dtypes == neuron_table.dtypes).all(), maxsi_neurons.dtypes[maxsi_neurons.dtypes != neuron_table.dtypes]
 
-    # as step 05: only the cells with an SI (05:129) and a row in the synapse table (05:223, 298). A cell has an SI
+    # as step 05: only the cells with an SI (05:129) and a row in the synapse table (05:164, 239). A cell has an SI
     # here when it was labelled, even if the SI is empty (a MinFisherP cut with the synapses off it of one kind).
     in_run = maxsi_neurons["neuron"].isin(all_neurons)
     failed = maxsi_neurons["neuron"].isin(maxsi_failures["neuron"])

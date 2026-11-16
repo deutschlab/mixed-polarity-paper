@@ -44,29 +44,6 @@ LARVA_DATA_DIR.joinpath("results").mkdir(parents=True, exist_ok=True)
 #
 # Only run this block if starting from unfixed SWC files obtained directly from
 # Winding et al. 2023. Skip if the fixed SWC files already exist in LARVA_SWC_DIR.
-'''
-import os
-import pandas as pd
-
-swc_directory = str(LARVA_SWC_DIR / "neurons")
-output_directory = str(LARVA_SWC_DIR / "neurons_fixed")
-
-os.makedirs(output_directory, exist_ok=True)
-
-for filename in os.listdir(swc_directory):
-    if filename.endswith('.swc') and not filename.endswith('_fixed.swc'):
-        swc_path = os.path.join(swc_directory, filename)
-        df = pd.read_csv(swc_path)
-        df.columns = ['id', 'type', 'x', 'y', 'z', 'r', 'parent_id']
-        swc_formatted = df[['id', 'type', 'x', 'y', 'z', 'r', 'parent_id']]
-        file_id = filename.rsplit('.', 1)[0]
-        metadata_line = f"# Meta: {{'id': '{file_id}'}}\n"
-        output_path = os.path.join(output_directory, f'{file_id}_fixed.swc')
-        with open(output_path, 'w') as f:
-            f.write(metadata_line)
-            swc_formatted.to_csv(f, sep=' ', index=False, header=False, mode='a')
-        print(f"Processed: {filename} -> {output_path}")
-'''
 
 #%%
 # Define the directory containing the SWC files
@@ -289,14 +266,6 @@ post_connectors.reset_index(drop=True).to_feather(str(LARVA_POST_CONNECTORS_FTR)
 #%%
 pre_connectors=pd.read_feather(str(LARVA_PRE_CONNECTORS_FTR))
 #%%
-'''
-allsynapses2=allsynapses.copy()
-allsynapses=allsynapses.drop_duplicates(subset=['pre', 'post', 'cleft_score', 'pre_x', 'pre_y', 'pre_z','post_x', 'post_y', 'post_z'])
-allsynapses=allsynapses.drop_duplicates(subset=['pre', 'post', 'cleft_score', 'pre_x', 'pre_y', 'pre_z'])
-allsynapses=allsynapses.drop_duplicates(subset=['pre', 'post', 'cleft_score', 'post_x', 'post_y', 'post_z'])
-
-all_duplicates = allsynapses2[allsynapses2.duplicated(subset=['pre', 'post', 'cleft_score', 'pre_x', 'pre_y', 'pre_z', 'post_x', 'post_y', 'post_z'], keep=False)]
-'''
 #%%
 pre_connectors['pre'] = pre_connectors['pre'].astype('int64')
 pre_connectors['post'] = pre_connectors['post'].astype('int64')

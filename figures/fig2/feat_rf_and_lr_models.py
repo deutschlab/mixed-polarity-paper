@@ -144,13 +144,6 @@ rf = RandomForestRegressor(n_estimators=100, random_state=42)
 rf.fit(X_train, y_train)
 rf_pred = rf.predict(X_test)
 print("RF R²:", r2_score(y_test, rf_pred))
-'''
-# XGBoost
-xgb = XGBRegressor(n_estimators=100, learning_rate=0.1, max_depth=4, objective='reg:squarederror', random_state=42)
-xgb.fit(X_train, y_train)
-xgb_pred = xgb.predict(X_test)
-print("XGB R²:", r2_score(y_test, xgb_pred))
-'''
 # %% 2. Linear Regression per Superclass
 
 df_f_f = df_f_f.dropna(subset=['SI'])

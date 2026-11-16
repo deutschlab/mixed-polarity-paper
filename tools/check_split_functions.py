@@ -12,7 +12,7 @@ MinFisherP cut; this tool checks absolute_phi on every candidate's table.
 This tool takes step 08's code out of the file without running the file (its top level
 loads the full synapse table) and runs step 08's own batch function,
 run_neuron_batch_pipeline, on navis neurons built from small trees. Only the loading and
-the SFC split are replaced: the skeleton and its synapses come from the test tree, and the
+the SFC split (with prepare_for_split, which adds its flow column) are replaced: the skeleton and its synapses come from the test tree, and the
 SFC split is a stand-in that returns the whole neuron twice, labelled dendrite and axon, so the SFC part
 is not tested here. Everything else is step 08's code. The
 results are compared with a reference written separately (it finds the two sides by
@@ -22,7 +22,8 @@ saves:
   - SI and Fisher p (relative tolerance 1e-12),
   - |phi| from step 08's absolute_phi against sqrt(chi^2 / n) from scipy,
   - that the MaxSI and MinFisherP nodes are among the reference's best (ties allowed, and
-    counted in an INFO line, since step 08 breaks them by sort order),
+    counted in an INFO line: step 08 takes the first node of the tie, MaxSI after a sort by SI,
+    MinFisherP in the node table's order),
   - the side counts saved for both chosen nodes, and the MaxSI cut's axon side (step 08 stores none
     for MinFisherP; including its tie and
     empty-side cases), and that the split and the axon neuron carry the counted synapses,
@@ -38,7 +39,7 @@ Run from the repository root:
 PASS means step 08's per-node scores, its MaxSI and MinFisherP choices, its saved side
 counts, axon side and |phi| agree with the reference on every tree. The tool prints one line
 per check, writes the same to outputs/tools/check_split_functions/report.txt and exits with
-status 1 if anything fails. About 40 seconds with the defaults.
+status 1 if anything fails. About 20 seconds with the defaults.
 """
 import argparse
 import ast
@@ -70,7 +71,7 @@ NODE_MODULE = REPO / "methods" / "node_cut_si.py"   # step 08 imports its node-l
 FUNCTIONS = ["SI_calc", "calc_s", "safe_SI_calc", "calculate_node_SI", "get_descendants_from_node",
              "split_neuron_by_si_node", "assign_axon_and_dendrite", "find_neuron_id_column",
              "run_neuron_batch_pipeline", "absolute_phi"]
-STUBBED = {"upload_swc", "heal_attach_princeton_non_process", "get_split"}  # loading, replaced below
+STUBBED = {"upload_swc", "heal_attach_princeton_non_process", "get_split", "prepare_for_split"}  # loading and the SFC split, replaced below
 TABLE = ["side_1_pre", "side_1_post", "side_2_pre", "side_2_post"]
 COUNTS = TABLE + ["node_pre_excluded", "node_post_excluded"]
 
@@ -106,7 +107,8 @@ def load_step08(path, trees):
                  "fisher_exact": fisher_exact, "multipletests": multipletests,
                  "upload_swc": lambda neuron_id: trees[neuron_id]["neuron"].copy(),
                  "heal_attach_princeton_non_process": lambda swc, synapses: swc,
-                 "get_split": stand_in_split}
+                 "get_split": stand_in_split,
+                 "prepare_for_split": lambda neuron: neuron}   # adds the flow column for the SFC split, which is replaced
     free = set()
     for f in FUNCTIONS:  # names each function reads but neither binds itself nor gets from here
         body = list(ast.walk(defs[f]))
@@ -444,7 +446,7 @@ def main():
                + ("" if not bad else f": {len(bad)} with problems, first {bad[0][0]}: {'; '.join(bad[0][1])}"))
         for k, v in ties.items():
             ties[k] = v + r_ties[k]
-    report(True, "picks decided by a tie (step 08 breaks ties by sort order): "
+    report(True, "picks decided by a tie (MinFisherP: the first in table order; MaxSI: the first after an unstable sort by SI): "
            + ", ".join(f"{k} {v}" for k, v in ties.items()), info=True)
 
     n_long = 20000

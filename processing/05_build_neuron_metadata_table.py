@@ -129,67 +129,6 @@ nodesG['linker']=nodesG['linker'].fillna(0)
 nodesG=nodesG.dropna(subset='SI')
 sns.histplot(nodesG,hue='linker',x='SI')
 #%%
-
-#%%nt
-#nt_df=pd.read_csv(NEURONS_CSV)
-#nodesG=nodesG.merge(nt_df[['root_id','nt_type','nt_type_score']],on='root_id',how='left')
-#%%
-r'''
-# Define the base input directory
-input_base_dir = r"C:\Users\user\organised_work\data\783\recieved\swc\783"
-
-# Get the list of subdirectories in the input directory
-input_subfolders = [f.name for f in os.scandir(input_base_dir) if f.is_dir()]
-
-# Define your global variables (if needed)
-
-# Initialize a global DataFrame (optional, if you need to aggregate results)
-global_results = []
-vv=0
-# Start timing
-start_time_global = time.time()
-
-# Loop through each folder in the input directory
-for folder_name in input_subfolders:
-    print(f"Processing folder: {folder_name}")
-    
-    # Define the input folder path
-    input_folder = os.path.join(input_base_dir, folder_name)
-    
-    try:
-        # Load SWC files for the current folder
-        swc_list = load_swc(input_folder)  # Ensure this function is defined
-        
-        # Perform healing and attaching neurons
-
-        # Optionally, process results here (e.g., store in a DataFrame)
-        # Append results to the global_results list if needed
-        for swc in swc_list:
-            id_=swc.id
-            nodes=swc.n_nodes
-            leafs=swc.n_leafs
-            n_branches=swc.n_branches
-            cable_length=swc.cable_length
-            global_results.append([id_,nodes,leafs,n_branches,cable_length])
-
-    except Exception as e:
-        print(f"Error processing folder {folder_name}: {e}")
-        continue  # Skip to the next folder if an error occurs
-    del swc_list
-    gc.collect()
-    print(vv)
-    vv+=1
-
-    
-df=pd.DataFrame(global_results)
-df.columns=['root_id','nodes','leafs','branches','cable_length']
-df.to_feather(r'C:\Users\user\organised_work\data\783\generated\post_processing_data\article\swc_data.ftr')
-
-
-
-'''
-
-#%%
 df=pd.read_feather(SWC_DATA_FTR)
 df['root_id']=df['root_id'].astype(np.int64)
 nodesG=nodesG.merge(df,on='root_id',how='left')

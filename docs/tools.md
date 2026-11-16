@@ -1,13 +1,22 @@
 # Tools
 
 The scripts in `tools/` check the pipeline and the figure scripts, compare runs, and draw a cell's MaxSI split. Run them from the repository
-root with the environment active. Each one has `--help`, and its docstring has the full details; this page says what
+root with the environment active. Each has `--help` and a docstring with the full details; this page says what
 each tool is for, what it needs and what its result means.
 
-Most check tools print PASS or FAIL and exit with status 1 on a failure. Three exceptions: `compare_split_figures.py`
+Most check tools print PASS or FAIL and exit with status 1 on a failure. Four exceptions: `compare_split_figures.py`
 exits 0 whatever it finds (only its selftests can fail), `check_split_methods_on_subset.py` checks nothing without
-`--compare`, `compare_split_runs.py` exits 1 on a difference only with `--expect-identical`, and `draw_max_si_split.py` draws and stops with status 1 only when a cell fails its checks. A PASS holds only for the data the tool
-was given. None of the tools shows that an analysis is the right one.
+`--compare`, `compare_split_runs.py` exits 1 on a difference only with `--expect-identical`, and `draw_max_si_split.py`
+stops with status 1 only when a cell fails its checks. A PASS holds only for the data the tool was given.
+None of the tools shows that an analysis is the right one.
+
+Output folders on this page are for the default settings. Every tool with a default output folder, except
+`compare_split_figures.py`, puts it in the outputs folder of the current settings (`outputs_rebuild/`, `outputs_maxsi/`
+or `outputs_rebuild_maxsi/` under the others; see `figure_to_script_map.md`); the others write only where `--out` or
+`--report` points, or nothing. The tools that read the pipeline's tables read those of the current settings, except
+the step 08 and 09 checks, which always read the SFC tables, and `check_fig7_tables.py`, which runs only under the
+defaults. Only `check_fig6_logic.py`, `check_fig4e_logic.py`, `check_figure_text.py`,
+`check_split_functions.py` and the selftests of `compare_split_figures.py` need no data.
 
 ## Which tool do I need?
 
@@ -47,7 +56,7 @@ script finished.
 |---|---|
 | Output | `--out`, a new or empty folder (default `outputs/tools/run_figure/<script name>/`) |
 | `--dpi` | 72 by default, the same as the published SVGs |
-| `--replace OLD NEW` | swaps an exact piece of the script's text before it runs, for example to skip a slow step; the run is then no longer a full reproduction |
+| `--replace OLD NEW` | replaces an exact piece of the script's text before it runs, for example to skip a slow step; the run is then not a full reproduction |
 
 All figures go into one folder, so two figures saved under the same name in different subfolders overwrite each
 other. Tables the script writes still go to their usual place and replace what is there.
@@ -63,7 +72,7 @@ anything differs, a run didn't finish, or neither folder has a figure.
 | `--allow-extra-lines` | the second run may print extra lines, as long as every line of the first appears in order |
 | `--figures-only` | compares .svg, .png and .pdf only (useful against a folder of published SVGs) |
 | `--allow-no-figures` | for a script that only prints or writes tables, such as `figures/fig4/build_pc1_table.py` |
-| `--content` | an SVG that still differs passes if it draws the same text, colours, markers and shapes once the plot's size and position are removed (to 0.1% of the plot). Use it for a port saved at another figure size or font. Line widths and font sizes are not compared, and text saved as outlines fails |
+| `--content` | an SVG that still differs passes if it draws the same text, colours, markers and shapes ignoring the plot's size and position (to 0.1% of the plot). Use it for a port saved at another figure size or font. Line widths and font sizes are not compared; text saved as outlines fails |
 
 ```bash
 python tools/run_figure.py figures/fig1/canonicality_axon_dend.py --out outputs/tools/run_figure/before
@@ -85,8 +94,8 @@ others read run first: `build_pc1_table.py`, `fig4_heldout_models.py`, `reciproc
 | Resume | run again with the same `--out`: scripts that finished or stopped with an error are skipped, timed-out or interrupted ones run again, and `--rerun-failed` also reruns those that stopped with an error |
 | `--only fig4` | runs a subset |
 
-It exits with status 1 if any script did not finish, which here includes every script whose input tables are not
-supplied. Scripts that write tables still replace them (for example the 3 GB `data/derived/PC1_table.csv`).
+It exits with status 1 if any script did not finish, including every script whose input tables are
+missing. Scripts that write tables still replace them (for example the 3 GB `data/derived/PC1_table.csv`).
 
 ### `compare_runs.py`: compare two full runs, script by script
 
@@ -118,7 +127,7 @@ How it reads a figure:
 | text | every label with no number (cell-type names, category ticks, legend entries), in order |
 
 Numbers are paired by their position in the file. A number counts as changed if its value changes or it gains or
-loses a % sign. A pair is marked when the label next to it differs, because position pairing may then have matched
+loses a % sign. A pair is flagged when the label next to it differs, since pairing by position may then have matched
 different things. It also compares each script's `stdout.log` line by line once the numbers are masked, listing up
 to `--max-lines` (25) changed lines, and names each figure's panel from `docs/figure_to_script_map.md` where it can.
 
@@ -139,7 +148,7 @@ that run.
 The report header gives every line of each run's `commit.txt`. It warns if the two runs were made on different commits,
 and names the files under `figures/`, `processing/`, `methods/` and `config.py` that differ between them. Changed
 scripts under `figures/` are marked next to their results. A changed file outside `figures/` can affect any script, so
-none is marked for it. It also warns if a run had uncommitted changes: `commit.txt` notes that there were some, not
+none is marked for it. It also warns if a run had uncommitted changes; `commit.txt` records that there were some, not
 what they were.
 
 Output: `report.txt` and `cells.csv` (one row per number) in `outputs/tools/compare_split_figures/<label_a>_vs_<label_b>/`
@@ -161,8 +170,8 @@ python tools/compare_split_figures.py --mutants
 
 | Tool | What it checks | Needs | Time |
 |---|---|---|---|
-| `check_raw_synapse_table.py` | the raw synapse tables `processing/build_raw_synapse_table.py` writes: columns and types, `synapse_id` in order and unique, the version without self-synapses differing from the other by exactly those, every processed synapse present with the same pre and post cell, and the six coordinates (which catches a pre/post swap). `--csv` also checks the row count against the Codex CSV | step 04's synapse table, about 10 GB of memory (`--csv` also reads the Codex CSV) | 1 to 2 minutes |
-| `check_step05_root_id.py` | that step 05 writes `root_id` as exact cell IDs: it runs step 05's own lines on the real IDs and checks `root_id` is int64 and equal to `neuron`, nothing else changes, and the cells kept are the neuron table's. `--script` tests another copy | step 05's outputs, the annotation file and the synapse table's pre and post columns, about 5 GB of memory | a few seconds |
+| `check_raw_synapse_table.py` | the raw synapse tables `processing/build_raw_synapse_table.py` writes: columns and types, `synapse_id` in order and unique, the version without self-synapses differing from the other by exactly the self-synapses, every processed synapse present with the same pre and post cell, and the six coordinates (which catches a pre/post swap). `--csv` also checks the row count against the Codex CSV | step 04's synapse table, about 10 GB of memory (`--csv` also reads the Codex CSV) | 1 to 2 minutes |
+| `check_step05_root_id.py` | that step 05 writes `root_id` as exact cell IDs: it runs step 05's own lines on the real IDs and checks that `root_id` is int64 and equal to `neuron`, that nothing else changes, and that the cells kept are the neuron table's. `--script` tests another copy | step 05's outputs, the annotation file and the synapse table's pre and post columns, about 5 GB of memory | a few seconds |
 
 `check_step05_root_id.py` writes `outputs/tools/check_step05_root_id/report.txt`.
 
@@ -175,19 +184,19 @@ the script's checksum, and take `--script FILE` to check another copy.
 
 | Tool | Script | Made-up input | What it checks |
 |---|---|---|---|
-| `check_fig6_logic.py` | `figures/fig6/aadd_specific_circuits.py` (Fig 6, needs the Buhmann tables) | 23 cells, 156 synapses between 27 pairs | which connections count (SI threshold, including a value exactly at it, type filters, populations), the within-type and reciprocal fractions, bar order, printed summaries, the summary table, the between-type edges, the SVG files, the other data sources, and that a wrong `DATA_SOURCE` or a missing table stops the script. Not tested: the rest of the drawing and the interactive cells at the end |
+| `check_fig6_logic.py` | `figures/fig6/aadd_specific_circuits.py` (Fig 6; the submitted figure used the Buhmann tables) | 23 cells, 156 synapses between 27 pairs | which connections count (SI threshold, including a value exactly at it, type filters, populations), the within-type and reciprocal fractions, bar order, printed summaries, the summary table, the between-type edges, the SVG files, the other data sources, and that a wrong `DATA_SOURCE` or a missing table stops the script. Not tested: the rest of the drawing and the interactive cells at the end |
 | `check_fig4e_logic.py` | `figures/fig4/syntype_x_pathway_layers.py` (revised Fig 4E) | 27 rows of the per-type table, small synapse and neuron tables, a `neuron_data` table | every table it writes, the four line plots (the olfactory ones with AL and the mushroom body lobes only) and two stacked-bar plots, neuropil names (left/right dropped, `LAL` not read as `LA`), shares of AD, AA, DD and DA only, the olfactory types and pairs, `NA` and `None` read as type names, the script's default build of its rows from the Princeton tables, and from the Buhmann tables or the authors' table (`DATA_SOURCE`, `SI_SOURCE`), and that a wrong `DATA_SOURCE` or a missing table stops it |
 
 ## Figure 7 ports
 
 The seven `figures/fig7/fig7*.py` scripts are made from the authors' original Figure 7 scripts, which are not in this
 repository (give their folder with `--originals` or `FIG7_ORIGINALS`). These are maintainers' checks: on a clean clone
-they stop, or report the tables missing.
+they stop or report missing tables.
 
 | Tool | What it does |
 |---|---|
-| `make_fig7_ports.py` | makes the seven scripts from the originals. By default it checks that each script is exactly what it makes, so a hand edit fails (a change belongs in its list of fixes); `--write` rewrites them, only from originals whose checksums it knows. `--selftest` plants mistakes in its fix list |
-| `check_fig7_ports.py` | runs each original and its port side by side, without writing anything real, and compares what they draw, print, read and write, and that each port saves its SVGs into `outputs/fig7/<script>/` in Arial. Text is set to Arial 8 pt on both sides, so fonts are not compared. A port whose input is missing (7E) is reported as not run. `--mutants` plants 27 bugs; `--only` checks some of the seven; `--timeout` defaults to 1200 s. About a minute, 5 with `--mutants` |
+| `make_fig7_ports.py` | makes the seven scripts from the originals. By default it checks that each script is exactly what it would make, so a hand edit fails (changes go in its list of fixes); `--write` rewrites them, only from originals whose checksums it knows. `--selftest` plants mistakes in its fix list |
+| `check_fig7_ports.py` | runs each original and its port side by side, without writing anything real. It compares what they draw, print, read and write, and checks that each port saves its SVGs in Arial into `outputs/fig7/<script>/`. Text is set to Arial 8 pt on both sides, so fonts are not compared. A port whose input is missing (7E) is reported as not run. `--mutants` plants 29 bugs; `--only` checks some of the seven; `--timeout` defaults to 1200 s. About a minute; 5 minutes with `--mutants` |
 | `check_fig7_tables.py` | checks the published Figure 7 tables `config.py` names (and `NEURON_TABLE_FTR`) against `tools/fig7_tables_reference.json`: checksums, columns, types, rows, 64-bit IDs, duplicate keys. It stops unless `PIPELINE_RUN = "published"` and `SPLIT_METHOD = "sfc"`. `--selftest` requires altered copies to fail; `--record` writes a new reference to `outputs/tools/check_fig7_tables/` for review. About a minute |
 
 A PASS of `check_fig7_ports.py` means a port does what the original does on this machine, not that it reproduces the
@@ -200,12 +209,14 @@ a `pre_clustering` or `rms_inspection` type
 or a cell whose own `sub_class` is `uniglomerular`. Given the two tables before any type was removed
 (`--unfiltered` and `--unfiltered-bwf`; they are not deposited), it also requires that removing those cells gives the
 two tables exactly, row for row. `--mutants` requires five wrong lists to fail (a type left out, a kept type added, a
-name with an en dash, a wrong kind, a kind spelt differently). It does not test why a type was left out. A few
-seconds, with or without the unfiltered tables; `outputs/tools/check_msb_exclusion/`.
+name with an en dash, a wrong kind, a kind spelt differently); it needs the two unfiltered tables. It does not test
+why a type was left out. A few seconds (with or without the unfiltered tables); `outputs/tools/check_msb_exclusion/`.
 
 ## Synapse-type tools
 
-Both read the synapse and neuron tables from `data/derived/` (`data/derived_maxsi/` under `SPLIT_METHOD = "maxsi"`).
+Both read the synapse and neuron tables of the current settings (`SYNAPSE_TABLE_FTR`, `NEURON_TABLE_FTR`, and
+`SI_UPDATED_FTR` with `--si corrected`): `data/derived/` by default, and under other settings the folder
+`figure_to_script_map.md` gives (for example `data/derived_rebuild_maxsi/` under `"rebuild"` with `"maxsi"`).
 
 | | `synapse_type_shares.py` | `split_agreement.py` |
 |---|---|---|
@@ -230,8 +241,9 @@ python tools/synapse_type_shares.py --si corrected
 
 ### `check_split_methods_on_subset.py`: run step 08 on some neurons
 
-It runs step 08 on a subset (by default every intrinsic neuron whose skeleton is under `SWC_DIR`), so the split methods
-can be checked without the full skeleton download. It needs the raw synapse table. It patches four places in
+It runs step 08 on a few neurons, to check the split methods without a full run. By default
+it takes every intrinsic neuron whose skeleton is under `SWC_DIR`, which with the full skeleton download is nearly
+all of them (hours; see the measurements below), so pass `--limit` or `--ids`. It needs the raw synapse table. It patches four places in
 `processing/08_alternative_split_methods.py` rather than keeping its own copy, and stops if any is not found exactly
 once.
 
@@ -244,7 +256,7 @@ once.
 | `--compare REF.ftr` | compares each score per neuron with a reference that has a `neuron_id` column, to `--tol` (default 1e-9); differences go to `differences_*.csv` |
 | `--compare-only` | repeats the comparison on a finished run |
 
-Time and memory were measured on macOS, on runs that used navis's own flow centrality. Step 08 uses
+Time and memory were measured on macOS, with navis's own flow centrality. Step 08 uses
 `methods/flow_centrality.py`, which skips navis's dense matrix, so these figures may not hold for it. 1,144 intrinsic
 neurons took 28 to 36 minutes; reading the synapse table peaks at 12.4 GB, and a run that read the whole table peaked
 at 24.7 GB, almost all of it from one batch of 500 neurons. 20 neurons took 13 seconds and about 1 GB. Use `--limit` on a smaller machine.
@@ -253,7 +265,7 @@ A PASS covers only the neurons run. Against a table made by the same step 08 cod
 depend on which neurons run together, not that the method is right.
 
 ```bash
-python tools/check_split_methods_on_subset.py --out outputs/tools/check_split_methods_on_subset/run1 \
+python tools/check_split_methods_on_subset.py --out outputs/tools/check_split_methods_on_subset/run1 --limit 200 \
     --compare data/derived/SI_comparisons.ftr
 python tools/check_split_methods_on_subset.py --out outputs/tools/check_split_methods_on_subset/run1 --compare-only \
     --compare data/derived/SI_comparisons.ftr other_summary.ftr
@@ -269,7 +281,7 @@ It runs step 08's own batch function on small made-up neurons and compares with 
 counts, SI and Fisher p of every candidate cut, `absolute_phi`, the nodes MaxSI and MinFisherP choose, the axon side
 (ties and empty sides too), and that neurons with no valid cut fail. It also runs random trees, a 20,000-node chain and
 re-rooted trees, and reports how often a tie decided the choice. Not tested: the SFC split, loading skeletons and
-synapses, and the IG, `fisher_q` and odds-ratio columns. About 40 seconds; `--random N` (default 300) and `--seed` set
+synapses, and the IG, `fisher_q` and odds-ratio columns. About 20 seconds; `--random N` (default 300) and `--seed` set
 the random trees, `--script FILE` checks another version.
 
 ### `check_step09_failures.py`: step 09 with planted failures
@@ -302,11 +314,14 @@ the cut's SI and each side's canonical share in the title (the dendrite's share 
 presynapses). It builds each cell as step 09 does, from its healed skeleton with the synapses of
 `SYNAPSE_TABLE_RAW_FTR` attached, and cuts it with `methods/split_max_si.py` (Amit Gross's function), which scores the
 same cuts as `methods/node_cut_si.py` and takes the highest SI, the first node on a tie. It computes the log another
-way, so on a near-tie it could choose another cut; the tool therefore runs step 09's rule on each cell too and stops
-unless the cut node, side counts and axon side are the same, and it does not draw a cell step 09 would refuse. If
-step 09's MaxSI batches are there (`MAXSI_LABEL_BATCH_DIR`, or `--batches`), it also stops unless each cell's cut node,
-SI and side counts are those of step 09's saved run. It stops if the raw table has self-synapses for a cell it draws,
-or if a cell has no skeleton, no synapse, or more than one row in step 09's summaries. The shares count the synapses attached to the skeleton, so they can differ by a few
+way, so on a near-tie it could pick another cut; the tool therefore also runs step 09's rule on each cell and stops
+unless the cut node, side counts and axon side match; a cell step 09 would refuse (a side with no synapse, or
+both sides with the same presynaptic fraction) stops it too. If step 09's MaxSI batches are there
+(`MAXSI_LABEL_BATCH_DIR`, or `--batches`), it also stops unless each cell appears once in step 09's summaries, with the
+same cut node, SI and side counts. It stops if the raw table has self-synapses for a cell it draws, or if a cell has no
+skeleton, a skeleton navis cannot read, no synapse, or no cut with an SI. Any stop ends the run: later cells are not drawn and
+`summary.csv` is not written; SVGs already drawn are kept. To draw a cell that
+step 09's saved run does not hold, point `--batches` at a folder with no summaries. The shares count the synapses attached to the skeleton, so they can differ by a few
 synapses from the neuron table's, which counts rows of the synapse table. It needs the raw synapse table and the
 cells' skeletons under `SWC_DIR`; `--view` sets the camera (default -90 -90 0).
 
@@ -315,7 +330,7 @@ python tools/draw_max_si_split.py 720575940628463468 720575940633095137
 python tools/draw_max_si_split.py 720575940633095137 --view -90 -90 -30 --batches data/intermediate_rebuild_maxsi/maxsi_labels/batches
 ```
 
-It writes one SVG per cell and `summary.csv` to `outputs/tools/draw_max_si_split/`.
+It writes one SVG per cell and, when every cell passes, `summary.csv` to `outputs/tools/draw_max_si_split/`.
 
 ## Comparing two runs of step 08
 
@@ -337,7 +352,8 @@ python tools/compare_split_runs.py RUN_A/batches RUN_B/batches --exact processed
 ```
 
 On the 1,144 neurons of skeleton folder 7, choosing the cut on the processed instead of the raw synapse table changed
-the MaxSI cut in 34 neurons and the MinFisherP cut in 55, none across its cutoff.
+the MaxSI cut in 34 neurons and the MinFisherP cut in 55, none across its cutoff. This was run on 3 Oct 2026 with step 08 as it was
+then, which broke MinFisherP ties by a sort and used navis's own flow centrality.
 
 ## Checking the simple PC1 model
 
@@ -378,7 +394,7 @@ With `--outputs`, maths exponents (drawn at 5.6 pt) are listed, not failed, PNG 
 symbols such as Greek letters and ≥ are checked by font name only. Figures written with `fig.canvas.print_figure`
 instead of `savefig` skip `use_arial_8()`, and without Arial installed the SVG text still names Arial while PNG and
 PDF use another font. A PASS means `use_arial_8()` sets every text it is given; whether a panel still looks right at
-8 pt has to be seen on the panel.
+8 pt must be checked by eye.
 
 ```bash
 python tools/check_figure_text.py

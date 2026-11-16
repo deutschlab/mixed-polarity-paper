@@ -284,14 +284,6 @@ plot_order = ['AD_nr','AD_r','AA_nr','AA_r','DD_nr','DD_r','DA_nr','DA_r']
 
 # Add sorting helpers
 # Add sorting helpers
-'''
-com_df['r_total'] = com_df[['AD_r', 'AA_r', 'DD_r', 'DA_r']].sum(axis=1)
-com_df['AD_total'] = com_df['AD_r'] + com_df['AD_nr']
-
-# Sort: by AD_total ascending, then r_total ascending
-com_df_sorted = com_df.sort_values(by=['AD_total', 'r_total'], ascending=[True, True]).reset_index(drop=True)
-com_df_sorted = com_df_sorted.drop(columns=['r_total', 'AD_total'])
-'''
 
 
 com_df['r_total'] = com_df[['AD_r', 'AA_r', 'DD_r', 'DA_r']].sum(axis=1)

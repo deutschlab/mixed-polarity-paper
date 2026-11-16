@@ -163,14 +163,6 @@ joblib.dump(
 )
 
 #%%
-r'''
-import joblib
-
-# Load the saved model
-best_model = joblib.load(
-    r'C:\Users\user\organised_work\code\783\article\5\new_org\figs\reci partners\organized\New folder\final_random_forest_model.pkl'
-)
-'''
 
 
 #%%

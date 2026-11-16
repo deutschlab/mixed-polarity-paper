@@ -1,7 +1,8 @@
 """Check what figures/fig6/aadd_specific_circuits.py computes, on a small made-up connectome.
 
-The Figure 6 script needs tables this repository does not deposit (the Buhmann neuron and
-synapse tables), so it cannot be run from a clean clone. This tool runs the script's own text
+The submitted Figure 6 was drawn from tables this repository does not deposit (the Buhmann
+neuron and synapse tables), and by default the script reads the pipeline's tables, which a
+clean clone does not have either. This tool runs the script's own text
 on 23 made-up cells (with real-sized IDs) and 156 made-up synapses between 27 pairs of cells,
 written to a temporary folder together with a stand-in `config` module, and compares what the
 script computes with values worked out by hand

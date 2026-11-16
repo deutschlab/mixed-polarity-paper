@@ -1,24 +1,63 @@
 # Figure-to-Script Map
 
-This document maps each manuscript figure panel to the script that generates it, the input
-tables it requires, and the output directory where figures are saved.
+Which script draws each panel, which tables it reads, and where it saves.
 
-All figure scripts import `config.py` (paths) and `methods/methods_all.py` (utilities).
-Figures are saved under `outputs/` (`outputs/figN/` for the figure folders; the other folders and `processing/phi_threshold.py` use their own names, given below); a few scripts also write tables to `data/derived/` (shown as "writes" below). None of these are committed to this repository.
-With `SPLIT_METHOD = "maxsi"` in `config.py` (after step 09), every output path below starts with `outputs_maxsi/` instead of `outputs/`; `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR`, `SI_UPDATED_FTR` and the tables built from them are read from `data/derived_maxsi/` or `data/intermediate_maxsi/`, and the tables a script writes go there too. A script that reads a table with no MaxSI version (`MAXSI_NOT_AVAILABLE` in `config.py`) stops. `"minfisherp"` and `"maxphi"` work the same way, with `outputs_minfisherp/`, `data/derived_minfisherp/` and so on.
-With `PIPELINE_RUN = "rebuild"` (a fresh run of the pipeline), the same applies with `outputs_rebuild/` and `data/derived_rebuild/` (`outputs_rebuild_maxsi/` and `data/derived_rebuild_maxsi/` with `"maxsi"`; likewise `_rebuild_minfisherp` and `_rebuild_maxphi`).
+All figure scripts import `config.py` for their paths, and most also import `methods/methods_all.py`, the shared
+functions. Twelve of the 69 do not: the seven `figures/fig7/fig7*.py` scripts, `figures/fig6/aadd_specific_circuits.py`,
+`figures/fig4/fig4_heldout_models.py`, `figures/fig4/larva_syntype_x_pc1_map.py`,
+`figures/fig4/syntype_x_pathway_layers.py` and `figures/fig5/syn_type_x_reci_x_npil.py`. Figures are saved
+as SVG, usually in `outputs/figN/<name>/`, `outputs/split_methods/<name>/` or `outputs/supporting/<name>/`; a few
+scripts also write tables to `data/derived/` (shown as "writes" below). None of these is committed.
+
+**Where the files go under each setting.** The output paths below are for the default settings, under `outputs/`. Other settings in `config.py` move the
+figures, and the pipeline's tables and those built from them, to other folders:
+
+| `PIPELINE_RUN` | `SPLIT_METHOD` | Figures | Tables |
+|--|--|--|--|
+| `"published"` | `"sfc"` | `outputs/` | `data/derived/`, `data/intermediate/` |
+| `"published"` | `"maxsi"` | `outputs_maxsi/` | `data/derived_maxsi/`, `data/intermediate_maxsi/` |
+| `"rebuild"` | `"sfc"` | `outputs_rebuild/` | `data/derived_rebuild/`, `data/intermediate_rebuild/` |
+| `"rebuild"` | `"maxsi"` | `outputs_rebuild_maxsi/` | `data/derived_rebuild_maxsi/`, `data/intermediate_rebuild_maxsi/` |
+
+`"minfisherp"` and `"maxphi"` work like `"maxsi"`, in their own folders. **The main figures of the revision are drawn
+with `"rebuild"` and `"maxsi"`**, so they land in `outputs_rebuild_maxsi/`. A script that reads a table with no MaxSI
+version (`MAXSI_NOT_AVAILABLE` in `config.py`) stops under `"maxsi"`. Some scripts run under one setting only (see
+their rows): `fig1c_example_splits.py` and `fig3c_ma_mm_examples.py` need `"rebuild"` (they draw on MaxSI under
+either split and save to `outputs_rebuild/` or `outputs_rebuild_maxsi/`), `method_examples.py` needs
+`"rebuild"` and `"sfc"`, and `si_x_twigs.py` and `larva_syntype_x_pc1_map.py` need `"maxsi"`.
 
 ---
 
 ## Running the figure scripts
 
-`figures/fig1/create_split_axon_dendrite_princeton.py` and `figures/fig3/fig3c_mixed_example_sfc.py` make a Neuroglancer link through `caveclient` before they draw, so they stop with an error unless you have a FlyWire account and a CAVE token saved on your machine (see the caveclient documentation). Every script imports `methods/methods_all.py`, which imports `caveclient` and `nglui`, so both packages must be installed (they are in the pinned requirements); only these two scripts need the token. Both also write a `temp_link_<random hex>.html` file into the folder you run them from and try to open it with Microsoft Edge at its Windows path; on macOS and Linux they print "Edge executable not found" and carry on.
+Two scripts, `figures/fig1/create_split_axon_dendrite_princeton.py` and `figures/fig3/fig3c_mixed_example_sfc.py`,
+make a Neuroglancer link through `caveclient` before they draw, so they stop with an error unless you have a FlyWire
+account and a CAVE token saved on your machine (see the caveclient documentation). They use the Neuroglancer helpers
+in `methods/methods_all.py` (`create_links_many_neurons`, `shorthen_and_open_links`), which no pipeline step uses;
+they only make links for viewing example cells. Both scripts also write a `temp_link_<random hex>.html` file into
+the folder you run them from and try to open it with Microsoft Edge at its Windows path; on macOS and Linux they print
+"Edge executable not found" and carry on. `methods/methods_all.py` imports `caveclient` and `nglui`, and steps 01 and
+02a and four figure scripts import `nglui` directly, so both packages must be installed (both are in the pinned
+requirements). Only the two Neuroglancer scripts need the token.
 
-Each script saves its figures as SVG in its own folder, usually `outputs/figN/<name>/`, `outputs/split_methods/<name>/` or `outputs/supporting/<name>/`. One exception: `figures/fig1/create_split_axon_dendrite_princeton.py` writes to `outputs/fig3/pc1_example/`. The two Fig 4 PC1 scripts also write PNG, and `figures/fig5/syn_type_x_reci_x_npil.py` writes PDF. A few figure scripts also write tables into `data/derived/`. Under `SPLIT_METHOD = "maxsi"` the figures go to `outputs_maxsi/` instead of `outputs/`, and those tables to `data/derived_maxsi/` or `data/intermediate_maxsi/`.
+One script saves outside its own folder: `figures/fig1/create_split_axon_dendrite_princeton.py` writes to
+`outputs/fig3/pc1_example/`. `figures/fig4/syntype_x_pc1.py` also writes PNG, and `figures/fig5/syn_type_x_reci_x_npil.py`
+writes PDF.
 
-A note on SI: step 04 stores each neuron's SI in the synapse table as `SI_pre` and `SI_post`, and step 05 stores it in the neuron table and in `SI_updated.ftr`. All three come from the same output of steps 01 and 02a, so after a fresh run each neuron has the same SI in all three (`SI_updated.ftr` has a few more neurons than the neuron table). Tables from an earlier run may not match, which is why the synapse-type tools refer to the table SI as "older" and to `SI_updated.ftr` as "corrected".
+**Which SI.** On the SFC split, step 04 stores each cell's SI in the synapse table as `SI_pre` and `SI_post`, and
+step 05 stores it in the neuron table and in `SI_updated.ftr`; on the MaxSI split, step 09 writes all three. After a
+fresh run each cell has the same SI in all three (`SI_updated.ftr` has a few more cells than the neuron table). The
+authors' delivered tables (not included; see the README's [What you can reproduce](../README.md#what-you-can-reproduce))
+come from an earlier run whose SI kept synapses from a cell to itself, except for the 182 large cells from step 02a;
+the manuscript's Methods leave them out, as `SI_updated.ftr` does. That is why the synapse-type tools call the table
+SI "older" and `SI_updated.ftr` "corrected".
 
-Most figure scripts take SI from the neuron table or the synapse table, and ten always take it from `SI_updated.ftr` (six in `figures/fig2`–`fig3`, `figures/fig7/filopodia_x_mirror_neurons.py` and three in `figures/split_methods/`: the two MaxSI scripts and `four_methods_si_comparison.py`, which reads each split's); the revised Fig 4E and the Figure 6 script can be set to it (`DATA_SOURCE = 'princeton'` and `SI_SOURCE = 'SI_updated'`). The neuron and synapse tables the figures were made from (not included; see the README's [What you can reproduce](../README.md#what-you-can-reproduce)) come from an earlier run whose SI kept synapses from a neuron to itself, except for the 182 large cells from step 02a. The manuscript's Methods exclude self-synapses, as `SI_updated.ftr` does.
+Most figure scripts take SI from the neuron table or the synapse table. Thirteen take it from `SI_updated.ftr`
+instead: eight in `figures/fig2`–`fig3` (`fig3d_si_compartment_correct.py` and `si_x_npil_x_synapse_detection.py`
+only on their default settings), `figures/fig7/filopodia_x_mirror_neurons.py`, and four in `figures/split_methods/`
+(the two MaxSI scripts, `method_examples.py`, and `four_methods_si_comparison.py`, which reads each split's). The
+revised Fig 4E and the Figure 6 script can be set to it (`DATA_SOURCE = 'princeton'` and `SI_SOURCE = 'SI_updated'`).
+Under `"maxsi"` the neuron table, the synapse table and `SI_updated.ftr` hold the MaxSI SI; the four `figures/split_methods/` scripts still read the SFC `SI_updated.ftr`.
 
 ---
 
@@ -29,7 +68,7 @@ the SI distribution, axon/dendrite split examples, and canonical vs mixed neuron
 
 | Panel | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|
-| Fig 1C | `figures/fig1/fig1c_example_splits.py` (after step 09 with MaxSI; `PIPELINE_RUN = "rebuild"`): the cells 720575940628463468 (LC31b), 720575940614955304 (LC15) and 720575940633095137 (DNp09 in the legend; FlyWire's type is DNp71), split by MaxSI | `MAXSI_LABEL_BATCH_DIR`, `MAXSI_SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` | `outputs/fig1/fig1c_example_splits/` (`fig1c_example_splits.svg`, `fig1c_canonical_shares.csv`: each compartment's canonical count, total and percent) |
+| Fig 1C | `figures/fig1/fig1c_example_splits.py` (after step 09 with MaxSI; `PIPELINE_RUN = "rebuild"`): the cells 720575940628463468 (LC31b), 720575940614955304 (LC15) and 720575940633095137 (DNp09 in the legend; FlyWire's type is DNp71), split by MaxSI | `MAXSI_LABEL_BATCH_DIR`, `MAXSI_SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` | `outputs/fig1/fig1c_example_splits/`, in `outputs_rebuild/` or `outputs_rebuild_maxsi/` (`fig1c_example_splits.svg`, `fig1c_canonical_shares.csv`: each compartment's canonical count, total and percent) |
 | Fig 1E | `figures/fig1/canonicality_axon_dend.py` | `NEURON_TABLE_FTR` | `outputs/fig1/canonicality_axon_dend/` |
 | Fig 1G | `figures/fig1/si_x_canonicality.py` | `NEURON_TABLE_FTR` | `outputs/fig1/si_x_canonicality/` |
 | Fig 1 Supp D | `figures/fig1/canonicality_violin_intrinsic_sclass.py` | `NEURON_TABLE_FTR` | `outputs/fig1/canonicality_violin_intrinsic_sclass/` |
@@ -59,7 +98,7 @@ Includes an adult vs larva SI comparison and PCA of morphological features.
 | Fig 2 Supp 4B (`feat_import_bar_princeton.svg`) | `figures/fig2/feat_rf_and_lr_models.py` | `NEURON_TABLE_FTR` | `outputs/fig2/feat_rf_and_lr_models/` |
 | Fig 2F | `figures/fig2/si_x_pca.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` (loaded, but nothing that runs uses it) | `outputs/fig2/SI_x_PCA/` |
 | Fig 2G | `figures/fig2/si_x_pca.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` (loaded, but nothing that runs uses it) | `outputs/fig2/SI_x_PCA/` |
-| Fig 2 Supp 1A | `figures/fig2/si_x_twigs.py` (runs only with `SPLIT_METHOD = "maxsi"`) | `SI_UPDATED_FTR`, `MAXSI_LABEL_BATCH_DIR`, `NEUROPIL_SYNAPSE_CSV`, `NEURONS_CSV`, skeletons in `SWC_DIR` | `outputs/fig2/SI_x_twigs/` (SVG, per-cell CSV, summary) |
+| Fig 2 Supp 1A | `figures/fig2/si_x_twigs.py` (runs only with `SPLIT_METHOD = "maxsi"`) | `SI_UPDATED_FTR`, `NEURON_TABLE_FTR` (`super_class`), `MAXSI_LABEL_BATCH_DIR`, `NEUROPIL_SYNAPSE_CSV`, `NEURONS_CSV`, skeletons in `SWC_DIR` | `outputs/fig2/SI_x_twigs/` (SVG, per-cell CSV, summary) |
 | Fig 2 Supp 1B/C | `figures/fig2/si_comparisons.py` | `NEURON_TABLE_FTR`, `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig2/SI_comparisons/` |
 | Supp 2-S2 A | `figures/fig2/si_x_primary_types_mirror.py` | `NEURON_ANNOTATIONS_CSV`, `NEURON_TABLE_FTR`, `SI_UPDATED_FTR` | `outputs/fig2/SI_x_primary_types_mirror/` |
 | Supp 2-S2 D | `figures/fig2/si_x_primary_types.py` | `NEURON_TABLE_FTR` | `outputs/fig2/SI_x_primary_types/` |
@@ -67,10 +106,10 @@ Includes an adult vs larva SI comparison and PCA of morphological features.
 
 > Fig 2A requires larval data files — see [data_availability.md](data_availability.md). A larval cell is drawn when it has an SI and at least one synapse on the axon and one on the dendrite, the rule the adult side applies through `dend_correct` and `axon_correct`. Under `SPLIT_METHOD = "maxsi"` its two larval tables are the MaxSI ones written by `processing/larva/larva_maxsi_labels.py`, so both the adult and the larval SI come from a MaxSI split. Under `"minfisherp"` or `"maxphi"` Fig 2A stops, as there is no larval split for those methods. Under `"maxsi"` it needs both step 09 (MaxSI, for the adult tables) and the larval step; the larval step itself can run under any `SPLIT_METHOD`.
 > Fig 2 Supp 1A requires the neuropil synapse CSV — see [data_availability.md](data_availability.md).
-> In `outputs/fig2/SI_x_PCA/`, Fig 2F is `weights.svg` (line 100) and Fig 2G is
-> `optic_visual_projection_PC1_SI_CDF_vertical_v2.svg` (last written at line 910; lines 614 and 753 write the same
-> name first; only the last write remains). The script also saves variants, saves bar plots in `colored_bars/`, and
-> writes `full_info.ftr` to `outputs/fig2/SI_x_PCA/`.
+> In `outputs/fig2/SI_x_PCA/`, Fig 2F is `weights.svg` (line 102) and Fig 2G is
+> `optic_visual_projection_PC1_SI_CDF_vertical_v2.svg` (lines 617, 756 and 913 all write this name, so the file
+> on disk is the one from line 913). The script also saves variants, bar plots in `colored_bars/`, and
+> `full_info.ftr` in `outputs/fig2/SI_x_PCA/`.
 > Supp 2-S2 A is `SI_corr_sides_princeton_v2.svg` and reads the SI from `SI_UPDATED_FTR`; Supp 2-S2 D is
 > `std_of_si_within_groups_vs_between_princeton.svg` and uses the SI in `NEURON_TABLE_FTR`. `pca_on_feat.py` saves
 > signed PC1 and PC2 contributions and violin plots.
@@ -92,8 +131,8 @@ whether neurons within the same type use the same synapse-type pattern.
 | Panel | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|
 | Fig 3A | `figures/fig3/si_x_neuron_types.py` | `NEURON_ANNOTATIONS_CSV`, `NEURON_TABLE_FTR` | `outputs/fig3/si_x_neuron_types/` |
-| Fig 3C (revision) | `figures/fig3/fig3c_ma_mm_examples.py` (after step 09 with MaxSI; `PIPELINE_RUN = "rebuild"`): an MA and an MM connection, Dm12 720575940620507984 onto L3 720575940652492278 and onto Dm10 720575940637669518, picked by a stated rule | `MAXSI_LABEL_BATCH_DIR`, `MAXSI_SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` | `outputs/fig3/fig3c_ma_mm_examples/` (`fig3c_ma_mm_examples.svg`, `fig3c_examples.csv`: the cells, their MaxSI SI and the synapses of each connection) |
-| Fig 3C as submitted (LPLC2; a supplementary figure in the revision) | `figures/fig3/fig3c_mixed_example_sfc.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/mixed_example/` |
+| Fig 3C (revision) | `figures/fig3/fig3c_ma_mm_examples.py` (after step 09 with MaxSI; `PIPELINE_RUN = "rebuild"`): an MA and an MM connection, Dm12 720575940620507984 onto L3 720575940652492278 and onto Dm10 720575940637669518, picked by a stated rule | `MAXSI_LABEL_BATCH_DIR`, `MAXSI_SYNAPSE_TABLE_FTR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` | `outputs/fig3/fig3c_ma_mm_examples/`, in `outputs_rebuild/` or `outputs_rebuild_maxsi/` (`fig3c_ma_mm_examples.svg`, `fig3c_examples.csv`: the cells, their MaxSI SI and the synapses of each connection) |
+| Fig 3C as submitted (LPLC2; a supplementary figure in the revision; on the SFC split only, since under `"maxsi"` it draws the same cell with MaxSI labels) | `figures/fig3/fig3c_mixed_example_sfc.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/mixed_example/` |
 | Fig 3D | `figures/fig3/fig3d_si_compartment_correct.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/SI_x_correct_compartment/` |
 | Fig 3D (AD content, mixed) | `figures/fig3/fig3supp_ad_content_si_mixed.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/supp_ad_content_si_mixed/` |
 | Fig 3E (drawn with the neuron table's SI; see the note) | `figures/fig3/fig3d_si_compartment_correct.py` | `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/SI_x_correct_compartment/` |
@@ -104,28 +143,28 @@ whether neurons within the same type use the same synapse-type pattern.
 | Fig 3H | `figures/fig3/syntype_x_strength_x_identity.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_x_strength_x_identity/` |
 | Fig 3I | `figures/fig3/syn_type_prob_based_on_other_syn_type_princeton.py` | `CONNECTIONS_TABLE_FTR`, `NEURON_TABLE_FTR` | `outputs/fig3/syn_type_prob/` |
 | Fig 3J | `figures/fig3/syntype_x_features.py` | `NEURON_TABLE_FTR`, `SYNAPSE_TABLE_FTR` | `outputs/fig3/syntype_x_features/` |
-| Fig 3 Supp 1A, Buhmann curve, and the old-rule 3D, 3E and 3F on the Buhmann synapses | `figures/fig3/fig3d_si_compartment_correct.py` with `FIG3D_DATA_SOURCE=buhmann` and `FIG3D_MIXED_RULE=cutoffs` | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/SI_x_correct_compartment_buhmann_cutoffs_rule/` (the curve is `axon_dend_correct_SI_v2.svg`) |
+| Fig 3 Supp 1A, Buhmann curve, and the old-rule 3D, 3E and 3F on the Buhmann synapses | `figures/fig3/fig3d_si_compartment_correct.py` with `FIG3D_DATA_SOURCE=buhmann` and `FIG3D_MIXED_RULE=cutoffs` | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/SI_x_correct_compartment_buhmann_cutoffs_rule/` (the curve is `axon_dend_correct_SI_v2.svg`). Under `"maxsi"` the Buhmann tables are the MaxSI ones, so this row, the next two and Fig 3 Supp 2C draw the MaxSI version, not the submitted one; the submitted ones need `"published"` and `"sfc"` |
 | Fig 3 Supp 1A (Buhmann curve, earlier version; old-rule pies) | `figures/fig3/si_x_correct_percent_per_compartment_buhmann.py` | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/si_x_correct_compartment_buhmann/` |
 | Fig 3 Supp 2A/B (3D's rule: a cell below SI 0.1 is mixed) | `figures/fig3/fig3d_si_compartment_correct.py` with `DATA_SOURCE = "buhmann"` (or `FIG3D_DATA_SOURCE=buhmann`) | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/SI_x_correct_compartment_buhmann_si_rule/` (A: `synaptic_type_pie2_v2.svg`, B: `synaptic_type_npils2_v2.svg`) |
 | Fig 3 Supp 2C | `figures/fig3/si_x_npil_x_synapse_detection.py` with `C_RULE = "si"`: the synapses and labels of Fig 3E (Princeton) and Supp 3-S2 B (Buhmann), as `fig3d_si_compartment_correct.py` makes them with `MIXED_RULE = "si"` (cells of the four intrinsic super-classes, a synapse with an end on a cell with SI below 0.1 is Mixed, synapses outside every neuropil left out); one panel each for AA, AD, DA, DD and Mixed, with each neuropil's share on the Princeton (x) and Buhmann (y) synapses. `C_RULE = "all_cells"` counts every AA/AD/DA/DD synapse of the two synapse tables, with no cell or SI filter and no Mixed | `SYNAPSE_TABLE_FTR`, `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_NONP_FTR`, `NEURON_TABLE_NONP_FTR` (`"all_cells"` reads only the two synapse tables) | `outputs/fig3/si_x_npil_x_synapse_detection/` (`SI_corrr_npils.svg`; `SI_corrr_npils_numbers.svg`, the same with numbered neuropils; `npil_counts_princeton.csv` and `npil_counts_buhmann.csv`: synapses per neuropil and type; `npil_shares.csv`; `pearson_r.csv`: Pearson's r per type, and per type r on the synapses whose two cells have SI >= 0.1 on both detectors); `outputs/fig3/si_x_npil_x_synapse_detection_all_cells/` with `"all_cells"` |
 
-> Fig 3E is `synaptic_type_npils2_v2.svg` (line 440 of `fig3d_si_compartment_correct.py`). The script's
+> Fig 3E is `synaptic_type_npils2_v2.svg` (line 515 of `fig3d_si_compartment_correct.py`). The script's
 > `MIXED_RULE` (or `FIG3D_MIXED_RULE` in the environment) picks how a compartment is called mixed; `"cutoffs"` writes to
 > `outputs/fig3/SI_x_correct_compartment_cutoffs_rule/` (with `"buhmann"`, `..._buhmann_cutoffs_rule/`). `"si"`, the setting for the main 3D and 3E, marks both
-> compartments of a cell mixed when the cell's SI (from `SI_UPDATED_FTR`, lines 21-24) is below 0.1. `"cutoffs"`, for
+> compartments of a cell mixed when the cell's SI (from `SI_UPDATED_FTR`, lines 35-38) is below 0.1. `"cutoffs"`, for
 > the supplement, marks a compartment mixed when its share of correct synapses is not above the rolling curve's value
-> at SI 0.1, the rule of the published 3D and 3E. The published panels were drawn on the neuron table's SI: with lines
-> 21-24 switched off, so that the script keeps the SI in `NEURON_TABLE_FTR`, `"cutoffs"` draws the published 3E bars
+> at SI 0.1, the rule of the published 3D and 3E. On the SFC split, the published panels were drawn on the neuron table's SI: switch off lines
+> 35-38 so the script keeps the SI in `NEURON_TABLE_FTR`, and `"cutoffs"` draws the published 3E bars
 > exactly (the published figure also lists three neighbouring pairs of neuropil labels in the opposite order: MB
-> CA/BU, MB PED/FB and MB VL/AL). As committed, those lines use `SI_UPDATED_FTR`, which changes the cut-offs, the bars
-> and their order. `fig3supp_ad_content_si_mixed.py` has the same setting and applies it at each point of its SI grid.
+> CA/BU, MB PED/FB and MB VL/AL). As committed, those lines read `SI_UPDATED_FTR`, and the cut-offs, the bars
+> and their order change. `fig3supp_ad_content_si_mixed.py` has the same setting and applies it at each point of its SI grid.
 > `GROUP_MIXED = True` then counts every synapse with a mixed end (AM, MA, MD, DM, MM) as one category, "Mixed", in
 > the 3D pie and 3E. The shares are pooled over synapses, and "Mixed" means at least one end is mixed. The same script
 > also draws 3F's two pies with mixed ends (`syn_type_same_ptype_pie_mixed.svg` and `syn_type_diff_ptype_pie_mixed.svg`):
 > every synapse between these cells, with no SI filter, split into pairs of the same `primary_type` and pairs of
 > different types. With `"cutoffs"` they are the supplement's old-rule 3F. `fig3e_syntype_composition.py` instead
 > marks each end of a synapse mixed when that cell's SI computed with self-synapses kept (`SI_pre`/`SI_post` in the synapse table) is below 0.1,
-> and as committed it stops at line 40 (`KeyError: ['neuron']`) before any figure is saved.
+> and as committed it stops at line 42 (`KeyError: ['neuron']`) before any figure is saved.
 
 ---
 
@@ -147,10 +186,10 @@ multiple classification models.
 
 > `syntype_x_pc1_simple_model.py` saves a feature-importance plot, a confusion matrix and a decision surface
 > for a model on PC1, the same kinds of plot as Fig 4A and 4D. It reads the PCA table step 07 writes
-> (`PCA_TABLE_FTR`), like `syntype_x_pc1.py`. The authors' delivered plots were made from a PCA table that is
+> (`PCA_TABLE_FTR`), like `syntype_x_pc1.py`. The authors' plots came from a PCA table that is
 > not available, and a rerun differs from them (by up to 3.4 points in a cell of the
-> confusion matrix; accuracy 40.5% against 39.6%). That is more than the seed or the sign of PC1 changes, and fits
-> a different table, but that table cannot be checked. A rerun can be checked against an independent rebuild of
+> confusion matrix; accuracy 40.5% against 39.6%). That is more than a new seed or a flipped PC1 gives, so it points
+> to a different table, which cannot be checked. A rerun can be checked against an independent rebuild of
 > the model with `tools/check_simple_pc1_model.py` ([docs/tools.md](tools.md#checking-the-simple-pc1-model)). `syntype_x_pc1.py` draws a decision surface too, with its forest of trees without a leaf limit; its save line is
 > commented out. That forest drew the published Fig 4D (compared with the published panel's map). The redrawn 4D is
 > the 100-leaf model's map, the model 4A reports on neurons it never saw. Fig 4 Supp 1 holds only skeleton
@@ -195,13 +234,13 @@ reciprocity prediction.
 > is on AA, AD, DA and DD synapses between intrinsic cells with a cell type and both compartment flags, as the main
 > panel; its "All synapses" curve is every row of the synapse table (every super-class, any SI, all nine comp values). 4B's cell-type model
 > (`fig4_heldout_models.py`) picks, for each pair of cell types, the synapse type with the largest share of its own
-> type's training synapses (each synapse weighted by 1 / its type's training count), the rule that maximises balanced
+> type's training synapses (each synapse weighted by 1 / its type's training count), which gives the best balanced
 > accuracy on the training synapses; the three forests are trained on the balanced resample.
 
-> `reciprocal_fraction.py` also generates `RECI_PROP_FTR` as a side output, which is required
-> by `reciprocal_fraction_model.py`. Run `reciprocal_fraction.py` before `reciprocal_fraction_model.py`.
+> `reciprocal_fraction.py` also writes `RECI_PROP_FTR`, which `reciprocal_fraction_model.py`
+> reads, so run `reciprocal_fraction.py` first.
 
-> `reciprocal_fraction_model.py` also generates `RF_MODEL_PKL`
+> `reciprocal_fraction_model.py` also writes `RF_MODEL_PKL`
 > (`data/intermediate/reciprocity/models/final_random_forest_model_princeton.pkl`).
 
 ## Split methods (revision work) and supporting scripts
@@ -216,17 +255,17 @@ number in the text.
 | Supp 2-S2 A layout (left vs right) on the MaxSI cut's SI | `figures/split_methods/maxsi_x_primary_types_mirror.py` | `NEURON_TABLE_SFC_FTR`, `SI_UPDATED_SFC_FTR` (the SFC cells and SI under either `SPLIT_METHOD`), `SI_COMPARISONS_FTR`, `NEURON_ANNOTATIONS_CSV` | `outputs/split_methods/maxsi_x_primary_types_mirror/` |
 | Example cells: SFC split next to the MaxSI split | `figures/split_methods/skeleton_comparisons.py` | `SI_COMPARISONS_FTR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` | `outputs/split_methods/skeleton_comparisons/` |
 | The same for Kenyon cells (KCg-m) | `figures/split_methods/skeleton_comparisons_kc.py` | `NEURON_TABLE_SFC_FTR` (the SFC cells under either `SPLIT_METHOD`, like step 08), `SI_COMPARISONS_FTR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` | `outputs/split_methods/skeleton_comparisons_kc/` |
-| New Supp 1-S2: six example cells split four ways, and the SI of every candidate cut | `figures/split_methods/method_examples.py` (after steps 08 and 09 with all three cut methods; `PIPELINE_RUN = "rebuild"`, `SPLIT_METHOD = "sfc"`) | `SI_COMPARISONS_FTR`, `NEURON_TABLE_SFC_FTR`, `SI_UPDATED_FTR`, `MAXSI_LABEL_BATCH_DIR`, `MINFISHERP_LABEL_BATCH_DIR`, `MAXPHI_LABEL_BATCH_DIR`, `ALT_SPLIT_BATCH_DIR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` | `outputs/split_methods/method_examples/` (`method_examples.svg`, `example_cells.csv`: the rule behind each cell) |
+| New Supp 1-S2: six example cells split four ways, and the SI of every candidate cut | `figures/split_methods/method_examples.py` (after steps 08 and 09 with all three cut methods; `PIPELINE_RUN = "rebuild"`, `SPLIT_METHOD = "sfc"`) | `SI_COMPARISONS_FTR`, `NEURON_TABLE_SFC_FTR`, `SI_UPDATED_FTR`, `MAXSI_LABEL_BATCH_DIR`, `MINFISHERP_LABEL_BATCH_DIR`, `MAXPHI_LABEL_BATCH_DIR`, `ALT_SPLIT_BATCH_DIR`, `SYNAPSE_TABLE_RAW_FTR`, skeletons in `SWC_DIR` | `outputs/split_methods/method_examples/`, in `outputs_rebuild/` (`method_examples.svg`, `example_cells.csv`: the rule behind each cell) |
 | New supplement (revision): the four splits compared. Left/right agreement of SI (ICC on the Supp 2-S2 A pairs), the splits against each other (Spearman, and the share of cells on the same side of SI 0.1), and MaxSI SI minus SFC SI. Written for the revision, not ported; runs after step 09 with all three methods | `figures/split_methods/four_methods_si_comparison.py` | `NEURON_TABLE_SFC_FTR`, `SI_UPDATED_SFC_FTR`, `MAXSI_SI_UPDATED_FTR`, `MINFISHERP_SI_UPDATED_FTR`, `MAXPHI_SI_UPDATED_FTR`, `SI_COMPARISONS_FTR` (a check), `NEURON_ANNOTATIONS_CSV` | `outputs/split_methods/four_methods_si_comparison/`: five SVGs and four CSVs |
 | Text: "simple neurons (PC1 < 0.5), which are primarily optic neurons" | `figures/supporting/pc1_x_nt_sclass_pies.py` | `NEURON_TABLE_FTR`, `PCA_TABLE_FTR` | `outputs/supporting/pc1_x_nt_sclass_pies/` |
 
 > Run `processing/build_raw_synapse_table.py` first: it writes `SYNAPSE_TABLE_RAW_FTR`. `SI_COMPARISONS_FTR` comes from step 08
 > (`08_alternative_split_methods.py`, optional). With `ONLY_CELLS_WITH_SKELETONS = "auto"` (the default) the skeleton scripts use
 > the authors' original cell selection when all of those cells' skeletons are on disk; if even one is missing they replace the
-> whole selection with cells that have a skeleton (and print that they did), so the images are then not the original cells.
+> whole selection with cells that have a skeleton (and say so), so the images then show other cells.
 > The original cells need the full skeleton download.
 
-> `processing/phi_threshold.py` saves `outputs/processing/phi_threshold/phi_threshold.svg`, which shows how it finds the Phi
+> `processing/phi_threshold.py` saves `processing/phi_threshold/phi_threshold.svg` in the outputs folder of the current setting. The figure shows how the script finds the Phi
 > cutoff that matches SI = 0.1 (not a panel of the submitted paper).
 
 ## Figure 6 — Reciprocal motifs in different neural systems
@@ -235,11 +274,11 @@ One script, ported from the corresponding author's MATLAB script `FlyWire_AADD_s
 included in this repository). It reads the **Princeton** tables by default (`DATA_SOURCE = 'princeton'`),
 like every other figure of the revised paper: `NEURON_TABLE_FTR` and `SYNAPSE_TABLE_FTR` (and `SI_UPDATED_FTR`
 if `SI_SOURCE = 'SI_updated'`). The submitted Figure 6 was made from the Buhmann tables; `DATA_SOURCE = 'buhmann'`
-reproduces it: every Fig 6D box and whisker exactly, Fig 6A–C and the per-type bars of Supp 6-S1/S2 closely
+under `PIPELINE_RUN = "published"` and `SPLIT_METHOD = "sfc"` reproduces it: every Fig 6D box and whisker exactly, Fig 6A–C and the per-type bars of Supp 6-S1/S2 closely
 (the Buhmann table's `primary_type` is not the Codex consolidated cell types the MATLAB script read), and the
 Supp 6-S3 graphs with the same edges. This repository does not build the published Buhmann tables; it builds MaxSI versions of them
 (`processing/buhmann_maxsi_labels.py`; see `docs/data_availability.md`). `FIG6_DATA_SOURCE=buhmann` in the environment
-sets `DATA_SOURCE`; with `'buhmann'` the figures go to `outputs/fig6/aadd_specific_circuits_buhmann/` instead.
+sets `DATA_SOURCE`; with `'buhmann'` the figures go to `outputs/fig6/aadd_specific_circuits_buhmann/` instead. Under `"maxsi"`, `'buhmann'` reads the MaxSI Buhmann tables.
 
 | Panel | Script | Input tables | Output path |
 |-------|--------|-------------|-------------|
@@ -290,21 +329,21 @@ setting, with them and with `NEURON_DATA_FTR` read from `data/derived/` (`REBUIL
 
 > The `fig7*.py` scripts draw their own neuron sets from the bouton tables, which differ from the other
 > figures': no four-super-class filter in 7G's 'All' lines or anywhere in 7I, one value per neuron and compartment
-> in 7F's 'All' violins, and the bouton tables carry the neuron table's SI. 7D, Supp 7-S1, Supp 7-S3 and
+> in 7F's 'All' violins, and the bouton tables carry the neuron table's SI (the MaxSI SI in their MaxSI versions). 7D, Supp 7-S1, Supp 7-S3 and
 > Supp 7-S4 D-F have no script. The seven `fig7*.py` scripts are made from the authors' originals by
 > `tools/make_fig7_ports.py` (change them there, not in the scripts); `tools/check_fig7_ports.py` checks that
 > each draws what its original draws, and `tools/check_fig7_tables.py` checks their input tables.
 
 > The `si_sim_*.py` scripts recompute SI on the existing axon/dendrite labels; they do not re-split any neuron.
 > `post_on_filo_ratio.py`, `si_comb_analysis.py` and the three `si_sim_*.py` scripts load the whole synapse table
-> (`SYNAPSE_TABLE_FTR`, about 76 million rows), so they need a machine with plenty of memory.
-> Fig 7 neuron sets differ from the other figures: `post_on_filo_ratio.py` and `si_comb_analysis.py` apply the
+> (`SYNAPSE_TABLE_FTR`, about 76 million rows), so they need a lot of memory.
+> Two more scripts use their own neuron sets: `post_on_filo_ratio.py` and `si_comb_analysis.py` apply the
 > four-super-class filter but not the `dropna` on `axon_correct`/`dend_correct`/`primary_type`, and `post_on_filo_ratio.py`
 > takes the compartment from the second letter of `comp`, so synapses from linker segments (LA, LD) are included.
 > Their pie and correctness plots are not panels. The saved 7J bar compares baseline with no-filopodia only; the
 > sample-out table is read by `si_comb_analysis.py` and used only in a figure it shows and does not save.
-> `si_comb_analysis.py` keeps the cells with SI >= 0.1 (`NEURON_TABLE_FTR`'s SI), as the 7J legend says; the submitted
-> 7J has no SI filter, so on the published tables its bar differs from the submitted one. The flag tables (`SYN_BOUTON_FTR`,
+> `si_comb_analysis.py` keeps cells with SI >= 0.1 (`NEURON_TABLE_FTR`'s SI), as the 7J legend says. The submitted
+> 7J has no SI filter, so on the published tables the bar differs from it. The flag tables (`SYN_BOUTON_FTR`,
 > `SYN_BOUTON_NEW_FTR`) cover the published synapse table's synapses only and don't depend on the split, so they are
 > read under every `SPLIT_METHOD`; 7H and the three `si_sim_*.py` scripts leave out synapses without a flag (on
 > `data/derived_rebuild_maxsi`, the 760,723 synapses with an end in one of the 52 cells the published table lacks).

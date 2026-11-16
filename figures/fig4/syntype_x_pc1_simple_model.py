@@ -170,17 +170,6 @@ y_pred = rf_clf.predict(X_test)
 
 import joblib
 import os
-r'''
-save_path = r"C:\Users\user\organised_work\code\783\article\princeton\final\Fig3\Fig_3\syntype X PC1"
-
-# Create directory if it does not exist
-os.makedirs(save_path, exist_ok=True)
-
-model_file = os.path.join(save_path, "rf_pc1_model.joblib")
-joblib.dump(rf_clf, model_file)
-
-print("Model saved to:", model_file)
-'''
 #%%
 #rf_loaded = joblib.load(model_file)
 

@@ -6,7 +6,7 @@ Code for the manuscript *Organizational principles governing synapse types in a 
 
 The analysis uses the FlyWire FAFB v783 connectome of the adult fruit fly brain, with one SWC skeleton per neuron and the Princeton synapse table.
 
-Each neuron's skeleton is split into an axon and a dendrite, sometimes with a short linker between them. We then measure how well the neuron keeps its inputs and outputs apart on those two sides. That is the segregation index (SI), which runs from 0 (mixed) to 1 (fully separated). Each synapse gets a two-letter type, the sending neuron's compartment followed by the receiving neuron's: AD, AA, DD or DA. A synapse with a linker end gets a type such as AL or LD, which the analyses leave out. The rest of the code builds tables from these labels and makes the figures in the paper, which look at synapse types across neuron classes, neurotransmitters, neuron shape, brain regions and reciprocal connections.
+Each neuron's skeleton is split into an axon and a dendrite. We then measure how well the neuron keeps its inputs and outputs apart on those two sides. That is the segregation index (SI), which runs from 0 (mixed) to 1 (fully separated). Each synapse gets a two-letter type, the sending neuron's compartment followed by the receiving neuron's: AD, AA, DD or DA. The main figures use the MaxSI split, which cuts each neuron at the one skeleton node that gives the highest SI; the synapses on that node get no type. The published split (synapse flow centrality, SFC) also leaves a linker in most neurons, the stretch between axon and dendrite that neither side takes in, of any length; a synapse with a linker end gets a type such as AL or LD, which most analyses leave out. The rest of the code builds tables from these labels and makes the figures in the paper, which look at synapse types across neuron classes, neurotransmitters, neuron shape, brain regions and reciprocal connections.
 
 The folder [MSB-and-Post-on-MSB-pipeline/](MSB-and-Post-on-MSB-pipeline/) holds two separate pipelines. `MSB_pipeline` groups presynapses into multi-synapse boutons (MSBs) using DBSCAN on distances along the skeleton, and `Post_on_MSB_pipeline`, which runs after it, finds the postsynapses on spines coming off those boutons.
 
@@ -14,9 +14,9 @@ The folder [MSB-and-Post-on-MSB-pipeline/](MSB-and-Post-on-MSB-pipeline/) holds 
 
 The demo runs without downloading anything, since its 200 neurons, their synapses and skeletons are in `demo/`. The two MSB pipelines also come with their own sample data and READMEs.
 
-The full pipeline cannot be run from public data alone. With the Codex downloads you can run steps 01 to 04, but step 05, which builds the per-neuron table, also needs a file called `swc_data.ftr` that no script here makes. Steps 06 to 08, the Phi-cutoff script, the two synapse-type tools and almost all figure scripts need step 05's table, so from the downloads alone none of them can run.
+The pipeline runs from the Codex downloads and the files included here: the raw synapse table under the default `PIPELINE_RUN = "published"`, then steps 01 to 09 under `"rebuild"` (see [Reproducing the analysis](#reproducing-the-analysis)). The figure scripts run on its tables too, except those that need one of the inputs below or a FlyWire CAVE token (see [Figures](#figures)).
 
-Sixteen tables that the scripts read are not made anywhere in this repository, and one more input, the neuropil synapse table read by `figures/fig2/si_x_twigs.py`, has to be requested from the corresponding authors. All seventeen are listed in [docs/data_availability.md](docs/data_availability.md), and the scripts that need them will not run without them. Three of the sixteen tables come from the earlier Buhmann synapse detection. The pipeline here is written for the Princeton synapse table; the Buhmann section of docs/data_availability.md says what would have to change and which panels need those tables (among them all of Figure 6's script-made panels). The larval curve in Figure 2A can't be rebuilt either: it needs raw files from the corresponding authors, and the larva script currently gives no usable output (see [docs/pipeline_overview.md](docs/pipeline_overview.md)).
+Fourteen tables that the scripts read are not made anywhere in this repository, and one more input, the neuropil synapse table read by `figures/fig2/si_x_twigs.py`, has to be requested from the corresponding authors. All fifteen are listed in [docs/data_availability.md](docs/data_availability.md), and the scripts that need them will not run without them. Two of the fourteen tables come from the earlier Buhmann synapse detection. The pipeline here is written for the Princeton synapse table; the Buhmann section of docs/data_availability.md says what would have to change and which panels need those tables (among them all of Figure 6's script-made panels). The larval curve in Figure 2A needs raw files from the corresponding authors. With them, `processing/larva/larva_maxsi_labels.py` builds the MaxSI larval tables Figure 2A reads; the SFC larval script, `larva_process.py`, gives no usable output as committed (see [docs/pipeline_overview.md](docs/pipeline_overview.md)).
 
 The derived tables in `data/derived/` are not included; they are available from the corresponding authors on request.
 
@@ -36,7 +36,7 @@ The demo only covers the SI steps, not the MSB pipelines.
 |---|---|
 | Python | 3.12.4 on Linux, macOS or Windows. Other Python versions may not work with the pinned packages |
 | Packages | Pinned in `requirements.txt` and `environment.yml`, including `navis==1.7.0`, `pandas==2.2.2`, `numpy==1.26.4`, `scikit-learn==1.5.2`, `scipy==1.13.1`, `matplotlib==3.9.2` and `seaborn==0.13.2`. Keep navis at 1.7.0 (other versions can give different SI values), without navis-fastcore |
-| Memory | 32 GB recommended for the full pipeline (use goes above 16 GB). The optional `processing/build_raw_synapse_table.py` peaked at about 40 GB (22 GB resident) on a 36 GB Mac. No special hardware is needed |
+| Memory | 32 GB recommended for the full pipeline (several steps hold 17 to 30 GB). `processing/build_raw_synapse_table.py` peaked at about 40 GB (22 GB resident) on a 36 GB Mac. No special hardware is needed |
 | Disk | Raw inputs about 43 GB; the raw synapse tables in `data/derived/` (made by `build_raw_synapse_table.py`) about 7 GB; one full run's tables, SFC and MaxSI together, under 40 GB more |
 | Install time | About 5 to 10 minutes with conda, or 10 to 20 with pip |
 
@@ -73,8 +73,8 @@ Step 08 and `build_raw_synapse_table.py` are not in the table: `build_raw_synaps
 
 - Measured on one machine only: an Apple M4 Max Mac, 36 GB, 14 cores, macOS. Not tried on Linux or Windows, nor on any machine under 36 GB.
 - Step 09's table building (30.3 GB peak footprint), step 06 (20.6 GB resident), step 03 (19.1 GB footprint) and step 04 (17.7 GB resident) each run as one process, so they set a memory floor. Plan on 32 GB plus swap; on Linux or Windows, set up swap.
-- Steps 01 and 09 run as several copies; only 5 copies have been measured, and step 01 as 5 copies held more than 16 GB. On a smaller machine run them as fewer copies, but each copy then holds more memory. Run no more copies than cores.
-- With 5 copies, the running times of steps 01 to 07 and 09 add up to about 3 hours. The copies used 9.3 CPU-hours for step 01 and 2.3 for step 09; one copy has not been timed. Steps 01, 08 and 09 resume if stopped; the others start again.
+- Steps 01 and 09 run as several copies; only 5 copies have been measured, and step 01 as 5 copies held at least 17.7 GB. On a smaller machine run them as fewer copies, but each copy then holds more memory. Run no more copies than cores.
+- With 5 copies, the running times of steps 01 to 07 and 09 add up to about 3 hours, and `build_swc_data.py` takes 12 minutes more. The copies used 9.3 CPU-hours for step 01 and 2.3 for step 09; one copy has not been timed. Steps 01, 08 and 09 resume if stopped; the others start again.
 - On another machine, expect the same values but not the same bytes (file listing order and the processor's last digits differ): sort by `synapse_id` or `root_id` and compare with a small tolerance.
 
 ### Data
@@ -105,7 +105,9 @@ flowchart TD
     S01 --> S05["05"]
     S02A --> S05
     S04 --> S05
-    ANN["Annotations, cell_stats, neurons.csv,<br/>ranks, swc_data.ftr"] --> S05
+    SWC --> SWCD["build_swc_data"]
+    SWCD --> S05
+    ANN["Annotations, cell_stats, neurons.csv,<br/>ranks"] --> S05
     S04 --> S06["06"]
     S05 --> S06
     S05 --> S07["07"]
@@ -113,7 +115,7 @@ flowchart TD
     S05 --> FIGS
     S06 --> FIGS
     S07 --> FIGS
-    CSV -.-> BR["build_raw_synapse_table<br/>(optional)"]
+    CSV --> BR["build_raw_synapse_table"]
     BR -.-> S08["08 (optional)"]
     S05 -.-> S08
     SWC -.-> S08
@@ -121,7 +123,7 @@ flowchart TD
     BR -.-> FIGS
     S08 -.-> PHI["phi_threshold<br/>(optional)"]
     S05 -.-> PHI
-    BR -.-> S09["09 (optional)"]
+    BR --> S09["09"]
     S04 -.-> S09
     SWC -.-> S09
     S05 -.-> S09
@@ -132,61 +134,64 @@ flowchart TD
 
 Each step below links to its full description in [docs/pipeline_overview.md](docs/pipeline_overview.md#pipeline-flow), which also has the full chart of inputs.
 
-| Step | What it makes | Needs | Time (one full run, 36 GB Mac) |
+| Step | What it makes (in `data/derived_rebuild/` under `"rebuild"`) | Needs | Time (one full run, 36 GB Mac) |
 |---|---|---|---|
 | [01](docs/pipeline_overview.md#script-01--extract-compartments--si-standard-neurons) | Compartment labels and SI per neuron | Synapse CSV, skeletons | About 2 hours as 5 copies |
 | [02a](docs/pipeline_overview.md#script-02a--large-neurons-pipeline) | The same for the very large neurons | Synapse CSV, skeletons | 27 minutes |
 | [02b](docs/pipeline_overview.md#script-02b--merge-connectors) | Step 01's synapse labels collected into two tables | 01, finished on every subfolder | 58 seconds |
 | [03](docs/pipeline_overview.md#script-03--merge-synapses-and-connectors) | The labels added back to the synapse list | Synapse CSV, 02a, 02b | 86 seconds |
-| [04](docs/pipeline_overview.md#script-04--build-master-synapse-table) | `data/derived/synapses_783_article_princeton.ftr` | 01, 02a, 03 | 41 seconds |
-| [05](docs/pipeline_overview.md#script-05--build-neuron-metadata-table) | `data/derived/neuron_data_full_article_princeton.ftr`, `SI_updated.ftr` | 01, 02a, 04, annotations, `cell_stats.csv`, `neurons.csv`, ranks, `swc_data.ftr` | 56 seconds |
+| [04](docs/pipeline_overview.md#script-04--build-master-synapse-table) | `synapses_783_article_princeton.ftr` | 01, 02a, 03 | 41 seconds |
+| [build_swc_data.py](docs/pipeline_overview.md#shape-table-before-step-05) | `swc_data.ftr`: nodes, leafs, branches and cable length of each skeleton | Skeletons | 12 minutes |
+| [05](docs/pipeline_overview.md#script-05--build-neuron-metadata-table) | `neuron_data_full_article_princeton.ftr`, `SI_updated.ftr` | 01, 02a, 04, `build_swc_data.py`, annotations, `cell_stats.csv`, `neurons.csv`, ranks | 56 seconds |
 | [06](docs/pipeline_overview.md#script-06--build-connection-and-reciprocity-table) | The per-connection and reciprocity tables | 04, 05 | 28 to 29 seconds |
-| [07](docs/pipeline_overview.md#script-07--pca-of-morphological-features) | `data/derived/neurons_pca_princeton.ftr` | 05 | 2 seconds |
-| [build_raw_synapse_table.py](docs/pipeline_overview.md#raw-synapse-table-optional) (optional) | The raw synapse table (two versions) | Synapse CSV | 2 minutes |
-| [08](docs/pipeline_overview.md#script-08--alternative-split-methods-optional) (optional) | `data/derived/SI_comparisons.ftr` | 05, raw synapse table, intrinsic neurons' skeletons | |
+| [07](docs/pipeline_overview.md#script-07--pca-of-cell-features) | `neurons_pca_princeton.ftr` | 05 | 2 seconds |
+| [build_raw_synapse_table.py](docs/pipeline_overview.md#raw-synapse-table) | The raw synapse table (two versions), for step 09 and step 08 | Synapse CSV | 2 minutes |
+| [08](docs/pipeline_overview.md#script-08--alternative-split-methods-optional) (optional) | `SI_comparisons.ftr` | 05, raw synapse table, intrinsic neurons' skeletons | |
 | [phi_threshold.py](docs/pipeline_overview.md#phi-threshold-optional) (optional) | The Phi cutoff that matches SI = 0.1 (printed, and a plot) | 05, 08 | |
-| [09](docs/pipeline_overview.md#script-09--maxsi-minfisherp-and-maxphi-synapse-labels-optional) (optional) | Synapse, neuron and SI tables in `data/derived_maxsi/` (or `_minfisherp`, `_maxphi`) | 04, 05, raw synapse table without self-synapses, all skeletons | About 30 minutes as 5 copies (MaxSI) |
-| [larva/larva_process.py](docs/pipeline_overview.md#larval-step-for-figure-2a) | Larval SI for Figure 2A, run separately | Larval raw files | |
-| [larva/larva_maxsi_labels.py](docs/pipeline_overview.md#larval-maxsi-step-for-figure-2a-on-the-maxsi-split) | Larval SI and synapse tables on the MaxSI split, in `data/larva_maxsi/` (Figure 2A under `SPLIT_METHOD = "maxsi"`) | Larval raw files | About 2 minutes |
+| [09](docs/pipeline_overview.md#script-09--maxsi-minfisherp-and-maxphi-synapse-labels) | Synapse, neuron and SI tables on the MaxSI split, which the main figures use, in `data/derived_rebuild_maxsi/` under `"rebuild"` (or `_minfisherp`, `_maxphi`) | 04, 05, raw synapse table without self-synapses, all skeletons | About 30 minutes as 5 copies (MaxSI) |
+| [larva/larva_process.py](docs/pipeline_overview.md#larval-sfc-step) | Larval SI for Figure 2A, run separately | Larval raw files | |
+| [larva/larva_maxsi_labels.py](docs/pipeline_overview.md#larval-maxsi-step-figure-2a) | Larval SI and synapse tables on the MaxSI split, in `data/larva_maxsi/` (Figure 2A under `SPLIT_METHOD = "maxsi"`) | Larval raw files | About 2 minutes |
 | [larva/larva_pc1.py](docs/pipeline_overview.md#larval-pc1-step) | Each larval cell's PC1, in `data/larva_maxsi/` | larva_maxsi_labels.py | About 15 seconds |
 
 | Setting | Where | What it does |
 |---|---|---|
-| `PIPELINE_RUN` | `config.py` | `"published"` (default): the delivered tables; steps 01 to 07 stop at the start (`refuse_published_run`). `"rebuild"`: a fresh run into `data/derived_rebuild/`, `data/intermediate_rebuild/`, `outputs_rebuild/` |
+| `PIPELINE_RUN` | `config.py` | `"published"` (default): the delivered tables; steps 01 to 07 and `build_swc_data.py` stop at the start (`refuse_published_run`). `"rebuild"`: a fresh run into `data/derived_rebuild/`, `data/intermediate_rebuild/`, `outputs_rebuild/` |
 | `SPLIT_METHOD` | `config.py` | The split the scripts read: `"sfc"` (the published split, the default), `"maxsi"`, `"minfisherp"` or `"maxphi"`. Leave it at `"sfc"` until step 09 has written that method's three tables |
 | `METHOD`, or `STEP09_METHOD` | step 09 | Step 09's cut: `"maxsi"` (default, highest SI), `"minfisherp"` (lowest two-sided Fisher exact p) or `"maxphi"` (highest \|phi\|), each into its own folders |
 | `RAW_TABLE_KEEP_SELF_SYNAPSES` | `config.py` | Raw synapse table without (`False`, default) or with self-synapses. Step 09 needs `False` |
 | `ACCEPT_FAILED_CELLS`, or `STEP09_ACCEPT_FAILED_CELLS`; `ACCEPT_CELLS_WITHOUT_SKELETON` | step 09 | Step 09 writes no table if a cell has no usable skeleton (unless `ACCEPT_CELLS_WITHOUT_SKELETON = True`) or the number of failed cells is not `ACCEPT_FAILED_CELLS` (default: none may fail). Run it once, read the count and errors it prints, then set these two, for each method |
-| `N_SHARDS`, `SHARD` (or `STEP01_N_SHARDS`/`STEP01_SHARD`, `STEP09_N_SHARDS`/`STEP09_SHARD`) | steps 01 and 09 | Run the step as several copies at once, one per `SHARD`, all with the same `N_SHARDS`. Step 09 then needs a last run with `N_SHARDS = 1` to build its tables; see [step 01](docs/pipeline_overview.md#script-01--extract-compartments--si-standard-neurons) and [step 09](docs/pipeline_overview.md#script-09--maxsi-minfisherp-and-maxphi-synapse-labels-optional) |
+| `N_SHARDS`, `SHARD` (or `STEP01_N_SHARDS`/`STEP01_SHARD`, `STEP09_N_SHARDS`/`STEP09_SHARD`) | steps 01 and 09 | Run the step as several copies at once, one per `SHARD`, all with the same `N_SHARDS`. Step 09 then needs a last run with `N_SHARDS = 1` to build its tables; see [step 01](docs/pipeline_overview.md#script-01--extract-compartments--si-standard-neurons) and [step 09](docs/pipeline_overview.md#script-09--maxsi-minfisherp-and-maxphi-synapse-labels) |
 
 What each setting moves and stops is in [docs/pipeline_overview.md](docs/pipeline_overview.md#settings-split_method-and-pipeline_run).
 
-Before a fresh run, set `PIPELINE_RUN = "rebuild"` in `config.py` (under the default `"published"`, steps 01 to 07 stop at the start), and make sure `data/derived/swc_data.ftr` exists (and, for steps 08 and 09, the raw synapse table; see the notes below). Then run the steps in this order, from the repository root:
+Before a fresh run, set `PIPELINE_RUN = "rebuild"` in `config.py` (under the default `"published"`, steps 01 to 07 and `build_swc_data.py` stop at the start). Steps 08 and 09 also need the raw synapse table, which `build_raw_synapse_table.py` builds under the default `"published"`, so build it first if you will run them. Then run the steps in this order, from the repository root:
 
 ```bash
+python processing/build_raw_synapse_table.py           # for 09 (and 08), under "published" -> data/derived/, the raw synapse table (two versions)
+# then set PIPELINE_RUN = "rebuild" in config.py; the steps below write to data/derived_rebuild/
 python processing/01_extract_compartments_SI.py        # takes hours; compartment labels and SI per neuron
 python processing/02a_large_neurons_pipeline.py        # the very large neurons, in a separate pass
 python processing/02b_merge_connectors.py
 python processing/03_merge_synapses_connectors.py
-python processing/04_build_master_synapse_table.py     # -> data/derived/synapses_783_article_princeton.ftr
-python processing/05_build_neuron_metadata_table.py    # -> data/derived/neuron_data_full_article_princeton.ftr (needs swc_data.ftr)
+python processing/04_build_master_synapse_table.py     # -> synapses_783_article_princeton.ftr
+python processing/build_swc_data.py                    # -> swc_data.ftr; any time before 05
+python processing/05_build_neuron_metadata_table.py    # -> neuron_data_full_article_princeton.ftr
 python processing/06_build_connection_reciprocity_table.py
-python processing/07_pca_morphology.py                 # -> data/derived/neurons_pca_princeton.ftr
-python processing/build_raw_synapse_table.py           # optional, before 08 -> the raw synapse table (two versions)
-python processing/08_alternative_split_methods.py      # optional -> data/derived/SI_comparisons.ftr
+python processing/07_pca_morphology.py                 # -> neurons_pca_princeton.ftr
+python processing/08_alternative_split_methods.py      # optional -> SI_comparisons.ftr
 python processing/phi_threshold.py                     # optional, after 05 and 08
-python processing/09_maxsi_synapse_labels.py           # optional -> data/derived_maxsi/ (MaxSI synapse, neuron and SI tables)
-STEP09_METHOD=minfisherp python processing/09_maxsi_synapse_labels.py   # optional -> data/derived_minfisherp/
-STEP09_METHOD=maxphi python processing/09_maxsi_synapse_labels.py   # optional -> data/derived_maxphi/
+python processing/09_maxsi_synapse_labels.py           # the main figures' split -> data/derived_rebuild_maxsi/ (MaxSI synapse, neuron and SI tables)
+STEP09_METHOD=minfisherp python processing/09_maxsi_synapse_labels.py   # optional -> data/derived_rebuild_minfisherp/
+STEP09_METHOD=maxphi python processing/09_maxsi_synapse_labels.py   # optional -> data/derived_rebuild_maxphi/
 python processing/buhmann_maxsi_labels.py               # optional, "rebuild" + "maxsi" -> data/derived_rebuild_maxsi/; needs the published Buhmann tables, not deposited
 python processing/bouton_maxsi_tables.py                # optional, "rebuild" + "maxsi" -> data/derived_rebuild_maxsi/ (the two Fig 7 bouton tables); needs the authors' bouton tables, not deposited
 ```
 
 Notes:
 
-- Step 05 reads `swc_data.ftr`, which no script here writes. The code that writes it is inside step 05 (lines 137-190), in a commented-out block that points to a local Windows path.
-- Step 01 skips neurons with more than 80,000 skeleton nodes; step 02a processes the large neurons, from a list of 186 neuron IDs written into the script, not from step 01's size check (182 of them got an SI). Run step 02b only after step 01 has finished every subfolder.
-- `swc_data.ftr`, `neuron_data.ftr` and the raw synapse table stay in `data/derived/` under `"rebuild"` too, since no step from 01 to 07 makes them. The raw table is needed only by steps 08 and 09, the optional `processing/buhmann_maxsi_labels.py` and `processing/bouton_maxsi_tables.py` (which reads the version without self-synapses, `SYNAPSE_TABLE_RAW_NO_SELF_FTR`, directly, not through the `RAW_TABLE_KEEP_SELF_SYNAPSES` switch), and six figure scripts (`figures/fig1/create_split_axon_dendrite_princeton.py`, `figures/fig1/fig1c_example_splits.py`, `figures/fig3/fig3c_ma_mm_examples.py`, the two `figures/split_methods/skeleton_comparisons*.py` and `figures/split_methods/method_examples.py`). For a split made by step 09, run 01 → … → 05, then 09 with that method, then set `SPLIT_METHOD` to the same method and run 06 → 07, then the figure scripts, the ones that write tables first.
+- Step 05 reads `swc_data.ftr`, which `processing/build_swc_data.py` makes from the skeletons. It reads each file as it is, without healing. It stops, writing nothing, if any file in `data/raw/swc/783/` is not a `<subfolder>/<root_id>.swc` skeleton that reads cleanly, or if navis is not 1.7.0 (full list in [docs/pipeline_overview.md](docs/pipeline_overview.md#shape-table-before-step-05)), so leave the downloaded zip and other files outside that folder. On our 139,273 skeletons it gave the same values as the authors' `swc_data.ftr` in every column.
+- Step 01 skips neurons with more than 80,000 skeleton nodes; step 02a processes the large neurons, from a list of 186 neuron IDs written into the script, not from step 01's size check (all 186 get an SI in a fresh run; 182 have one in the delivered tables). Run step 02b only after step 01 has finished every subfolder.
+- `neuron_data.ftr` and the raw synapse table stay in `data/derived/` under `"rebuild"` too, since no step from 01 to 07 makes them. The raw table is needed only by steps 08 and 09, the optional `processing/buhmann_maxsi_labels.py` and `processing/bouton_maxsi_tables.py` (which reads the version without self-synapses, `SYNAPSE_TABLE_RAW_NO_SELF_FTR`, directly, not through the `RAW_TABLE_KEEP_SELF_SYNAPSES` switch), and six figure scripts (`figures/fig1/create_split_axon_dendrite_princeton.py`, `figures/fig1/fig1c_example_splits.py`, `figures/fig3/fig3c_ma_mm_examples.py`, the two `figures/split_methods/skeleton_comparisons*.py` and `figures/split_methods/method_examples.py`). For a split made by step 09, run 01 → … → 05, then 09 with that method, then set `SPLIT_METHOD` to the same method and run 06 → 07, then the figure scripts, the ones that write tables first.
 - Tables with no MaxSI version (`MAXSI_NOT_AVAILABLE`) stop the scripts that read them under `"maxsi"`, and the same holds for the other two methods. Do not copy the SFC files into the `_maxsi` folders to make them run. If a script stops on a missing file in a `_maxsi` folder, either the script that writes it (09, 06, 07 or a figure script) has not yet run under `"maxsi"`, or the table has no MaxSI version.
 - The larval SI for Figure 2A comes from `processing/larva/larva_process.py` (SFC split), which runs separately from these steps; as committed it gives no usable output (see above). Under `SPLIT_METHOD = "maxsi"` Figure 2A reads the larval MaxSI tables from `processing/larva/larva_maxsi_labels.py` instead, which also runs separately. Each larval step writes its own folders, whatever `PIPELINE_RUN` is.
 
@@ -194,15 +199,15 @@ Notes:
 
 The figure scripts are in `figures/fig1/` to `figures/fig7/`, usually one per panel, plus `figures/split_methods/` (the split-method comparison) and `figures/supporting/` (numbers in the text). They are `#%%` cell scripts for an editor like Spyder, but also run as plain Python from any folder; each plot then opens in a window and waits to be closed, which `tools/run_figure.py` avoids.
 
-`figures/fig1/create_split_axon_dendrite_princeton.py` and `figures/fig3/fig3c_mixed_example_sfc.py` make a Neuroglancer link through `caveclient` before they draw, so they stop with an error unless you have a FlyWire account and a CAVE token saved on your machine. Every script imports `caveclient` and `nglui` through `methods/methods_all.py`, so both must be installed (they are in the pinned requirements).
+`figures/fig1/create_split_axon_dendrite_princeton.py` and `figures/fig3/fig3c_mixed_example_sfc.py` make a Neuroglancer link through `caveclient` before they draw, so they stop with an error unless you have a FlyWire account and a CAVE token saved on your machine. They use the Neuroglancer helpers in `methods/methods_all.py`, which no pipeline step uses: they only make links for looking at example cells. `methods/methods_all.py` imports `caveclient` and `nglui`, and steps 01 and 02a and four figure scripts import `nglui` directly, so both must be installed (they are in the pinned requirements).
 
 Six scripts need others to run first: `figures/fig4/build_pc1_table.py` before `figures/fig4/syntype_x_pc1.py`, `figures/fig4/fig4_heldout_models.py` before `figures/fig4/models_comparison.py`, `figures/fig5/reciprocal_fraction.py` before `figures/fig5/reciprocal_fraction_model.py`, the three `figures/fig7/si_sim_*.py` scripts before `figures/fig7/si_comb_analysis.py`, and `figures/fig7/fig7i_filopodia_fraction_x_nt.py` before `figures/fig7/filopodia_x_mirror_neurons.py` and `figures/fig5/reciprocal_fraction_x_bwf.py` (it writes `neurons_nt_bwf_frac.ftr`; if it stops with an error, or is left out of a run such as `--only fig5`, those two read whatever copy is already there).
 
 Every text a script saves is Arial 8 pt: each script calls `use_arial_8()` from `methods/figure_text.py`, which sets all text (axes, ticks, legends, titles, colour bars, annotations, table cells) to Arial 8 pt as the figure is saved, and builds every legend at 8 pt, whatever sizes the script set. `tools/check_figure_text.py --outputs` reads a run's saved files and lists any text that is not. It changes only text, but labels take a different amount of room at 8 pt, so a panel's layout can shift.
 
-Each script saves its figures as SVG in its own folder, usually `outputs/figN/<name>/` (`outputs_maxsi/` under `SPLIT_METHOD = "maxsi"`); a few also write tables into `data/derived/` (`data/derived_maxsi/` or `data/intermediate_maxsi/` under `"maxsi"`). [docs/figure_to_script_map.md](docs/figure_to_script_map.md) shows which script makes which panel and where it saves it, with the exceptions and the token details in its section [Running the figure scripts](docs/figure_to_script_map.md#running-the-figure-scripts).
+Each script saves its figures as SVG in its own folder, usually `outputs/figN/<name>/`; a few also write tables into `data/derived/`. Both folders move with the settings: the main figures, drawn under `"rebuild"` and `"maxsi"`, go to `outputs_rebuild_maxsi/` and their tables to `data/derived_rebuild_maxsi/`. [docs/figure_to_script_map.md](docs/figure_to_script_map.md) shows which script makes which panel and where it saves it, with the exceptions and the token details in its section [Running the figure scripts](docs/figure_to_script_map.md#running-the-figure-scripts).
 
-A note on SI: most figure scripts take SI from the neuron or synapse table, and eleven always take it from `SI_updated.ftr` (six in `figures/fig2`–`fig3`, `figures/fig7/filopodia_x_mirror_neurons.py` and four in `figures/split_methods/`: the two MaxSI scripts, `four_methods_si_comparison.py`, which reads each split's, and `method_examples.py`, which checks its SFC split against it). The neuron and synapse tables the figures were made from come from an earlier run whose SI kept synapses from a neuron to itself, except for the 182 large cells from step 02a; the manuscript's Methods exclude self-synapses, as `SI_updated.ftr` does. After a fresh run each neuron has the same SI in the synapse table, the neuron table and `SI_updated.ftr`; tables from an earlier run may not match, which is why the synapse-type tools call the table SI "older" and `SI_updated.ftr` "corrected". (`SI_updated.ftr` has a few more neurons than the neuron table.) More in the same section of the map.
+A note on SI: most figure scripts take SI from the neuron or synapse table, and thirteen take it from `SI_updated.ftr` (eight in `figures/fig2`–`fig3`, two of them only on their default setting, `figures/fig7/filopodia_x_mirror_neurons.py` and four in `figures/split_methods/`: the two MaxSI scripts, `four_methods_si_comparison.py`, which reads each split's, and `method_examples.py`, which checks its SFC split against it). The neuron and synapse tables the figures were made from come from an earlier run whose SI kept synapses from a neuron to itself, except for the 182 large cells from step 02a; the manuscript's Methods exclude self-synapses, as `SI_updated.ftr` does. After a fresh run each neuron has the same SI in the synapse table, the neuron table and `SI_updated.ftr`; tables from an earlier run may not match, which is why the synapse-type tools call the table SI "older" and `SI_updated.ftr` "corrected". (`SI_updated.ftr` has a few more neurons than the neuron table.) More in the same section of the map.
 
 ## Tools
 
@@ -237,11 +242,11 @@ All tools are in `tools/`. Most check tools print PASS or FAIL. What a PASS cove
 
 ## Main generated tables
 
-The pipeline writes these to `data/derived/`. Step 09 writes MaxSI versions of the first three to `data/derived_maxsi/` (MinFisherP and MaxPhi versions to `data/derived_minfisherp/` and `data/derived_maxphi/`), and with `SPLIT_METHOD = "maxsi"` steps 06 and 07 write their tables there too (likewise for the other two).
+A fresh run (`PIPELINE_RUN = "rebuild"`) writes these to `data/derived_rebuild/`; the authors' delivered copies are in `data/derived/`. Step 09 writes MaxSI versions of the first three to `data/derived_rebuild_maxsi/` (MinFisherP and MaxPhi versions to `_rebuild_minfisherp` and `_rebuild_maxphi`), and with `SPLIT_METHOD = "maxsi"` steps 06 and 07 write their tables there too (likewise for the other two). The main figures read the MaxSI folder.
 
 | File | Contents |
 |------|----------|
-| `synapses_783_article_princeton.ftr` | One row per synapse between two different neurons that were both split, with both ends attached to a skeleton: the synapse ID, the two neurons, positions, brain region (`npil`), synapse type (`comp`) and `SI_pre`/`SI_post`. `comp` can take nine values, because a linker end gives types like AL or LD, so filter to AA/AD/DA/DD. |
+| `synapses_783_article_princeton.ftr` | One row per synapse between two different neurons that were both split, with both ends attached to a skeleton: the synapse ID, the two neurons, positions, brain region (`npil`), synapse type (`comp`) and `SI_pre`/`SI_post`. On the SFC split `comp` can take nine values, because a linker end gives types like AL or LD, so filter to AA/AD/DA/DD; on the MaxSI split it takes only those four. |
 | `neuron_data_full_article_princeton.ftr` | One row per neuron that could be split and is in both the annotation file and the synapse table: type, SI, shape measurements and connection counts. `neuron` and `root_id` hold the same ID; `nt_type` is the `neurons.csv` prediction and `nt_type_new` the annotation file's `top_nt`; do not use `linker` (step 05 fills it by row position). |
 | `SI_updated.ftr` | The SI of every neuron that got one (`root_id`, `SI`) |
 | `connections_by_syn_type_reciprocal_types_filtered_article_princeton.ftr` | One row per (`pre`, `post`) pair with at least one AA, AD, DA or DD synapse: synapse counts per type, `sum_syn`, each side's `primary_type`, and `reciprocal` and `same_type` as 0/1 integers |
@@ -277,9 +282,10 @@ processing/         the pipeline, from raw data to derived tables
   05_build_neuron_metadata_table.py        the per-neuron table
   06_build_connection_reciprocity_table.py the per-connection and reciprocity tables
   07_pca_morphology.py                     PCA of the shape measurements
-  build_raw_synapse_table.py               optional: the raw synapse table from the Codex CSV (for 08 and the split-method figures)
+  build_swc_data.py                        the shape table step 05 reads (nodes, leafs, branches, cable length)
+  build_raw_synapse_table.py               the raw synapse table from the Codex CSV (for 09, 08 and the split-method figures)
   08_alternative_split_methods.py          optional: two single-node cuts compared with the published split
-  09_maxsi_synapse_labels.py               optional: synapse, neuron and SI tables under the MaxSI, MinFisherP or MaxPhi split
+  09_maxsi_synapse_labels.py               synapse, neuron and SI tables under the MaxSI split (the main figures), or MinFisherP or MaxPhi
   buhmann_maxsi_labels.py                  optional: the Buhmann synapse and neuron tables on step 09's MaxSI cuts
   bouton_maxsi_tables.py                   optional: the two Fig 7 bouton tables on the MaxSI synapse table
   phi_threshold.py                         optional: the Phi cutoff that matches SI = 0.1
