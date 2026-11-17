@@ -35,14 +35,12 @@ import matplotlib.cm as cm
 import pickle
 
 #%%
-#allsynapses=pd.read_feather(r'C:\Users\user\organised_work\data\connections\synapses')
 
 #%%
 
 #%%
 # Define the base directories
 input_base_dir = PROCESSED_SWC_DIR
-#output_base_dir = r"C:\Users\user\organised_work\data\783\generated\783\trees\all_trees"
 
 
 # Get the list of subdirectories in the input directory, in a fixed order (a set's order changes from run to run)

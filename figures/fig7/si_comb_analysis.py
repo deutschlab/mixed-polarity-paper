@@ -218,7 +218,6 @@ axes[-1].set_xticklabels(['Axon', 'Dendrite'])
 axes[0].set_ylabel("Mean correctness")
 
 fig.legend(LABELS, frameon=False, loc='upper right',)
-#fig.suptitle("Axon vs Dendrite correctness per superclass", y=1.02)
 
 plt.tight_layout()
 plt.show()

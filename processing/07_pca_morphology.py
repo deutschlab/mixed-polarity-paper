@@ -93,9 +93,6 @@ axes[1].set_title(f'PC2 feature contributions\n(var = {pca.explained_variance_ra
 
 plt.show()
 
-# (Optional) also attach PCs back to nodesG for later use:
-# nodesG.loc[idx, 'PC1'] = pcs[:, 0]
-# nodesG.loc[idx, 'PC2'] = pcs[:, 1]
 
 #%%
 PCA_TABLE_FTR.parent.mkdir(parents=True, exist_ok=True)

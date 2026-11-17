@@ -842,7 +842,7 @@ if write_tables:
     assert list(maxsi_neurons.columns) == list(neuron_table.columns)
     assert (maxsi_neurons.dtypes == neuron_table.dtypes).all(), maxsi_neurons.dtypes[maxsi_neurons.dtypes != neuron_table.dtypes]
 
-    # as step 05: only the cells with an SI (05:129) and a row in the synapse table (05:164, 239). A cell has an SI
+    # as step 05: only the cells with an SI (05:129) and a row in the synapse table (05:164, 238). A cell has an SI
     # here when it was labelled, even if the SI is empty (a MinFisherP cut with the synapses off it of one kind).
     in_run = maxsi_neurons["neuron"].isin(all_neurons)
     failed = maxsi_neurons["neuron"].isin(maxsi_failures["neuron"])

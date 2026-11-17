@@ -154,8 +154,8 @@ these changes:
 - Attach synapses with `heal_attach` instead of `heal_attach_princeton` (both in `methods/methods_all.py`).
   `heal_attach` goes through `attach_synapses`, which keeps only synapses with a `cleft_score` of at least 30 (its
   `min_score` default), so the table needs a `cleft_score` column. The Princeton route applies no score cut.
-- Steps 01 and 02a each define their own `heal_attach_princeton` (01 line 105, 02a line 65), which replaces the one
-  in `methods/methods_all.py`; the calls to change are at 01 line 180 and 02a line 132.
+- Steps 01 and 02a each define their own `heal_attach_princeton` (01 line 102, 02a line 63), which replaces the one
+  in `methods/methods_all.py`; the calls to change are at 01 line 176 and 02a line 129.
 - The Princeton route carries each synapse's `synapse_id` and `size` through steps 01, 02a, 02b and 03 (by column
   name in 01, partly by column position in the others), and step 03 merges on `synapse_id`. `attach_synapses` keeps
   neither column.

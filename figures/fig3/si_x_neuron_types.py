@@ -39,7 +39,6 @@ import matplotlib.cm as cm
 
 
 #%%
-#allsynapses=pd.read_feather(r'C:\Users\user\organised_work\data\783\generated\post_processing_data\synapses_783_final.ftr')
 #%%
 nodesG=pd.read_feather(NEURON_TABLE_FTR)
 nodesG=nodesG.dropna(subset=['axon_correct','dend_correct','primary_type','super_class'])

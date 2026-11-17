@@ -150,6 +150,5 @@ def plot_4_pies(df, fig_title):
 nodesG_si = nodesG[nodesG['SI'] >= 0.1].copy()
 plot_4_pies(nodesG_si, 'Distribution by PC1 groups | SI >= 0.1')
 # without SI filter
-#plot_4_pies(nodesG.copy(), 'Distribution by PC1 groups | no SI filter')
 
 

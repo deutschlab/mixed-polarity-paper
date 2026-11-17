@@ -390,7 +390,6 @@ plt.show()
 # ------------------------------------------------------------
 
 # df is the merged comparison table, all super-classes:
-# df = pd.merge(nodesP, nodesG, on=['neuron', 'super_class'], how='inner')
 
 preferred_order = [
     "central",

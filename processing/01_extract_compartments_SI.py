@@ -34,8 +34,6 @@ import pickle
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
 refuse_published_run("Step 01")
-#allsynapses=pd.read_feather(r'C:\Users\user\organised_work\data\connections\synapses')
-#allsynapses=pd.read_feather(r'C:\Users\user\organised_work\data\783\generated\preprocessing\synapses\flywire_synapses_783_sclass_filter_processed.feather')
 #%% Shards: N copies of this step at once, each on its own folders
 # N_SHARDS = 1 runs every folder in one process. With N_SHARDS = N, the copy with SHARD = k (0 to N-1) runs the folders
 # sorted(all folders under SWC_DIR)[k::N] that are not done yet, and keeps from the CSV only the rows whose pre or
@@ -93,7 +91,6 @@ del chunks, chunk, v, n_digits
 allsynapses.columns
 
 #%%
-#duplicates_df = allsynapses[allsynapses.duplicated(keep=False)]
 from flow_centrality import prepare_for_split   # the flow column without navis's dense matrix
 #%%
 def get_split(item,flow_thresh=1):
@@ -111,7 +108,6 @@ def heal_attach_princeton(item,allsynapses):
         return 'heal or attach issue'
 
 #%%
-#allsynapses=allsynapses.drop_duplicates()???
 
 #%%
 import os
@@ -255,7 +251,6 @@ for folder_name in sorted(folders_to_process):
         nid=n.id
 
         SI,IG=SI_calc(['',(len(axon_swc.presynapses),len(axon_swc.postsynapses)),(len(dend_swc.presynapses),len(dend_swc.postsynapses))])
-        #print(SI)
         all_SI.append([nid,SI])
         axon_connectors=axon_swc.connectors
         axon_connectors['compartment']='A'

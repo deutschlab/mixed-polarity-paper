@@ -34,10 +34,9 @@ _out_dir = OUTPUT_DIR / "fig7" / "filopodia_x_mirror_neurons"
 _out_dir.mkdir(parents=True, exist_ok=True)
 #%%
 
-# TODO (to confirm with the authors): this table is loaded but never used here (df1 is next assigned as a
-# degrees-of-freedom count in the ANOVA cells), and the file is not deposited, so this line alone
-# would stop Supp 7-S4 from running. Commented out; to be confirmed with the authors.
-# df1=pd.read_feather(SYN_BOUTON_FTR)
+# TODO (to confirm with the authors): the authors' script loads SYN_BOUTON_FTR here as df1 but never uses it
+# (df1 is next assigned as a degrees-of-freedom count in the ANOVA cells), and the file is not deposited,
+# so that load alone would stop Supp 7-S4 from running. It is left out here.
 #%%
 
 bwf_df=pd.read_feather(NEURONS_NT_BWF_FTR)
@@ -81,7 +80,6 @@ plt.axvline(x=between_std, color='black', linestyle='--', label='Between-group s
 plt.xlim(0, 0.3)
 
 plt.xlabel('std(SI) within group')
-#plt.title('Distribution of within-group std(SI) across primary types')
 plt.legend(loc='upper right', title=f'n = {len(var)} primary types')
 sns.despine(right=True, top=True)
 plt.xlabel('SD of filopodia fraction', size=8)

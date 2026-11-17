@@ -31,7 +31,6 @@ import pickle
 import os
 import pickle
 # to make sure u take the right iteraiton! Majd
-#base_dir = r'C:\Users\user\organised_work\data\783\generated\783\trees\all_trees_princeton'
 base_dir = PROCESSED_SWC_DIR
 
 all_si_list = []

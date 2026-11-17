@@ -63,7 +63,6 @@ syn_df=syn_df.merge(nodesG[['root_id','super_class']],left_on='post',right_on='r
 #%%
 connections=pd.read_feather(CONNECTIONS_TABLE_FTR)
 #%%
-#connections=connections[connections['sum_syn']>=5]
 #%%
 
 connectionsp=connections[['pre','post','reciprocal']]
@@ -279,7 +278,6 @@ custom_palette = {
 }
 
 # Define symmetric stacking order (top → bottom)
-##plot_order = ['AD_nr', 'AA_nr', 'DD_nr', 'DA_nr', 'DA_r', 'DD_r', 'AA_r', 'AD_r']
 plot_order = ['AD_nr','AD_r','AA_nr','AA_r','DD_nr','DD_r','DA_nr','DA_r']
 
 # Add sorting helpers

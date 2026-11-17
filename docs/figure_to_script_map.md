@@ -106,9 +106,9 @@ Includes an adult vs larva SI comparison and PCA of morphological features.
 
 > Fig 2A requires larval data files — see [data_availability.md](data_availability.md). A larval cell is drawn when it has an SI and at least one synapse on the axon and one on the dendrite, the rule the adult side applies through `dend_correct` and `axon_correct`. Under `SPLIT_METHOD = "maxsi"` its two larval tables are the MaxSI ones written by `processing/larva/larva_maxsi_labels.py`, so both the adult and the larval SI come from a MaxSI split. Under `"minfisherp"` or `"maxphi"` Fig 2A stops, as there is no larval split for those methods. Under `"maxsi"` it needs both step 09 (MaxSI, for the adult tables) and the larval step; the larval step itself can run under any `SPLIT_METHOD`.
 > Fig 2 Supp 1A requires the neuropil synapse CSV — see [data_availability.md](data_availability.md).
-> In `outputs/fig2/SI_x_PCA/`, Fig 2F is `weights.svg` (line 102) and Fig 2G is
-> `optic_visual_projection_PC1_SI_CDF_vertical_v2.svg` (lines 617, 756 and 913 all write this name, so the file
-> on disk is the one from line 913). The script also saves variants, bar plots in `colored_bars/`, and
+> In `outputs/fig2/SI_x_PCA/`, Fig 2F is `weights.svg` (line 98) and Fig 2G is
+> `optic_visual_projection_PC1_SI_CDF_vertical_v2.svg` (lines 613, 752 and 909 all write this name, so the file
+> on disk is the one from line 909). The script also saves variants, bar plots in `colored_bars/`, and
 > `full_info.ftr` in `outputs/fig2/SI_x_PCA/`.
 > Supp 2-S2 A is `SI_corr_sides_princeton_v2.svg` and reads the SI from `SI_UPDATED_FTR`; Supp 2-S2 D is
 > `std_of_si_within_groups_vs_between_princeton.svg` and uses the SI in `NEURON_TABLE_FTR`. `pca_on_feat.py` saves
@@ -148,13 +148,13 @@ whether neurons within the same type use the same synapse-type pattern.
 | Fig 3 Supp 2A/B (3D's rule: a cell below SI 0.1 is mixed) | `figures/fig3/fig3d_si_compartment_correct.py` with `DATA_SOURCE = "buhmann"` (or `FIG3D_DATA_SOURCE=buhmann`) | `NEURON_TABLE_NONP_FTR`, `SYNAPSE_TABLE_NONP_FTR` | `outputs/fig3/SI_x_correct_compartment_buhmann_si_rule/` (A: `synaptic_type_pie2_v2.svg`, B: `synaptic_type_npils2_v2.svg`) |
 | Fig 3 Supp 2C | `figures/fig3/si_x_npil_x_synapse_detection.py` with `C_RULE = "si"`: the synapses and labels of Fig 3E (Princeton) and Supp 3-S2 B (Buhmann), as `fig3d_si_compartment_correct.py` makes them with `MIXED_RULE = "si"` (cells of the four intrinsic super-classes, a synapse with an end on a cell with SI below 0.1 is Mixed, synapses outside every neuropil left out); one panel each for AA, AD, DA, DD and Mixed, with each neuropil's share on the Princeton (x) and Buhmann (y) synapses. `C_RULE = "all_cells"` counts every AA/AD/DA/DD synapse of the two synapse tables, with no cell or SI filter and no Mixed | `SYNAPSE_TABLE_FTR`, `NEURON_TABLE_FTR`, `SI_UPDATED_FTR`, `SYNAPSE_TABLE_NONP_FTR`, `NEURON_TABLE_NONP_FTR` (`"all_cells"` reads only the two synapse tables) | `outputs/fig3/si_x_npil_x_synapse_detection/` (`SI_corrr_npils.svg`; `SI_corrr_npils_numbers.svg`, the same with numbered neuropils; `npil_counts_princeton.csv` and `npil_counts_buhmann.csv`: synapses per neuropil and type; `npil_shares.csv`; `pearson_r.csv`: Pearson's r per type, and per type r on the synapses whose two cells have SI >= 0.1 on both detectors); `outputs/fig3/si_x_npil_x_synapse_detection_all_cells/` with `"all_cells"` |
 
-> Fig 3E is `synaptic_type_npils2_v2.svg` (line 515 of `fig3d_si_compartment_correct.py`). The script's
+> Fig 3E is `synaptic_type_npils2_v2.svg` (line 513 of `fig3d_si_compartment_correct.py`). The script's
 > `MIXED_RULE` (or `FIG3D_MIXED_RULE` in the environment) picks how a compartment is called mixed; `"cutoffs"` writes to
 > `outputs/fig3/SI_x_correct_compartment_cutoffs_rule/` (with `"buhmann"`, `..._buhmann_cutoffs_rule/`). `"si"`, the setting for the main 3D and 3E, marks both
-> compartments of a cell mixed when the cell's SI (from `SI_UPDATED_FTR`, lines 35-38) is below 0.1. `"cutoffs"`, for
+> compartments of a cell mixed when the cell's SI (from `SI_UPDATED_FTR`, lines 34-37) is below 0.1. `"cutoffs"`, for
 > the supplement, marks a compartment mixed when its share of correct synapses is not above the rolling curve's value
 > at SI 0.1, the rule of the published 3D and 3E. On the SFC split, the published panels were drawn on the neuron table's SI: switch off lines
-> 35-38 so the script keeps the SI in `NEURON_TABLE_FTR`, and `"cutoffs"` draws the published 3E bars
+> 34-37 so the script keeps the SI in `NEURON_TABLE_FTR`, and `"cutoffs"` draws the published 3E bars
 > exactly (the published figure also lists three neighbouring pairs of neuropil labels in the opposite order: MB
 > CA/BU, MB PED/FB and MB VL/AL). As committed, those lines read `SI_UPDATED_FTR`, and the cut-offs, the bars
 > and their order change. `fig3supp_ad_content_si_mixed.py` has the same setting and applies it at each point of its SI grid.
@@ -164,7 +164,7 @@ whether neurons within the same type use the same synapse-type pattern.
 > every synapse between these cells, with no SI filter, split into pairs of the same `primary_type` and pairs of
 > different types. With `"cutoffs"` they are the supplement's old-rule 3F. `fig3e_syntype_composition.py` instead
 > marks each end of a synapse mixed when that cell's SI computed with self-synapses kept (`SI_pre`/`SI_post` in the synapse table) is below 0.1,
-> and as committed it stops at line 42 (`KeyError: ['neuron']`) before any figure is saved.
+> and as committed it stops at line 41 (`KeyError: ['neuron']`) before any figure is saved.
 
 ---
 
@@ -190,8 +190,8 @@ multiple classification models.
 > not available, and a rerun differs from them (by up to 3.4 points in a cell of the
 > confusion matrix; accuracy 40.5% against 39.6%). That is more than a new seed or a flipped PC1 gives, so it points
 > to a different table, which cannot be checked. A rerun can be checked against an independent rebuild of
-> the model with `tools/check_simple_pc1_model.py` ([docs/tools.md](tools.md#checking-the-simple-pc1-model)). `syntype_x_pc1.py` draws a decision surface too, with its forest of trees without a leaf limit; its save line is
-> commented out. That forest drew the published Fig 4D (compared with the published panel's map). The redrawn 4D is
+> the model with `tools/check_simple_pc1_model.py` ([docs/tools.md](tools.md#checking-the-simple-pc1-model)). `syntype_x_pc1.py` draws a decision surface too, with its forest of trees without a leaf limit; it shows the
+> surface but does not save it. That forest drew the published Fig 4D (compared with the published panel's map). The redrawn 4D is
 > the 100-leaf model's map, the model 4A reports on neurons it never saw. Fig 4 Supp 1 holds only skeleton
 > images of the Fig 4D neurons.
 >

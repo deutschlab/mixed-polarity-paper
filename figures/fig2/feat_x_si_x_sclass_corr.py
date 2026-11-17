@@ -219,7 +219,6 @@ cbar.set_label("Correlation", fontsize=4)
 cbar.set_ticks([0.6,0.7, 0.8,0.9, 1.0])
 
 # Style the heatmap axes
-#ax1.set_title("Feature Correlation Matrix", fontsize=title_size)
 ax1.tick_params(axis='x', labelsize=4, rotation=90,size=4)
 ax0.tick_params(axis='y', labelsize=tick_size, rotation=0)
 ax1.set_yticklabels([])

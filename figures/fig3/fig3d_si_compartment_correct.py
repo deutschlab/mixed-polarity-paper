@@ -28,7 +28,6 @@ if DATA_SOURCE not in ("princeton", "buhmann"):
 MIXED_RULE = os.environ.get("FIG3D_MIXED_RULE", "si")
 if MIXED_RULE not in ("si", "cutoffs"):
     raise SystemExit(f'MIXED_RULE must be "si" or "cutoffs", not {MIXED_RULE!r}')
-#allsynapses=allsynapses.head(1000000)
 if DATA_SOURCE == "princeton":
     nodesG=pd.read_feather(NEURON_TABLE_FTR)
     #%%
@@ -354,7 +353,6 @@ print(f"synapses outside every neuropil, left out of the neuropil bars: {int(_no
 allsynapses = allsynapses[~_no_npil]
 
 #%%
-#allsynapses.to_feather(r'C:\Users\user\organised_work\data\783\generated\post_processing_data\article\synapses_783_article_princeton_mixed.ftr')
 
 #%%
 aaa=allsynapses.head(1000)

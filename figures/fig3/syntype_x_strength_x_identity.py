@@ -145,13 +145,10 @@ legend_patches = [
 plt.yticks([0,4,8,12],size=8)
 
 plt.ylabel('Mean Value with SD')
-#plt.title('Mean Values of AD, AA, and DD and DA for Same and Not Same')
 plt.xticks(rotation=90)
-#plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.ylim(0, max(np.array(means) + np.array(cis)) + 1)
 sns.despine(top=True,right=True)
 plt.tight_layout()
-#plt.savefig(r'C:\Users\user\organised_work\code\783\article\princeton\3\synapses_per_connection_princeton\syn_type_means_s_ns_princeton.svg')
 plt.show()
 
 #%%
@@ -159,7 +156,6 @@ plt.show()
 
 # assumes: import numpy as np, import matplotlib.pyplot as plt
 # and you already have: ns_AD, s_AD, ns_AA, s_AA, ns_DD, s_DD, ns_DA, s_DA
-# custom_palette = {'AA':'#8b2be2','DD':'#F4B95A','AD':'#9F4800','DA':'#B3B3B3'}
 
 def mean_se(a):
     a = np.asarray(a)
@@ -291,7 +287,6 @@ plt.xlim(1, 11)
 plt.xticks(range(1, 12))
 plt.xlabel('Number of synapses between pre and post',size=4)
 plt.ylabel('Cumulative Distribution Function (CDF)',size=4)
-#plt.title('CDF of Synapse Counts Between Neuron Pairs')
 plt.legend(fontsize=4)
 
 plt.tight_layout()

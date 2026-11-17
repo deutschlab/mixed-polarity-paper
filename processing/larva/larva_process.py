@@ -74,7 +74,6 @@ def get_split(item,flow_thresh=1):
         return 'split issue'
 def heal_attach(item,allsynapses):
     try:
-        #ealed_neurons=navis.heal_skeleton(item)
         healed_neurons_att_syn=attach_synapses_larva2(item,allsynapses)
         return healed_neurons_att_syn
     except:
@@ -106,18 +105,14 @@ nlist=pd.read_csv(LARVA_NEURON_LIST_CSV)
 nlist.dtypes
 
 #%%
-#allsynapses=allsynapses[allsynapses['pre'].isin(nlist['neuron'])]
-#allsynapses=allsynapses[allsynapses['post'].isin(nlist['neuron'])]
 
 #%%
-#allsynapses=allsynapses[(allsynapses['pre']!=-1)&(allsynapses['post']!=-1)]
 
 #%% 
 
 #%%
 swc_list_to_analyse = navis.NeuronList(i for i in swc_list if int(i.id) in nlist['neuron'].values)
 #%%
-#swc_list_to_analyse = navis.NeuronList(i for i in swc_list)
 
 
 #%%
@@ -147,9 +142,6 @@ for i in range(0, num_items):
     print(f"--------------------------------{i}--------------------")
     n = healed_attached_neurons_list[i]
     
-    #if len(n.nodes)>80000:
-    #    trees.append(f'neruon too big: {n.id}')
-    #    continue
     axon_swc=None
     dend_swc=None
     linker_swc=None

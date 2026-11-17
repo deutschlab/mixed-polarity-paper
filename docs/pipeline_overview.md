@@ -337,7 +337,7 @@ reads. It reads only the `pre`, `post` and `comp` columns of the synapse table.
 | **Outputs** | `SI_UPDATED_SFC_FTR`, `NEURON_TABLE_SFC_FTR` (`neuron_data_full_article_princeton.ftr`), under either `SPLIT_METHOD` (`SI_UPDATED_FTR` and `NEURON_TABLE_FTR` are the same files under `"sfc"`). The table is built in passes on a working copy, `NEURON_TABLE_PARTIAL_FTR`, which is deleted when the table is written at the end |
 | **Key columns** | `root_id`, `super_class`, `primary_type`, `nt_type`, `SI`, `cable_length`, synapse counts, the compartment counts `pre_A` to `post_L` and `axon_correct`/`dend_correct`, shape measurements, sensory rank columns |
 | **Downstream** | Scripts 06, 07, 08, 09, `phi_threshold.py`; nearly every figure script |
-| **Note** | The left merge at line 202 leaves `root_id` empty for synapse-table cells that are not annotated cells with an SI, making the column float64, which rounds IDs this large (it holds only every 128th integer there). Line 239 drops those rows and line 240 resets `root_id` from `neuron`, so the table holds exact int64 IDs, like the delivered one. A neuron table written without line 240 has rounded `root_id` values (no other column differs) and should be rebuilt; `tools/check_step05_root_id.py` checks these lines on the real IDs. |
+| **Note** | The left merge at line 202 leaves `root_id` empty for synapse-table cells that are not annotated cells with an SI, making the column float64, which rounds IDs this large (it holds only every 128th integer there). Line 238 drops those rows and line 239 resets `root_id` from `neuron`, so the table holds exact int64 IDs, like the delivered one. A neuron table written without line 239 has rounded `root_id` values (no other column differs) and should be rebuilt; `tools/check_step05_root_id.py` checks these lines on the real IDs. |
 
 ---
 
@@ -547,7 +547,7 @@ and dendrite and computes SI. Independent of scripts 01–09.
 | **Inputs** | `LARVA_SWC_DIR`, `LARVA_SYNAPSE_TABLE_CSV`, `LARVA_NEURON_LIST_CSV` (the larval raw files, from the corresponding authors) |
 | **Outputs** | `LARVA_SI_FTR`, `LARVA_SYNAPSES_FTR`, and intermediate connector tables in `LARVA_DATA_DIR` |
 | **Downstream** | `figures/fig2/fig2a_si_cdf_adult_larva.py` under `SPLIT_METHOD = "sfc"` |
-| **Note** | As committed it gives no usable output. It calls `attach_synapses_larva2` (line 78), which neither it nor anything it imports defines, and the bare `except` in `heal_attach` (called once on the whole neuron list, line 124) turns that error into a text string, so no cell is split and the SI output is empty |
+| **Note** | As committed it gives no usable output. It calls `attach_synapses_larva2` (line 77), which neither it nor anything it imports defines, and the bare `except` in `heal_attach` (called once on the whole neuron list, line 119) turns that error into a text string, so no cell is split and the SI output is empty |
 
 ---
 

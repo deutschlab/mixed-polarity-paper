@@ -50,7 +50,7 @@ and is dropped (`05:129`), and a "% of neurons" taken from it is a share of the 
 | Column | Description |
 |--------|-------------|
 | `neuron` | Cell ID (int64); the column to join on |
-| `root_id` | The same ID again (int64). Step 05 merges the synapse table's cells onto the annotated cells with an SI, drops the rows with no match, and sets `root_id` from `neuron` (`05:240`), so the two are equal on every row |
+| `root_id` | The same ID again (int64). Step 05 merges the synapse table's cells onto the annotated cells with an SI, drops the rows with no match, and sets `root_id` from `neuron` (`05:239`), so the two are equal on every row |
 | `super_class` | Super-class (for example sensory, motor, central) |
 | `primary_type` | Primary cell type |
 | `nt_type` | Predicted neurotransmitter from `neurons.csv` (the FlyWire prediction); the neurotransmitter figures use this column. Empty for about 14% of cells |
@@ -60,7 +60,7 @@ and is dropped (`05:129`), and a "% of neurons" taken from it is a share of the 
 | `axon_correct`, `dend_correct` | Share of the axon's ends that are presynaptic, `pre_A / (pre_A + post_A)`, and of the dendrite's that are postsynaptic, `post_D / (pre_D + post_D)` (`05:195-197`). Most figures drop cells where either is empty |
 | `out_synapses_count`, `in_synapses_count` | The cell's synapses in the synapse table as presynaptic and as postsynaptic cell, all nine `comp` values included (float64) |
 | `out_partners`, `in_partners`, `max_out_degree`, `max_in_degree`, `mean_out_degree`, `mean_in_degree` | Partner counts and synapses per partner |
-| Six ratio columns | Ratios of the synapse and partner counts (`05:232-237`) |
+| Six ratio columns | Ratios of the synapse and partner counts (`05:231-236`) |
 | `nodes`, `leafs`, `branches`, `cable_length` | From `swc_data.ftr`: skeleton nodes, end nodes, branch nodes (float64 here, after a left merge), and cable length in nm (float32) |
 | `length_nm`, `area_nm`, `size_nm` | From `cell_stats.csv` |
 | `linker` | Do not use: step 05 fills it by row position (`05:69`) and loses the large cells' flags (`05:87-88`), so it does not say which cells have a linker |

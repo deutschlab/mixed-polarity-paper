@@ -447,9 +447,7 @@ def create_links_two_neurons_shared_synapses(pre,post,syn_df):
         target_site="seunglab"  # or whatever your target site is
     )
     
-    #combined_url2='https://neuroglancer.neuvue.io'+combined_url[0][22:]
     all_urls.append(combined_url)
-#all_urls_mod=['https://neuroglancer.neuvue.io'+i[0][22:] for i in all_urls]
     links_='https://neuroglancer.neuvue.io'+all_urls[0][22:]
 
     return all_urls
@@ -463,8 +461,6 @@ def create_links_many_neurons(nlist,syn_df):
 
 
     # First, ensure dhi is a copy if you intend to modify it without affecting the original DataFrame
-    #presynapses = syn_df[(syn_df['pre'].isin(nlist))].copy().sample(1000)
-    #postsynapses = syn_df[(syn_df['post'].isin(nlist))].copy().sample(1000)
     presynapses = syn_df[(syn_df['pre'].isin(nlist))].copy()
     postsynapses = syn_df[(syn_df['post'].isin(nlist))].copy()
     presynapses['color']='red'
@@ -539,9 +535,7 @@ def create_links_many_neurons(nlist,syn_df):
         target_site="seunglab"  # or whatever your target site is
     )
     
-    #combined_url2='https://neuroglancer.neuvue.io'+combined_url[0][22:]
     all_urls.append(combined_url)
-#all_urls_mod=['https://neuroglancer.neuvue.io'+i[0][22:] for i in all_urls]
     links_='https://neuroglancer.neuvue.io'+all_urls[0][22:]
 
     return all_urls
@@ -558,8 +552,6 @@ def create_links_two_neurons_and_shared_synapses2(nlist,syn_df,sample=200):
 
     
     # First, ensure dhi is a copy if you intend to modify it without affecting the original DataFrame
-    #presynapses = syn_df[(syn_df['pre'].isin(nlist))].copy().sample(1000)
-    #postsynapses = syn_df[(syn_df['post'].isin(nlist))].copy().sample(1000)
     presynapses_1 = safe_sample(syn_df[syn_df['pre'] == nlist[0]].copy(),n=sample)
     postsynapses_1 = safe_sample(syn_df[syn_df['post'] == nlist[0]].copy(),n=sample)
     presynapses_2 = safe_sample(syn_df[syn_df['pre'] == nlist[1]].copy(),n=sample)
@@ -657,9 +649,7 @@ def create_links_two_neurons_and_shared_synapses2(nlist,syn_df,sample=200):
         target_site="seunglab"  # or whatever your target site is
     )
     
-    #combined_url2='https://neuroglancer.neuvue.io'+combined_url[0][22:]
     all_urls.append(combined_url)
-#all_urls_mod=['https://neuroglancer.neuvue.io'+i[0][22:] for i in all_urls]
     links_='https://neuroglancer.neuvue.io'+all_urls[0][22:]
 
     return all_urls
@@ -687,8 +677,6 @@ def upload_swc(id_):
         
         try:
             swc = navis.read_swc(swc_path)
-            #print(folder_name)
-            #allsynapses2 = allsynapses[(allsynapses['pre'] == int(id_[:-4])) | (allsynapses['post'] == int(id_[:-4]))]
 
             return swc
         except:
@@ -757,61 +745,6 @@ def attach_synapses(x,syn, min_score=30,neuropils=False,batch_size=100, progress
 
         return x
 
-
-
-def attach_synapses_princeton(x,syn,neuropils=False,batch_size=100, progress=True):
-   
-   
-        if isinstance(x, navis.core.BaseNeuron):
-            x = navis.NeuronList([x])
-
-        if isinstance(x, navis.NeuronList):
-            for n in x:
-                presyn = postsyn = pd.DataFrame([])
-                add_cols = ['neuropil'] if neuropils else []
-                cols = ['pre_x', 'pre_y', 'pre_z',
-                            'post','synapse_id','size'] + add_cols
-                presyn = syn.loc[syn.pre == np.int64(n.id), cols
-                                     ].rename({'pre_x': 'x',
-                                               'pre_y': 'y',
-                                               'pre_z': 'z',
-                                               'post': 'partner_id'},
-                                              axis=1)
-                presyn['type'] = 'pre'
-                cols = ['post_x', 'post_y', 'post_z',
-                            'pre','synapse_id','size'] + add_cols
-                postsyn = syn.loc[syn.post == np.int64(n.id), cols
-                                      ].rename({'post_x': 'x',
-                                                'post_y': 'y',
-                                                'post_z': 'z',
-                                                'pre': 'partner_id'},
-                                               axis=1)
-                postsyn['type'] = 'post'
-
-                connectors = pd.concat((presyn, postsyn), axis=0, ignore_index=True)
-
-                # Turn type column into categorical to save memory
-                connectors['type'] = connectors['type'].astype('category')
-
-                # If TreeNeuron, map each synapse to a node
-                if isinstance(n, navis.TreeNeuron):
-                    tree = navis.neuron2KDTree(n, data='nodes')
-                    dist, ix = tree.query(connectors[['x', 'y', 'z']].values)
-
-                    too_far = dist > 10_000
-                    if any(too_far):
-                        connectors = connectors[~too_far].copy()
-                        ix = ix[~too_far]
-
-                    connectors['node_id'] = n.nodes.node_id.values[ix]
-
-                    # Add an ID column for navis' sake
-                    connectors.insert(0, 'connector_id', np.arange(connectors.shape[0]))
-
-                n.connectors = connectors
-
-
-        return x
 
 
 def attach_synapses_princeton(x,syn,neuropils=False,batch_size=100, progress=True):
@@ -1010,7 +943,6 @@ def calculate_geodesic_dist_pre_post_sampled_folder(folder,allsynapses):
         
     i=0
     for swc in healed_attached_neurons_list:
-        #print(i)
         i+=1
     
         all_dist_list.append([swc.id,calculate_geodesic_dist_pre_post_sampled(swc,300,allsynapses2)])
@@ -1128,23 +1060,6 @@ def get_shared_synapses_undirected(pre_neuron,post_neuron,syn_df):
     shared_syn_com=pd.concat([shared_syn_dir1,shared_syn_dir2])
     
     return shared_syn_com
-def divide_to_syn_type(syn_df,pos):
-    AD=syn_df[syn_df['syn_type']=='AD']
-    AD=AD[[pos,pos+'_x',pos+'_y',pos+'_z']]
-    
-    AA=syn_df[syn_df['syn_type']=='AA']
-    AA=AA[[pos,pos+'_x',pos+'_y',pos+'_z']]
-
-    DD=syn_df[syn_df['syn_type']=='DD']
-    DD=DD[[pos,pos+'_x',pos+'_y',pos+'_z']]
-
-    DA=syn_df[syn_df['syn_type']=='DA']
-    DA=DA[[pos,pos+'_x',pos+'_y',pos+'_z']]
-
-
-    return AD,AA,DD,DA
-
-
 def divide_to_syn_type(syn_df,pos):
     AD=syn_df[syn_df['comp']=='AD']
     AD=AD[[pos,pos+'_x',pos+'_y',pos+'_z']]

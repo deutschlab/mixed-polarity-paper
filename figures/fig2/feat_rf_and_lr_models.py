@@ -472,7 +472,6 @@ plt.xlabel('Model')
 plt.grid(axis='y', linestyle='--', alpha=0.6)
 plt.grid(False)
 
-#plt.title('R² Score per Group: Linear Regression vs. Random Forest')
 plt.legend(title='Group', bbox_to_anchor=(1.05, 1), loc='upper left')
 
 plt.tight_layout()

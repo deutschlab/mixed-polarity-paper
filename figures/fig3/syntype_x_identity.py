@@ -55,7 +55,6 @@ syn_df=syn_df.merge(nodesG[['neuron','super_class']],left_on='post',right_on='ne
 #%%
 syn_df=syn_df.dropna(subset=['super_class_x','super_class_y'])
 #%%          ------------   Fig 1a - SI_dist ---------
-#syn_df=syn_df[(syn_df['SI_pre']>=0.1)&(syn_df['SI_post']>=0.1)]
 #%%
 nodesG=nodesG.dropna(subset='primary_type')
 #%%
@@ -71,7 +70,6 @@ aa=syn_df.head()
 #%%
 syn_df=syn_df[['pre','post','SI_pre','SI_post','comp']]
 #%%
-#syn_df=syn_df[(syn_df['SI_post']>=0.1)&(syn_df['SI_pre']>=0.1)]
 #%%
 syn_df_m=syn_df.merge(nodesG[['root_id','primary_type','primary_SI_mean']],left_on='pre',right_on='root_id',how='left')
 #%%

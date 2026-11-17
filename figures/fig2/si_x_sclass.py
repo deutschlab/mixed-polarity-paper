@@ -33,7 +33,6 @@ nodesG = nodesG[~(
 )]
 
 nodesG[nodesG['neuron']==720575940642312136]['SI']
-#syn_df = pd.read_feather(r'C:\Users\user\organised_work\data\783\generated\post_processing_data\article\synapses_783_article.ftr')
 
 #%%
 # ------- Fig 1e Super_class X SI -------

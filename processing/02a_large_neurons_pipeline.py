@@ -40,8 +40,6 @@ import pickle
 sys.path.insert(0, str(METHODS_DIR))
 from methods_all import *
 refuse_published_run("Step 02a")
-#allsynapses=pd.read_feather(r'C:\Users\user\organised_work\data\connections\synapses')
-#allsynapses=pd.read_feather(r'C:\Users\user\organised_work\data\783\generated\preprocessing\synapses\flywire_synapses_783_sclass_filter_processed.feather')
 #%%
 # The synapse table is read after the list of large cells (lista) below, so that only their synapses are kept.
 
@@ -73,7 +71,6 @@ def heal_attach_princeton(item,allsynapses):
 #%%
 
 # (synapses from a neuron to itself are dropped as the table is read, further down)
-#allsynapses=allsynapses.drop_duplicates()???
 
 #%%
 

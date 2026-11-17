@@ -55,7 +55,6 @@ nodesG=nodesG[nodesG['super_class'].isin(['central','optic','visual_projection',
 
 #%%
 #%%
-#syn_df=syn_df.sample(1000000)
 
 #%%
 syn_df=syn_df[[ 'pre', 'post',
@@ -351,7 +350,6 @@ X = balanced_syn_df_m[[
      ]]
 
 y = balanced_syn_df_m['comp']  # Target
-#y = balanced_syn_df_m['comp'].sample(frac=1).reset_index(drop=True)
 
 #%%
 
@@ -405,7 +403,6 @@ legend_elements = [
 plt.tick_params(axis='both', width=0.3)
 
 plt.legend(handles=legend_elements, title='Neuron Role', loc='upper right')
-#plt.legend(handles=legend_elements, title='Neuron Role', loc='upper right')
 sns.despine(right=True,top=True)
 plt.rc('axes', titlesize=8)    
 plt.rc('axes', labelsize=8)      
@@ -446,7 +443,6 @@ for text in disp.text_.ravel():  # flatten the array
 # Format axis labels and ticks
 ax.set_xlabel('Predicted Label', fontsize=8)
 ax.set_ylabel('True Label', fontsize=8)
-#ax.set_title('Confusion Matrix (Percent)', fontsize=6)
 ax.tick_params(axis='x', labelsize=8)
 ax.tick_params(axis='y', labelsize=8)
 plt.setp(ax.get_xticklabels(), rotation=0, ha='right')

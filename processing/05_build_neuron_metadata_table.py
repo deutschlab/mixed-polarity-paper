@@ -228,7 +228,6 @@ df = df.merge(out_partners, on='neuron', how='left')
 df = df.merge(in_partners, on='neuron', how='left')
 #%%
 
-#df['comp_correct_ratio']=df['axon_correct']/df['dend_correct']
 df['partners_ratio']=df['in_partners']/df['out_partners']
 df['max_degree_ratio']=df['max_in_degree']/df['max_out_degree']
 df['mean_degree_ratio']=df['mean_in_degree']/df['mean_out_degree']

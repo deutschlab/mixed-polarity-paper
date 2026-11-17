@@ -70,7 +70,6 @@ plt.axvline(x=between_std, color='black', linestyle='--', label='Between-group s
 plt.xlim(0, 0.3)
 
 plt.xlabel('std(SI) within group')
-#plt.title('Distribution of within-group std(SI) across primary types')
 plt.legend(loc='upper right', title=f'n = {len(var)} primary types')
 sns.despine(right=True, top=True)
 plt.xlabel('SD of SI', size=8)

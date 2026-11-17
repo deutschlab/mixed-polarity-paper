@@ -15,7 +15,6 @@ mpl.rcParams['svg.fonttype'] = 'none'
 mpl.rcParams['font.family'] = 'Arial'
 from methods.figure_text import use_arial_8
 use_arial_8()   # every text in Arial 8 pt when a figure is saved
-#allsynapses=allsynapses.head(1000000)
 nodesG=pd.read_feather(NEURON_TABLE_FTR)
 #%%
 a=nodesG[['neuron','SI','super_class','nodes','primary_type','axon_correct']]
@@ -156,7 +155,6 @@ plt.show()
 allsynapses['npil'] = allsynapses['npil'].str.replace(r'_(L|R)$', '', regex=True)
 
 #%%
-#allsynapses.to_feather(r'C:\Users\user\organised_work\data\783\generated\post_processing_data\article\synapses_783_article_princeton_mixed.ftr')
 
 #%%
 aaa=allsynapses.head(1000)

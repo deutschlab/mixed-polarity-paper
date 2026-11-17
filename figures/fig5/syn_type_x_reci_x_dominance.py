@@ -232,7 +232,6 @@ ax.set_title(f"Same Type Percentage\nn={same_total_lower_sum:.0f}", fontsize=8)
 fig.tight_layout()
 
 fig.savefig(_out_dir / "same_type_percentage_princeton.svg", format='svg')
-#plt.close(fig)
 #%%
 # --- Plot and Save Not Same Type ---
 fig, ax = plt.subplots(figsize=(1.8, 1.8))
@@ -260,7 +259,6 @@ ax.set_yticklabels(ax.get_yticklabels(), fontsize=8, rotation=0)
 ax.set_title(f"Not Same Type Percentage\nn={not_same_total_lower_sum:.0f}", fontsize=8)
 fig.tight_layout()
 fig.savefig(_out_dir / "not_same_type_percentage_princeton.svg", format='svg')
-#plt.close(fig)
 #%%
 
 

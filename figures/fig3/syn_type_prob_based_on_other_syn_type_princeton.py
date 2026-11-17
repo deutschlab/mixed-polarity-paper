@@ -47,7 +47,6 @@ connections = connections[connections['super_class_y'].isin(['central', 'optic',
 #%%
 connections=connections.query("SI_x>=0.1 and SI_y>=0.1")
 #%%
-#connections=connections[connections['reciprocal']==1]
 #%%
 AD=connections[connections['AD']>=1]
 AA=connections[connections['AA']>=1]
@@ -93,7 +92,6 @@ plt.rc('legend', title_fontsize=8)
 # Plot heatmap
 plt.figure(figsize=(2.4,1.5))
 sns.heatmap(heatmap_df, annot=True, square=True, fmt=".2f",cmap='Blues',vmax=0.25,annot_kws={"size": 4})
-#plt.title('Proportion of Connections to Target Type\nGiven Query Type ≥ 1')
 plt.xlabel('Conditional Type')
 plt.ylabel('Given Type')
 plt.tight_layout()
@@ -138,7 +136,6 @@ plt.rc('ytick', labelsize=4)        # Y tick label size
 plt.rc('legend', fontsize=8)        # Legend text size
 plt.rc('legend', title_fontsize=8) 
 sns.heatmap(df, annot=annot_data, fmt="", square=True,cmap='Blues', vmin=0, vmax=0.25,annot_kws={"size": 4})
-#plt.title('Average Percent Composition per Connection Type')
 plt.xlabel('Distribution of synaptic types')
 plt.ylabel('Given a connection with synaptic type')
 plt.tight_layout()
@@ -303,7 +300,6 @@ for ax, (type_name, values), col in zip(axs, data.items(), colors):
     sizes = [v / total * 100 for v in values]
     ax.pie(
         sizes,
-        #labels=labels,              # outside labels
         autopct='%1.1f%%',          # inside percentages
         colors=col,
         textprops={'fontsize': 8},
@@ -311,7 +307,6 @@ for ax, (type_name, values), col in zip(axs, data.items(), colors):
         pctdistance=0.7             # keep % inside closer to center
     )
 
-    #ax.set_title(f"{type_name} (n={total})", fontsize=8)
 
 pure_patch = mpatches.Patch(facecolor="#4A90E2", label="Pure")   # darker tone
 mixed_patch = mpatches.Patch(facecolor="#AED6F1", label="Mixed") # lighter tone

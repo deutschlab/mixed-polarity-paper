@@ -187,7 +187,6 @@ yr[['predicted','actual']]=yr[['predicted','actual']].astype(int)
 yr_g = yr.groupby('actual')['predicted'].agg(['mean', 'std']).reset_index()
 yr_g.columns = ['actual', 'predicted', 'std']
 
-#yr_g[['actual', 'predicted', 'std']] = yr_g[['actual', 'predicted', 'std']]
 
 yr_g_c = yr.groupby('actual')['predicted'].count().reset_index()
 yr_g_c['actual'] = yr_g_c['actual'] / 50

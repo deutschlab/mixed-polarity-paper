@@ -41,7 +41,6 @@ nodesG=nodesG.merge(pcadf,on='neuron',how='left')
 #%%
 syn_df=pd.read_feather(SYNAPSE_TABLE_FTR)
 #%%
-#syn_df=syn_df.sample(1000000)
 
 #%%
 syn_df=syn_df[[ 'pre', 'post',
@@ -66,7 +65,6 @@ syn_df_m=syn_df_m.dropna(subset=['super_class_x','super_class_y'])
 
 
 #%%
-#all_df=syn_df_m[[ 'comp',       'PC1_x','PC1_y','PC2_x','PC2_y']]
 all_df=syn_df_m[[ 'comp',       'PC1_x','PC1_y']]
 
 #%%
@@ -149,14 +147,12 @@ X = balanced_syn_df_m[[
      
 
 y = balanced_syn_df_m['comp']  # Target
-#y = balanced_syn_df_m['comp'].sample(frac=1).reset_index(drop=True)
 
 #%%
 
 # Stratified train-test split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 #%%
-#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
 #%%
 
@@ -171,7 +167,6 @@ y_pred = rf_clf.predict(X_test)
 import joblib
 import os
 #%%
-#rf_loaded = joblib.load(model_file)
 
 
 #%%
@@ -215,7 +210,6 @@ legend_elements = [
 plt.tick_params(axis='both', width=0.3)
 
 plt.legend(handles=legend_elements, title='Neuron Role', loc='upper right')
-#plt.legend(handles=legend_elements, title='Neuron Role', loc='upper right')
 sns.despine(right=True,top=True)
 plt.rc('axes', titlesize=8)    
 plt.rc('axes', labelsize=8)      
@@ -252,7 +246,6 @@ for text in disp.text_.ravel():  # flatten the array
 # Format axis labels and ticks
 ax.set_xlabel('Predicted Label', fontsize=8)
 ax.set_ylabel('True Label', fontsize=8)
-#ax.set_title('Confusion Matrix (Percent)', fontsize=6)
 ax.tick_params(axis='x', labelsize=8)
 ax.tick_params(axis='y', labelsize=8)
 plt.setp(ax.get_xticklabels(), rotation=0, ha='right')

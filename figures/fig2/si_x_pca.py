@@ -22,8 +22,6 @@ from sklearn.preprocessing import StandardScaler
 allsynapses=pd.read_feather(SYNAPSE_TABLE_FTR)
 #%%
 
-#gg=create_links_two_neurons_shared_synapses(720575940619807397,720575940620638335,allsynapses)
-#shorthen_and_open_links(gg[0])
 #%%
 #%%
 nodesG=pd.read_feather(NEURON_TABLE_FTR)
@@ -38,14 +36,12 @@ nodesG=nodesG.dropna(subset=['dend_correct','axon_correct','super_class','primar
 
 
 #%%
-#nodesG['SI']=(nodesG['axon_correct']+nodesG['dend_correct'])/2
 #%%
 nodesG=nodesG[['neuron','super_class', 'primary_type','length_nm','out_synapses_count','in_synapses_count',
        'area_nm', 'size_nm', 'SI', 'leafs', 
         'out_partners', 'in_partners']]
 #%%
 #%%
-#visual_projection = nodesG[nodesG['super_class']=='visual_projection']
 #%%
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler

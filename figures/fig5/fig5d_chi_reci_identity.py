@@ -506,7 +506,6 @@ for i, wedge in enumerate(wedges1):
     y = 0.6 * np.sin(np.deg2rad(angle))
     ax1.text(x, y, labels1_numeric[i], ha='center', va='center', fontsize=8)
 
-#ax1.set_title('Proportion of Not Same vs. Same')
 ax1.legend(wedges1, legend_labels1, title="Type", loc="center left", bbox_to_anchor=(1, 0.5))
 
 fig1_path = _out_dir / "proportion_not_same_vs_same_SIfiltered_princeton.svg"
@@ -523,7 +522,6 @@ for i, wedge in enumerate(wedges2):
     y = 0.6 * np.sin(np.deg2rad(angle))
     ax2.text(x, y, labels2_numeric[i], ha='center', va='center', fontsize=8)
 
-#ax2.set_title('Proportion of Reciprocal vs. Non-Reciprocal')
 ax2.legend(wedges2, legend_labels2, title="Type", loc="center left", bbox_to_anchor=(1, 0.5))
 
 fig2_path = _out_dir / "proportion_reciprocal_vs_nonreciprocal_SI_filtered_princeton.svg"
