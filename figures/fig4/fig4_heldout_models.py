@@ -10,7 +10,8 @@
 # mix of types, so each model is scored by balanced accuracy, the mean of the four types' recalls (chance 0.25).
 # Models (the three forests are trained on the same balanced synapses of a split; the cell-type lookup on all of the
 # split's training synapses, weighted as below):
-#   pc1              PC1 of the two cells, random forest of 100 trees with at most 100 leaves each (Fig 4A, 4D)
+#   pc1              PC1 of the two cells, random forest of 100 trees with at most 100 leaves each (Fig 4A;
+#                    the 4D map is drawn by syntype_x_pc1_simple_model.py)
 #   features         the eight features of the two cells (as Fig 3J), random forest of 100 trees, default settings
 #   pc1_superclass   PC1 and super-class of the two cells, the capped forest
 #   cell_types       for each pair of cell types, the synapse type with the largest share of its own type's training
